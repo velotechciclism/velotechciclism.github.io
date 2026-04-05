@@ -1,6 +1,8 @@
 import { prisma } from '../prisma.js';
 import { seedCategories, seedProducts } from '../data/catalogSeed.js';
 
+const MAX_PRODUCT_PRICE_EUR = 560;
+
 function slugify(value: string): string {
   return value
     .toLowerCase()
@@ -33,6 +35,11 @@ export async function ensureCatalogSeeded(): Promise<void> {
   }
 
   for (const item of seedProducts) {
+    const cappedPrice = Math.min(item.price, MAX_PRODUCT_PRICE_EUR);
+    const cappedOriginalPrice = item.originalPrice
+      ? Math.min(item.originalPrice, MAX_PRODUCT_PRICE_EUR)
+      : null;
+
     const category = await prisma.category.findUnique({ where: { slug: item.categorySlug } });
 
     if (!category) {
@@ -57,8 +64,8 @@ export async function ensureCatalogSeeded(): Promise<void> {
         description: item.description,
         categoryId: category.id,
         brandId: brand.id,
-        price: item.price,
-        originalPrice: item.originalPrice,
+        price: cappedPrice,
+        originalPrice: cappedOriginalPrice,
         ratingAvg: item.ratingAvg,
         reviewCount: item.reviewCount,
         isNew: Boolean(item.isNew),
@@ -72,8 +79,8 @@ export async function ensureCatalogSeeded(): Promise<void> {
         description: item.description,
         categoryId: category.id,
         brandId: brand.id,
-        price: item.price,
-        originalPrice: item.originalPrice,
+        price: cappedPrice,
+        originalPrice: cappedOriginalPrice,
         ratingAvg: item.ratingAvg,
         reviewCount: item.reviewCount,
         isNew: Boolean(item.isNew),

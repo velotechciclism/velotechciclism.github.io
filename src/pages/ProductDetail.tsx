@@ -22,6 +22,7 @@ import { products } from "@/data/products";
 import { useCart } from "@/context/CartContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { toast } from "sonner";
+import { MAX_UNITS_PER_PRODUCT } from "@/lib/cartRules";
 
 const ProductDetail: React.FC = () => {
   const { t } = useLanguage();
@@ -29,6 +30,7 @@ const ProductDetail: React.FC = () => {
   const { addItem } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [liked, setLiked] = useState(false);
 
   const product = products.find((p) => p.id === id);
 
@@ -59,8 +61,43 @@ const ProductDetail: React.FC = () => {
     .slice(0, 4);
 
   const handleAddToCart = () => {
-    addItem(product, quantity);
-    toast.success(`${quantity}x ${product.name} ${t("notifications.addedToCart")}`);
+    try {
+      addItem(product, quantity);
+      toast.success(`${quantity}x ${product.name} ${t("notifications.addedToCart")}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Nao foi possivel adicionar ao carrinho";
+      toast.error(message);
+    }
+  };
+
+  const handleLike = () => {
+    const nextValue = !liked;
+    setLiked(nextValue);
+    toast.success(nextValue ? "Item adicionado aos favoritos" : "Item removido dos favoritos");
+  };
+
+  const handleShare = async () => {
+    const shareData = {
+      title: product.name,
+      text: product.description,
+      url: window.location.href,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+        return;
+      } catch {
+        // fallback para clipboard abaixo
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      toast.success("Link do produto copiado");
+    } catch {
+      toast.error("Nao foi possivel compartilhar o produto");
+    }
   };
 
   const discount = product.originalPrice
@@ -208,7 +245,7 @@ const ProductDetail: React.FC = () => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => setQuantity(quantity + 1)}
+                    onClick={() => setQuantity(Math.min(MAX_UNITS_PER_PRODUCT, quantity + 1))}
                   >
                     <Plus className="w-4 h-4" />
                   </Button>
@@ -222,13 +259,16 @@ const ProductDetail: React.FC = () => {
                   <ShoppingCart className="w-5 h-5 mr-2" />
                   {t("products.addToCart")}
                 </Button>
-                <Button variant="outline" size="lg">
+                <Button variant="outline" size="lg" onClick={handleLike}>
                   <Heart className="w-5 h-5" />
                 </Button>
-                <Button variant="outline" size="lg">
+                <Button variant="outline" size="lg" onClick={handleShare}>
                   <Share2 className="w-5 h-5" />
                 </Button>
               </div>
+              <p className="text-xs text-muted-foreground">
+                Limite por compra: {MAX_UNITS_PER_PRODUCT} unidades deste item por usuario.
+              </p>
 
               {/* Stock Status */}
               <div className="flex items-center gap-2">

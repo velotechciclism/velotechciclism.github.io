@@ -109,6 +109,18 @@ const ChatbotWidget: React.FC = () => {
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    const openChatbot = () => {
+      setIsOpen(true);
+    };
+
+    window.addEventListener("velotech:open-chatbot", openChatbot);
+
+    return () => {
+      window.removeEventListener("velotech:open-chatbot", openChatbot);
+    };
+  }, []);
+
   const sendMessage = async () => {
     if (!inputValue.trim() || isLoading) return;
 

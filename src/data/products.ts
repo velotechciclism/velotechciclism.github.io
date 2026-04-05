@@ -1,10 +1,11 @@
 import { Product, Category } from "@/types/product";
+import { MAX_PRODUCT_PRICE_EUR } from "@/lib/cartRules";
 import productHelmet from "@/assets/product-helmet.jpg";
 import productJersey from "@/assets/product-jersey.jpg";
 import productBike from "@/assets/product-bike.jpg";
 import productGloves from "@/assets/product-gloves.jpg";
 
-export const products: Product[] = [
+const rawProducts: Product[] = [
   {
     id: "1",
     name: "AeroSpeed Pro Helmet",
@@ -712,6 +713,19 @@ export const products: Product[] = [
     },
   },
 ];
+
+export const products: Product[] = rawProducts.map((product) => {
+  const cappedPrice = Math.min(product.price, MAX_PRODUCT_PRICE_EUR);
+  const cappedOriginalPrice = product.originalPrice
+    ? Math.min(product.originalPrice, MAX_PRODUCT_PRICE_EUR)
+    : undefined;
+
+  return {
+    ...product,
+    price: cappedPrice,
+    originalPrice: cappedOriginalPrice,
+  };
+});
 
 export const categories: Category[] = [
   {

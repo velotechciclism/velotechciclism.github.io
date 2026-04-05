@@ -7,6 +7,15 @@ import heroImage from "@/assets/hero-cycling.jpg";
 
 const HeroSection: React.FC = () => {
   const { t } = useLanguage();
+
+  const handleWatchVideo = () => {
+    window.open(
+      "https://www.youtube.com/watch?v=9No-FiEInLA",
+      "_blank",
+      "noopener,noreferrer"
+    );
+  };
+
   return (
     <section className="relative min-h-[90vh] flex items-center overflow-hidden">
       {/* Background Image */}
@@ -55,7 +64,7 @@ const HeroSection: React.FC = () => {
                 <ArrowRight className="w-5 h-5" />
               </Button>
             </Link>
-            <Button variant="heroOutline" size="xl">
+            <Button variant="heroOutline" size="xl" onClick={handleWatchVideo}>
               <Play className="w-5 h-5" />
               {t("home.hero.watchVideo")}
             </Button>

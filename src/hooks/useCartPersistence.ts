@@ -3,6 +3,7 @@ import { Product, CartItem } from '@/types/product';
 import { useAuthContext } from '@/context/AuthContext';
 import { getApiUrl } from '@/lib/api';
 import { getAuthToken } from '@/lib/auth';
+import { MAX_UNITS_PER_PRODUCT } from '@/lib/cartRules';
 
 interface StoredOrderItem {
   id: string;
@@ -124,10 +125,15 @@ export function useCartPersistence() {
       }
     }
 
-    setItems((prev) => {
-      const existingItem = prev.find((item) => item.id === product.id);
+    const existingItem = items.find((item) => item.id === product.id);
+    if ((existingItem?.quantity || 0) + quantity > MAX_UNITS_PER_PRODUCT) {
+      throw new Error(`Limite maximo de ${MAX_UNITS_PER_PRODUCT} unidades por produto.`);
+    }
 
-      const nextItems = existingItem
+    setItems((prev) => {
+      const matchedItem = prev.find((item) => item.id === product.id);
+
+      const nextItems = matchedItem
         ? prev.map((item) =>
             item.id === product.id
               ? { ...item, quantity: item.quantity + quantity }
@@ -138,7 +144,7 @@ export function useCartPersistence() {
       persistCart(nextItems);
       return nextItems;
     });
-  }, [isAuthenticated, persistCart, user]);
+  }, [isAuthenticated, items, persistCart, user]);
 
   const removeItem = useCallback(async (productId: string) => {
     if (isAuthenticated && user) {
@@ -161,6 +167,10 @@ export function useCartPersistence() {
   }, [isAuthenticated, persistCart, user]);
 
   const updateQuantity = useCallback(async (productId: string, quantity: number) => {
+    if (quantity > MAX_UNITS_PER_PRODUCT) {
+      throw new Error(`Limite maximo de ${MAX_UNITS_PER_PRODUCT} unidades por produto.`);
+    }
+
     if (isAuthenticated && user) {
       try {
         const data = await fetchAuthJson<{ items: CartItem[] }>(`/cart/items/${productId}`, {

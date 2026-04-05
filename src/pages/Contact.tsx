@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
-import { Mail, Phone, MapPin, Send, Clock, MessageCircle } from "lucide-react";
+import { Mail, Phone, MapPin, Send, MessageCircle } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 
 const Contact: React.FC = () => {
@@ -71,6 +71,9 @@ const Contact: React.FC = () => {
     },
   ];
 
+  const cardClassName =
+    "rounded-2xl bg-muted p-6 hover:shadow-lg hover:bg-muted/80 transition-all duration-300 animate-fade-in";
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -91,25 +94,44 @@ const Contact: React.FC = () => {
         <div className="container mx-auto px-4 py-12">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
             {contactMethods.map((method, index) => (
-              <a
-                key={method.title}
-                href={method.link}
-                target={method.link && method.link.startsWith("http") ? "_blank" : undefined}
-                rel={method.link && method.link.startsWith("http") ? "noopener noreferrer" : undefined}
-                className="rounded-2xl bg-muted p-6 hover:shadow-lg hover:bg-muted/80 transition-all duration-300 animate-fade-in cursor-pointer"
-                style={{ animationDelay: `${index * 0.05}s` }}
-              >
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                  <method.icon className="w-6 h-6 text-primary" />
+              method.link ? (
+                <a
+                  key={method.title}
+                  href={method.link}
+                  target={method.link.startsWith("http") ? "_blank" : undefined}
+                  rel={method.link.startsWith("http") ? "noopener noreferrer" : undefined}
+                  className={`${cardClassName} cursor-pointer`}
+                  style={{ animationDelay: `${index * 0.05}s` }}
+                >
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                    <method.icon className="w-6 h-6 text-primary" />
+                  </div>
+                  <h3 className="font-display font-bold text-foreground mb-2">
+                    {method.title}
+                  </h3>
+                  <p className="font-semibold text-foreground mb-1">
+                    {method.details}
+                  </p>
+                  <p className="text-sm text-muted-foreground">{method.description}</p>
+                </a>
+              ) : (
+                <div
+                  key={method.title}
+                  className={cardClassName}
+                  style={{ animationDelay: `${index * 0.05}s` }}
+                >
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                    <method.icon className="w-6 h-6 text-primary" />
+                  </div>
+                  <h3 className="font-display font-bold text-foreground mb-2">
+                    {method.title}
+                  </h3>
+                  <p className="font-semibold text-foreground mb-1">
+                    {method.details}
+                  </p>
+                  <p className="text-sm text-muted-foreground">{method.description}</p>
                 </div>
-                <h3 className="font-display font-bold text-foreground mb-2">
-                  {method.title}
-                </h3>
-                <p className="font-semibold text-foreground mb-1">
-                  {method.details}
-                </p>
-                <p className="text-sm text-muted-foreground">{method.description}</p>
-              </a>
+              )
             ))}
           </div>
 
@@ -197,22 +219,6 @@ const Contact: React.FC = () => {
           </div>
         </div>
 
-        {/* Map Section (Placeholder) */}
-        <div className="bg-muted py-12 mt-12">
-          <div className="container mx-auto px-4">
-            <h2 className="font-display text-2xl font-bold text-foreground mb-8 text-center">
-              {t("contact.findUs")}
-            </h2>
-            <div className="rounded-2xl overflow-hidden h-96 bg-background border border-border flex items-center justify-center">
-              <div className="text-center">
-                <MapPin className="w-16 h-16 text-primary/30 mx-auto mb-4" />
-                <p className="text-muted-foreground">
-                  {t("contact.mapComingSoon")}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
       </main>
       <Footer />
     </div>

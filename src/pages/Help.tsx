@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/accordion";
 import { Search, MessageCircle, HelpCircle } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
+import { useNavigate } from "react-router-dom";
 
 interface FAQItem {
   id: string;
@@ -20,7 +21,12 @@ interface FAQItem {
 
 const Help: React.FC = () => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+
+  const handleOpenChat = () => {
+    window.dispatchEvent(new Event("velotech:open-chatbot"));
+  };
 
   const faqItems: FAQItem[] = [
     {
@@ -136,7 +142,7 @@ const Help: React.FC = () => {
               <p className="text-sm text-muted-foreground mb-4">
                 {t("help.liveChatDesc")}
               </p>
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" className="w-full" onClick={handleOpenChat}>
                 {t("help.startChat")}
               </Button>
             </div>
@@ -151,7 +157,11 @@ const Help: React.FC = () => {
               <p className="text-sm text-muted-foreground mb-4">
                 support@velotech.com
               </p>
-              <Button variant="outline" className="w-full">
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => window.open("mailto:support@velotech.com", "_self")}
+              >
                 {t("help.sendEmail")}
               </Button>
             </div>
@@ -166,7 +176,7 @@ const Help: React.FC = () => {
               <p className="text-sm text-muted-foreground mb-4">
                 {t("help.guidesDesc")}
               </p>
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" className="w-full" onClick={() => navigate("/blog") }>
                 {t("help.browseGuides")}
               </Button>
             </div>
@@ -242,8 +252,8 @@ const Help: React.FC = () => {
               {t("help.didntFindDesc")}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button>{t("help.contactSupport")}</Button>
-              <Button variant="outline">{t("help.browseBlog")}</Button>
+              <Button onClick={() => navigate("/contact")}>{t("help.contactSupport")}</Button>
+              <Button variant="outline" onClick={() => navigate("/blog")}>{t("help.browseBlog")}</Button>
             </div>
           </div>
         </div>

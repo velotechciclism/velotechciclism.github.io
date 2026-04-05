@@ -4,6 +4,7 @@ import { authMiddleware, AuthRequest } from '../middleware/auth.js';
 import { prisma } from '../prisma.js';
 
 const router = express.Router();
+const MAX_UNITS_PER_PRODUCT = 5;
 
 const addItemSchema = z.object({
   productId: z.string().min(1),
@@ -86,6 +87,25 @@ router.post('/items', authMiddleware, async (req: AuthRequest, res: Response) =>
     return;
   }
 
+  const existingItem = await prisma.cartItem.findUnique({
+    where: {
+      cartId_productId: {
+        cartId: cart.id,
+        productId: input.productId,
+      },
+    },
+  });
+
+  const currentQuantity = existingItem?.quantity || 0;
+  const nextQuantity = currentQuantity + input.quantity;
+
+  if (nextQuantity > MAX_UNITS_PER_PRODUCT) {
+    res.status(400).json({
+      error: `Limite maximo de ${MAX_UNITS_PER_PRODUCT} unidades por produto no carrinho.`,
+    });
+    return;
+  }
+
   await prisma.cartItem.upsert({
     where: {
       cartId_productId: {
@@ -116,6 +136,13 @@ router.patch('/items/:productId', authMiddleware, async (req: AuthRequest, res: 
 
   const input = updateItemSchema.parse(req.body);
   const cart = await getOrCreateCart(req.userId);
+
+  if (input.quantity > MAX_UNITS_PER_PRODUCT) {
+    res.status(400).json({
+      error: `Limite maximo de ${MAX_UNITS_PER_PRODUCT} unidades por produto no carrinho.`,
+    });
+    return;
+  }
 
   if (input.quantity === 0) {
     await prisma.cartItem.deleteMany({
