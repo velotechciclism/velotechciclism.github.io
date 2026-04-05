@@ -1,4 +1,6 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+import { getApiUrl, getBackendUnavailableMessage } from './api';
+
+const API_URL = getApiUrl();
 
 export interface User {
   id: number;
@@ -36,7 +38,7 @@ export async function registerUser(
     return response.json();
   } catch (error) {
     if (error instanceof TypeError && error.message === 'Failed to fetch') {
-      throw new Error('Servidor não está disponível. Certifique-se de que o backend está rodando em http://localhost:3001');
+      throw new Error(getBackendUnavailableMessage());
     }
     throw error;
   }
@@ -58,7 +60,7 @@ export async function loginUser(email: string, password: string): Promise<AuthRe
     return response.json();
   } catch (error) {
     if (error instanceof TypeError && error.message === 'Failed to fetch') {
-      throw new Error('Servidor não está disponível. Certifique-se de que o backend está rodando em http://localhost:3001');
+      throw new Error(getBackendUnavailableMessage());
     }
     throw error;
   }
@@ -77,7 +79,7 @@ export async function getProfile(token: string): Promise<User> {
     return response.json();
   } catch (error) {
     if (error instanceof TypeError && error.message === 'Failed to fetch') {
-      throw new Error('Servidor não está disponível');
+      throw new Error(getBackendUnavailableMessage());
     }
     throw error;
   }

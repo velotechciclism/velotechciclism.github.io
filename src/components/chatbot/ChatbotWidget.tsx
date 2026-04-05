@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { contactInfo } from "@/config/contact";
+import { getApiUrl } from "@/lib/api";
 
 interface Message {
   id: string;
@@ -20,7 +21,7 @@ interface ProductSuggestion {
   product_category: string;
 }
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001/api";
+const API_URL = getApiUrl();
 
 const ChatbotWidget: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
