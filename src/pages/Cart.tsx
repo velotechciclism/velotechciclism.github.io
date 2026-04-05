@@ -7,14 +7,32 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCart } from "@/context/CartContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { useAuthContext } from "@/context/AuthContext";
+import { toast } from "sonner";
 
 const Cart: React.FC = () => {
   const { t } = useLanguage();
-  const { items, removeItem, updateQuantity, totalPrice, clearCart } = useCart();
+  const { items, removeItem, updateQuantity, totalPrice, clearCart, checkout } = useCart();
+  const { isAuthenticated } = useAuthContext();
 
   const shipping = totalPrice > 100 ? 0 : 9.99;
   const tax = totalPrice * 0.23;
   const finalTotal = totalPrice + shipping + tax;
+
+  const handleCheckout = async () => {
+    if (!isAuthenticated) {
+      toast.error("Faça login para finalizar a compra");
+      return;
+    }
+
+    try {
+      await checkout("cartao", "Endereco nao informado");
+      toast.success(t("notifications.checkoutSuccess"));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : t("notifications.checkoutError");
+      toast.error(message);
+    }
+  };
 
   if (items.length === 0) {
     return (
@@ -191,7 +209,7 @@ const Cart: React.FC = () => {
                 </div>
 
                 {/* Checkout Button */}
-                <Button variant="yellow" size="lg" className="w-full">
+                <Button variant="yellow" size="lg" className="w-full" onClick={handleCheckout}>
                   {t("cart.proceedToCheckout")}
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>

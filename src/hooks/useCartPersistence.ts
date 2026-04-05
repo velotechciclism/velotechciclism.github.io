@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Product, CartItem } from '@/types/product';
 import { useAuthContext } from '@/context/AuthContext';
+import { getApiUrl } from '@/lib/api';
+import { getAuthToken } from '@/lib/auth';
 
 interface StoredOrderItem {
   id: string;
@@ -45,6 +47,36 @@ function readJson<T>(key: string, fallback: T): T {
   }
 }
 
+const API_URL = getApiUrl();
+
+async function fetchAuthJson<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const token = getAuthToken();
+
+  if (!token) {
+    throw new Error('Usuario nao autenticado');
+  }
+
+  const response = await fetch(`${API_URL}${path}`, {
+    ...init,
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+      ...(init.headers || {}),
+    },
+  });
+
+  if (!response.ok) {
+    const contentType = response.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+      const payload = (await response.json()) as { error?: string };
+      throw new Error(payload.error || 'Erro na requisicao');
+    }
+    throw new Error('Erro na requisicao');
+  }
+
+  return (await response.json()) as T;
+}
+
 export function useCartPersistence() {
   const { user, isAuthenticated } = useAuthContext();
   const [items, setItems] = useState<CartItem[]>([]);
@@ -58,16 +90,40 @@ export function useCartPersistence() {
   );
 
   const loadCartItems = useCallback(async () => {
-    const storedItems = readJson<CartItem[]>(getCartKey(user?.id), []);
-    setItems(storedItems);
-    setIsLoading(false);
-  }, [user?.id]);
+    try {
+      if (isAuthenticated && user) {
+        const data = await fetchAuthJson<{ items: CartItem[] }>('/cart');
+        setItems(data.items || []);
+      } else {
+        const storedItems = readJson<CartItem[]>(getCartKey(user?.id), []);
+        setItems(storedItems);
+      }
+    } catch {
+      const storedItems = readJson<CartItem[]>(getCartKey(user?.id), []);
+      setItems(storedItems);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isAuthenticated, user, user?.id]);
 
   useEffect(() => {
     void loadCartItems();
   }, [loadCartItems]);
 
   const addItem = useCallback(async (product: Product, quantity = 1) => {
+    if (isAuthenticated && user) {
+      try {
+        const data = await fetchAuthJson<{ items: CartItem[] }>('/cart/items', {
+          method: 'POST',
+          body: JSON.stringify({ productId: product.id, quantity }),
+        });
+        setItems(data.items || []);
+        return;
+      } catch {
+        // fallback abaixo
+      }
+    }
+
     setItems((prev) => {
       const existingItem = prev.find((item) => item.id === product.id);
 
@@ -82,17 +138,42 @@ export function useCartPersistence() {
       persistCart(nextItems);
       return nextItems;
     });
-  }, [persistCart]);
+  }, [isAuthenticated, persistCart, user]);
 
   const removeItem = useCallback(async (productId: string) => {
+    if (isAuthenticated && user) {
+      try {
+        const data = await fetchAuthJson<{ items: CartItem[] }>(`/cart/items/${productId}`, {
+          method: 'DELETE',
+        });
+        setItems(data.items || []);
+        return;
+      } catch {
+        // fallback abaixo
+      }
+    }
+
     setItems((prev) => {
       const nextItems = prev.filter((item) => item.id !== productId);
       persistCart(nextItems);
       return nextItems;
     });
-  }, [persistCart]);
+  }, [isAuthenticated, persistCart, user]);
 
   const updateQuantity = useCallback(async (productId: string, quantity: number) => {
+    if (isAuthenticated && user) {
+      try {
+        const data = await fetchAuthJson<{ items: CartItem[] }>(`/cart/items/${productId}`, {
+          method: 'PATCH',
+          body: JSON.stringify({ quantity }),
+        });
+        setItems(data.items || []);
+        return;
+      } catch {
+        // fallback abaixo
+      }
+    }
+
     if (quantity <= 0) {
       await removeItem(productId);
       return;
@@ -105,16 +186,36 @@ export function useCartPersistence() {
       persistCart(nextItems);
       return nextItems;
     });
-  }, [persistCart, removeItem]);
+  }, [isAuthenticated, persistCart, removeItem, user]);
 
   const clearCart = useCallback(async () => {
+    if (isAuthenticated && user) {
+      try {
+        await fetchAuthJson<{ ok: boolean }>('/cart/items', { method: 'DELETE' });
+      } catch {
+        // fallback abaixo
+      }
+    }
+
     setItems([]);
     persistCart([]);
-  }, [persistCart]);
+  }, [isAuthenticated, persistCart, user]);
 
   const checkout = useCallback(async (paymentMethod: string, shippingAddress: string) => {
     if (!isAuthenticated || !user || items.length === 0) {
       throw new Error('Usuário não autenticado ou carrinho vazio');
+    }
+
+    try {
+      const order = await fetchAuthJson<{ id: string }>('/cart/checkout', {
+        method: 'POST',
+        body: JSON.stringify({ paymentMethod, shippingAddress }),
+      });
+      setItems([]);
+      persistCart([]);
+      return order;
+    } catch {
+      // fallback abaixo
     }
 
     const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -144,7 +245,7 @@ export function useCartPersistence() {
 
     await clearCart();
     return order;
-  }, [isAuthenticated, user, items, clearCart]);
+  }, [isAuthenticated, user, items, clearCart, persistCart]);
 
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = items.reduce((sum, item) => sum + item.price * item.quantity, 0);

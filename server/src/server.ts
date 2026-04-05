@@ -5,7 +5,12 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import authRoutes from './routes/authRoutes.js';
 import chatbotRoutes from './routes/chatbotRoutes.js';
+import productsRoutes from './routes/productsRoutes.js';
+import cartRoutes from './routes/cartRoutes.js';
+import ordersRoutes from './routes/ordersRoutes.js';
+import engagementRoutes from './routes/engagementRoutes.js';
 import { prisma } from './prisma.js';
+import { ensureCatalogSeeded } from './services/catalogService.js';
 
 dotenv.config();
 
@@ -54,6 +59,10 @@ app.use(
 // Rotas
 app.use('/api/auth', authRoutes);
 app.use('/api/chatbot', chatbotRoutes);
+app.use('/api/products', productsRoutes);
+app.use('/api/cart', cartRoutes);
+app.use('/api/orders', ordersRoutes);
+app.use('/api', engagementRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => {
@@ -61,16 +70,27 @@ app.get('/api/health', (_req, res) => {
 });
 
 // Iniciar servidor
-const server = app.listen(PORT, () => {
-  console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
+let server: ReturnType<typeof app.listen>;
+
+async function bootstrap() {
+  await ensureCatalogSeeded();
+  server = app.listen(PORT, () => {
+    console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
+  });
+}
+
+bootstrap().catch(async (error) => {
+  console.error('Falha ao iniciar servidor:', error);
+  await prisma.$disconnect();
+  process.exit(1);
 });
 
 process.on('SIGINT', async () => {
   await prisma.$disconnect();
-  server.close(() => process.exit(0));
+  server?.close(() => process.exit(0));
 });
 
 process.on('SIGTERM', async () => {
   await prisma.$disconnect();
-  server.close(() => process.exit(0));
+  server?.close(() => process.exit(0));
 });

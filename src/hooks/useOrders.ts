@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuthContext } from '@/context/AuthContext';
+import { getApiUrl } from '@/lib/api';
+import { getAuthToken } from '@/lib/auth';
 
 interface OrderItem {
   id: string;
@@ -27,6 +29,8 @@ export function useOrders() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const apiUrl = getApiUrl();
+
   const getStorageKey = useCallback(() => {
     if (!user) {
       return null;
@@ -43,6 +47,22 @@ export function useOrders() {
     }
 
     try {
+      const token = getAuthToken();
+
+      if (token) {
+        const response = await fetch(`${apiUrl}/orders/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = (await response.json()) as Order[];
+          setOrders(data);
+          return;
+        }
+      }
+
       const storageKey = getStorageKey();
 
       if (!storageKey) {
@@ -59,7 +79,7 @@ export function useOrders() {
     } finally {
       setIsLoading(false);
     }
-  }, [getStorageKey, isAuthenticated, user]);
+  }, [apiUrl, getStorageKey, isAuthenticated, user]);
 
   useEffect(() => {
     loadOrders();
