@@ -1,26 +1,15 @@
 import React, { createContext, ReactNode } from 'react';
-import { useAuth } from '../hooks/useAuth';
-import { User, Session } from '@supabase/supabase-js';
-
-interface Profile {
-  id: string;
-  user_id: string;
-  name: string;
-  phone: string | null;
-  address: string | null;
-  created_at: string;
-  updated_at: string;
-}
+import { useAuth, AuthUser } from '../hooks/useAuth';
 
 interface AuthContextType {
-  user: User | null;
-  profile: Profile | null;
-  session: Session | null;
+  user: AuthUser | null;
+  profile: AuthUser | null;
+  session: string | null;
   isLoading: boolean;
   error: string | null;
   isAuthenticated: boolean;
-  register: (email: string, name: string, password: string, phone?: string, address?: string) => Promise<any>;
-  login: (email: string, password: string) => Promise<any>;
+  register: (email: string, name: string, password: string, phone?: string, address?: string) => Promise<{ user: AuthUser; token: string }>;
+  login: (email: string, password: string) => Promise<{ user: AuthUser; token: string }>;
   logout: () => Promise<void>;
   loadProfile: () => Promise<void>;
 }

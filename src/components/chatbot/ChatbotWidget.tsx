@@ -4,8 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { supabase } from "@/integrations/supabase/client";
-import { useLanguage } from "@/context/LanguageContext";
 import { contactInfo } from "@/config/contact";
 
 interface Message {
@@ -22,8 +20,9 @@ interface ProductSuggestion {
   product_category: string;
 }
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001/api";
+
 const ChatbotWidget: React.FC = () => {
-  const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
@@ -81,15 +80,27 @@ const ChatbotWidget: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke("chatbot", {
-        body: {
+      const response = await fetch(`${API_URL}/chatbot`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
           message: userMessage.content,
           conversationId,
           sessionId,
-        },
+        }),
       });
 
-      if (error) throw error;
+      if (!response.ok) {
+        throw new Error("Erro ao chamar o chatbot");
+      }
+
+      const data = (await response.json()) as {
+        conversationId: string;
+        message: string;
+        products: ProductSuggestion[];
+      };
 
       if (data.conversationId && !conversationId) {
         setConversationId(data.conversationId);

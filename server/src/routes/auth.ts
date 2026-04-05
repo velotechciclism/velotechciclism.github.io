@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import bcryptjs from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import pool from '../db/connection.js';
+import { prisma } from '../prisma.js';
 
 // Schemas de validação
 export const registerSchema = z.object({
@@ -31,63 +31,106 @@ export interface User {
 }
 
 export interface AuthResponse {
-  user: Omit<User, 'password'>;
+  user: User;
   token: string;
+}
+
+function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+
+  if (!secret) {
+    throw new Error('JWT_SECRET nao configurado no ambiente');
+  }
+
+  return secret;
 }
 
 // Funções
 export async function registerUser(data: RegisterData): Promise<AuthResponse> {
   const hashedPassword = await bcryptjs.hash(data.password, 10);
 
-  const result = await pool.query(
-    `INSERT INTO users (email, name, password, phone, address) 
-     VALUES ($1, $2, $3, $4, $5) 
-     RETURNING id, email, name, phone, address, created_at`,
-    [data.email, data.name, hashedPassword, data.phone || null, data.address || null]
-  );
+  const existingUser = await prisma.user.findUnique({ where: { email: data.email } });
 
-  const user = result.rows[0];
+  if (existingUser) {
+    throw new Error('Email ja cadastrado');
+  }
+
+  const user = await prisma.user.create({
+    data: {
+      email: data.email,
+      name: data.name,
+      password: hashedPassword,
+      phone: data.phone,
+      address: data.address,
+    },
+  });
+
+  const tokenExpiresIn = (process.env.JWT_EXPIRES_IN || '7d') as jwt.SignOptions['expiresIn'];
   const token = jwt.sign(
     { id: user.id, email: user.email },
-    process.env.JWT_SECRET || 'secret',
-    { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+    getJwtSecret(),
+    { expiresIn: tokenExpiresIn }
   );
 
-  return { user, token };
+  return {
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      phone: user.phone || undefined,
+      address: user.address || undefined,
+      created_at: user.createdAt,
+    },
+    token,
+  };
 }
 
 export async function loginUser(data: LoginData): Promise<AuthResponse> {
-  const result = await pool.query(
-    `SELECT * FROM users WHERE email = $1`,
-    [data.email]
-  );
+  const user = await prisma.user.findUnique({ where: { email: data.email } });
 
-  if (result.rows.length === 0) {
+  if (!user) {
     throw new Error('Email ou senha inválidos');
   }
 
-  const user = result.rows[0];
   const isPasswordValid = await bcryptjs.compare(data.password, user.password);
 
   if (!isPasswordValid) {
     throw new Error('Email ou senha inválidos');
   }
 
+  const tokenExpiresIn = (process.env.JWT_EXPIRES_IN || '7d') as jwt.SignOptions['expiresIn'];
   const token = jwt.sign(
     { id: user.id, email: user.email },
-    process.env.JWT_SECRET || 'secret',
-    { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+    getJwtSecret(),
+    { expiresIn: tokenExpiresIn }
   );
 
-  const { password, ...userWithoutPassword } = user;
-  return { user: userWithoutPassword, token };
+  return {
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      phone: user.phone || undefined,
+      address: user.address || undefined,
+      created_at: user.createdAt,
+    },
+    token,
+  };
 }
 
 export async function getUserById(id: number): Promise<User | null> {
-  const result = await pool.query(
-    `SELECT id, email, name, phone, address, created_at FROM users WHERE id = $1`,
-    [id]
-  );
+  const user = await prisma.user.findUnique({ where: { id } });
 
-  return result.rows[0] || null;
+  if (!user) {
+    return null;
+  }
+
+  return {
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    phone: user.phone || undefined,
+    address: user.address || undefined,
+    created_at: user.createdAt,
+  };
 }

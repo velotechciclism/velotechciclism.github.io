@@ -12,7 +12,9 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-const translations: Record<Language, Record<string, any>> = {
+type TranslationValue = string | Record<string, TranslationValue>;
+
+const translations: Record<Language, Record<string, TranslationValue>> = {
   'pt-br': ptBrTranslations || {},
   'en': enTranslations || {},
 };
@@ -55,11 +57,11 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const t = (key: string, defaultValue?: string): string => {
     const keys = key.split('.');
-    let value: any = translations[language];
+    let value: TranslationValue | undefined = translations[language];
 
     for (const k of keys) {
       if (value && typeof value === 'object' && k in value) {
-        value = value[k];
+        value = (value as Record<string, TranslationValue>)[k];
       } else {
         return defaultValue || key;
       }

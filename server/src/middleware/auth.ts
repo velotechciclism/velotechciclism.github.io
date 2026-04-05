@@ -6,22 +6,40 @@ export interface AuthRequest extends Request {
   userEmail?: string;
 }
 
+function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+
+  if (!secret) {
+    throw new Error('JWT_SECRET nao configurado no ambiente');
+  }
+
+  return secret;
+}
+
 export function authMiddleware(req: AuthRequest, res: Response, next: NextFunction) {
-  const token = req.headers.authorization?.split(' ')[1];
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader?.startsWith('Bearer ')) {
+    res.status(401).json({ error: 'Token nao fornecido' });
+    return;
+  }
+
+  const token = authHeader.slice('Bearer '.length).trim();
 
   if (!token) {
-    return res.status(401).json({ error: 'Token não fornecido' });
+    res.status(401).json({ error: 'Token nao fornecido' });
+    return;
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret') as {
+    const decoded = jwt.verify(token, getJwtSecret()) as {
       id: number;
       email: string;
     };
     req.userId = decoded.id;
     req.userEmail = decoded.email;
     next();
-  } catch (error) {
-    res.status(401).json({ error: 'Token inválido' });
+  } catch {
+    res.status(401).json({ error: 'Token invalido' });
   }
 }
