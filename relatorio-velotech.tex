@@ -1,0 +1,1045 @@
+% ============================================================================
+% Esse relatório foi desenvolvido em latex, usando a plataforma overleaf
+% ============================================================================
+% ============================================================================
+% RELATÓRIO TÉCNICO - VELOTECH
+% Disciplina: PTGPSI - 12º Ano
+% Aluno: Carlos Santos
+% Escola Secundária Henriques Nogueira
+% ============================================================================
+
+\documentclass[12pt,a4paper]{article}
+
+% ============================================================================
+% PACOTES
+% ============================================================================
+\usepackage[utf8]{inputenc}
+\usepackage[portuguese]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{times}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{indentfirst}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+
+% ============================================================================
+% CONFIGURAÇÕES DE PÁGINA (ABNT)
+% ============================================================================
+\geometry{
+    a4paper,
+    left=3cm,
+    right=2cm,
+    top=3cm,
+    bottom=2cm
+}
+
+\setstretch{1.5}
+\setlength{\parindent}{1.25cm}
+
+% ============================================================================
+% CONFIGURAÇÕES DE CÓDIGO
+% ============================================================================
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+
+% ============================================================================
+% CONFIGURAÇÕES DE HIPERLINKS
+% ============================================================================
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    citecolor=blue,
+    pdftitle={Relatório Técnico - VeloTech},
+    pdfauthor={Carlos Santos},
+}
+
+% ============================================================================
+% CABEÇALHO E RODAPÉ
+% ============================================================================
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[R]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+
+% ============================================================================
+% INÍCIO DO DOCUMENTO
+% ============================================================================
+\begin{document}
+
+% ============================================================================
+% CAPA
+% ============================================================================
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+    
+    {\large \textbf{ESCOLA SECUNDÁRIA HENRIQUES NOGUEIRA}}\\[0.5cm]
+    {\large Curso Profissional de Técnico de Gestão e Programação de Sistemas Informáticos}\\[2cm]
+    
+    \vfill
+    
+    {\LARGE \textbf{RELATÓRIO TÉCNICO}}\\[0.5cm]
+    {\Huge \textbf{VeloTech}}\\[0.3cm]
+    {\large Plataforma de E-commerce para Equipamentos de Ciclismo}\\[2cm]
+    
+    \vfill
+    
+    {\large
+    \begin{tabular}{ll}
+        \textbf{Aluno:} & Carlos Santos \\[0.3cm]
+        \textbf{Disciplina:} & PTGPSI \\[0.3cm]
+        \textbf{Ano:} & 12º Ano \\[0.3cm]
+    \end{tabular}
+    }
+    
+    \vfill
+    
+    {\large Torres Vedras}\\
+    {\large 2026}
+\end{titlepage}
+
+% ============================================================================
+% SUMÁRIO
+% ============================================================================
+\newpage
+\tableofcontents
+\newpage
+
+% ============================================================================
+% 1. INTRODUÇÃO
+% ============================================================================
+\section{Introdução}
+
+O presente relatório técnico documenta o desenvolvimento da plataforma VeloTech, uma aplicação web de comércio eletrónico especializada em equipamentos de ciclismo. O projeto foi desenvolvido como trabalho prático da disciplina de PTGPSI (Projeto Tecnológico de Gestão e Programação de Sistemas Informáticos) do 12º ano do Curso Profissional de Técnico de Gestão e Programação de Sistemas Informáticos.
+
+A VeloTech foi concebida para proporcionar uma experiência de compra moderna, responsiva e intuitiva, implementando as melhores práticas de desenvolvimento web atual. A plataforma oferece funcionalidades completas de e-commerce, incluindo catálogo de produtos, sistema de carrinho de compras, autenticação de utilizadores e suporte multilingue.
+
+\subsection{Objetivos do Projeto}
+
+\begin{itemize}[noitemsep]
+    \item Desenvolver uma aplicação web de e-commerce funcional e moderna
+    \item Implementar um sistema de autenticação seguro
+    \item Criar uma interface responsiva e acessível
+    \item Desenvolver um sistema de internacionalização (i18n)
+    \item Integrar múltiplos métodos de pagamento
+    \item Aplicar as melhores práticas de desenvolvimento frontend
+\end{itemize}
+
+% ============================================================================
+% 2. ARQUITETURA DO SISTEMA
+% ============================================================================
+\section{Arquitetura do Sistema}
+
+A arquitetura da VeloTech segue o modelo de \textit{Single Page Application} (SPA), onde a aplicação é carregada uma única vez e as transições entre páginas ocorrem sem recarregamento completo do navegador. Esta abordagem proporciona uma experiência de utilizador fluida e rápida \cite{reactdocs}.
+
+\subsection{Visão Geral da Arquitetura}
+
+\begin{figure}[H]
+\centering
+\begin{verbatim}
++-------------------+     +-------------------+     +-------------------+
+|                   |     |                   |     |                   |
+|    FRONTEND       |<--->|    SUPABASE       |<--->|   POSTGRESQL      |
+|    (React/Vite)   |     |    (BaaS)         |     |   (Database)      |
+|                   |     |                   |     |                   |
++-------------------+     +-------------------+     +-------------------+
+        |
+        v
++-------------------+
+|                   |
+|    BROWSER        |
+|    (Client)       |
+|                   |
++-------------------+
+\end{verbatim}
+\caption{Diagrama de Arquitetura do Sistema}
+\end{figure}
+
+\subsection{Estrutura de Diretórios}
+
+O projeto segue uma estrutura modular e organizada:
+
+\begin{lstlisting}[language=bash, caption=Estrutura de Diretórios do Projeto]
+velotech/
+├── public/                    # Arquivos estáticos
+├── src/
+│   ├── assets/               # Imagens e recursos
+│   ├── components/           # Componentes React
+│   │   ├── home/            # Componentes da página inicial
+│   │   ├── layout/          # Header, Footer
+│   │   ├── product/         # Componentes de produto
+│   │   └── ui/              # Componentes UI (shadcn)
+│   ├── context/             # Contextos React
+│   ├── data/                # Dados estáticos
+│   ├── hooks/               # Hooks personalizados
+│   ├── integrations/        # Integrações (Supabase)
+│   ├── lib/                 # Utilitários
+│   ├── locales/             # Ficheiros de tradução
+│   ├── pages/               # Páginas da aplicação
+│   └── types/               # Definições TypeScript
+├── supabase/                 # Configurações Supabase
+└── package.json             # Dependências do projeto
+\end{lstlisting}
+
+% ============================================================================
+% 3. TECNOLOGIAS UTILIZADAS
+% ============================================================================
+\section{Tecnologias Utilizadas}
+
+\subsection{Frontend}
+
+\subsubsection{React 18}
+
+O React é uma biblioteca JavaScript para construção de interfaces de utilizador, desenvolvida pelo Facebook (Meta). A versão 18, utilizada neste projeto, introduziu melhorias significativas como:
+
+\begin{itemize}[noitemsep]
+    \item \textbf{Concurrent Rendering}: Renderização concorrente para melhor performance
+    \item \textbf{Automatic Batching}: Agrupamento automático de atualizações de estado
+    \item \textbf{Suspense}: Carregamento assíncrono de componentes
+\end{itemize}
+
+O React utiliza o conceito de Virtual DOM (Document Object Model Virtual), que permite atualizações eficientes da interface minimizando manipulações diretas do DOM real \cite{reactdocs}.
+
+\subsubsection{TypeScript}
+
+TypeScript é um superconjunto tipado de JavaScript que compila para JavaScript puro. A sua utilização proporciona:
+
+\begin{itemize}[noitemsep]
+    \item Deteção de erros em tempo de compilação
+    \item Autocompletar e IntelliSense melhorados
+    \item Melhor documentação do código
+    \item Refatoração mais segura
+\end{itemize}
+
+\begin{lstlisting}[language=JavaScript, caption=Exemplo de Tipagem TypeScript - Interface de Produto]
+export interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  originalPrice?: number;
+  image: string;
+  category: string;
+  brand: string;
+  rating: number;
+  reviewCount: number;
+  inStock: boolean;
+  isNew?: boolean;
+  isFeatured?: boolean;
+  specs?: Record<string, string>;
+}
+\end{lstlisting}
+
+\subsubsection{Vite}
+
+Vite é uma ferramenta de build moderna que oferece:
+
+\begin{itemize}[noitemsep]
+    \item \textbf{Hot Module Replacement (HMR)}: Atualizações instantâneas durante o desenvolvimento
+    \item \textbf{Build otimizado}: Utiliza Rollup para produção
+    \item \textbf{Suporte nativo a TypeScript}: Sem configuração adicional
+    \item \textbf{Tempos de inicialização rápidos}: Servidor de desenvolvimento instantâneo
+\end{itemize}
+
+\subsubsection{Tailwind CSS}
+
+Tailwind CSS é um framework CSS utility-first que permite estilização diretamente no HTML através de classes utilitárias. Benefícios incluem:
+
+\begin{itemize}[noitemsep]
+    \item Desenvolvimento rápido sem trocar de arquivos
+    \item CSS final otimizado (apenas classes utilizadas)
+    \item Design system consistente
+    \item Responsividade integrada
+\end{itemize}
+
+\begin{lstlisting}[language=HTML, caption=Exemplo de Classes Tailwind CSS]
+<div className="min-h-screen flex flex-col">
+  <main className="flex-1 bg-muted py-8">
+    <div className="container mx-auto px-4">
+      <h1 className="font-display text-3xl font-bold 
+                     text-foreground mb-8">
+        Carrinho de Compras
+      </h1>
+    </div>
+  </main>
+</div>
+\end{lstlisting}
+
+\subsubsection{shadcn/ui}
+
+shadcn/ui é uma coleção de componentes reutilizáveis construídos com Radix UI e Tailwind CSS. Os componentes são:
+
+\begin{itemize}[noitemsep]
+    \item Acessíveis (WAI-ARIA compliant)
+    \item Personalizáveis
+    \item Não dependem de runtime
+    \item Copiados diretamente para o projeto
+\end{itemize}
+
+Componentes utilizados no projeto incluem: Button, Input, Card, Dialog, Toast, Accordion, Tabs, entre outros.
+
+\subsection{Backend e Base de Dados}
+
+\subsubsection{Supabase}
+
+O Supabase é uma plataforma de \textit{Backend as a Service} (BaaS) open-source que fornece:
+
+\begin{itemize}[noitemsep]
+    \item Base de dados PostgreSQL gerida
+    \item Autenticação e autorização
+    \item APIs RESTful automáticas
+    \item Subscriptions em tempo real
+    \item Armazenamento de ficheiros
+    \item Edge Functions
+\end{itemize}
+
+O Supabase foi escolhido por oferecer uma alternativa open-source ao Firebase com o poder do PostgreSQL \cite{supabasedocs}.
+
+\subsubsection{PostgreSQL}
+
+PostgreSQL é um sistema de gestão de base de dados relacional open-source, conhecido por:
+
+\begin{itemize}[noitemsep]
+    \item Conformidade com padrões SQL
+    \item Extensibilidade
+    \item Suporte a JSON e dados não estruturados
+    \item Transações ACID
+    \item Row Level Security (RLS)
+\end{itemize}
+
+\begin{lstlisting}[language=SQL, caption=Esquema da Tabela de Perfis de Utilizador]
+CREATE TABLE public.profiles (
+  id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID NOT NULL UNIQUE,
+  name TEXT NOT NULL,
+  phone TEXT,
+  address TEXT,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+  updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+);
+
+-- Ativar Row Level Security
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+
+-- Política: Utilizadores podem ver apenas seu próprio perfil
+CREATE POLICY "Users can view their own profile" 
+ON public.profiles 
+FOR SELECT 
+USING (auth.uid() = user_id);
+\end{lstlisting}
+
+\subsection{Bibliotecas Adicionais}
+
+\begin{longtable}{|p{4cm}|p{3cm}|p{7cm}|}
+\hline
+\textbf{Biblioteca} & \textbf{Versão} & \textbf{Descrição} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Biblioteca} & \textbf{Versão} & \textbf{Descrição} \\
+\hline
+\endhead
+\hline
+\endfoot
+\hline
+\endlastfoot
+@tanstack/react-query & 5.83.0 & Gestão de estado assíncrono e cache \\
+\hline
+react-router-dom & 6.30.1 & Roteamento declarativo para React \\
+\hline
+react-hook-form & 7.61.1 & Gestão de formulários com validação \\
+\hline
+zod & 3.25.76 & Validação de esquemas TypeScript \\
+\hline
+lucide-react & 0.462.0 & Ícones SVG como componentes React \\
+\hline
+sonner & 1.7.4 & Notificações toast elegantes \\
+\hline
+date-fns & 3.6.0 & Utilitários de manipulação de datas \\
+\hline
+recharts & 2.15.4 & Gráficos e visualização de dados \\
+\hline
+class-variance-authority & 0.7.1 & Variantes de componentes tipadas \\
+\hline
+tailwind-merge & 2.6.0 & Merge inteligente de classes Tailwind \\
+\hline
+\end{longtable}
+
+% ============================================================================
+% 4. FUNCIONALIDADES IMPLEMENTADAS
+% ============================================================================
+\section{Funcionalidades Implementadas}
+
+\subsection{Sistema de Autenticação}
+
+O sistema de autenticação foi implementado utilizando o Supabase Auth, que fornece:
+
+\begin{itemize}[noitemsep]
+    \item Registo de utilizadores com email e password
+    \item Login com credenciais
+    \item Gestão de sessões
+    \item Tokens JWT (JSON Web Tokens)
+    \item Perfis de utilizador
+\end{itemize}
+
+\subsubsection{Fluxo de Autenticação}
+
+\begin{enumerate}
+    \item O utilizador preenche o formulário de registo/login
+    \item Os dados são enviados para o Supabase Auth
+    \item O Supabase valida as credenciais
+    \item Um token JWT é retornado e armazenado no localStorage
+    \item O perfil do utilizador é criado/carregado automaticamente
+\end{enumerate}
+
+\begin{lstlisting}[language=JavaScript, caption=Hook de Autenticação - useAuth.ts]
+export function useAuth() {
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+
+  useEffect(() => {
+    const { data: { subscription } } = 
+      supabase.auth.onAuthStateChange((event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          fetchProfile(session.user.id);
+        }
+      });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const login = async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error) throw error;
+    return data;
+  };
+
+  return { user, session, profile, login, logout, register };
+}
+\end{lstlisting}
+
+\subsubsection{Row Level Security (RLS)}
+
+Para garantir a segurança dos dados, foram implementadas políticas RLS:
+
+\begin{lstlisting}[language=SQL, caption=Políticas de Segurança RLS]
+-- Utilizadores podem ver apenas seu perfil
+CREATE POLICY "Users can view their own profile" 
+ON public.profiles FOR SELECT 
+USING (auth.uid() = user_id);
+
+-- Utilizadores podem inserir seu próprio perfil
+CREATE POLICY "Users can insert their own profile" 
+ON public.profiles FOR INSERT 
+WITH CHECK (auth.uid() = user_id);
+
+-- Utilizadores podem atualizar seu próprio perfil
+CREATE POLICY "Users can update their own profile" 
+ON public.profiles FOR UPDATE 
+USING (auth.uid() = user_id);
+\end{lstlisting}
+
+\subsection{Sistema de Internacionalização (i18n)}
+
+O sistema de internacionalização permite que a aplicação seja apresentada em múltiplos idiomas (Português e Inglês). A implementação foi feita utilizando:
+
+\subsubsection{Arquitetura do Sistema de Tradução}
+
+\begin{itemize}[noitemsep]
+    \item \textbf{Context API do React}: Para gerir o estado global do idioma
+    \item \textbf{Ficheiros JSON}: Armazenamento das traduções por idioma
+    \item \textbf{Hook personalizado}: \texttt{useLanguage()} para acesso às traduções
+    \item \textbf{Persistência}: LocalStorage para manter a preferência do utilizador
+    \item \textbf{Deteção automática}: Idioma do navegador como fallback
+\end{itemize}
+
+\begin{lstlisting}[language=JavaScript, caption=Contexto de Idioma - LanguageContext.tsx]
+const translations: Record<Language, Record<string, any>> = {
+  'pt-br': ptBrTranslations,
+  'en': enTranslations,
+};
+
+export const LanguageProvider: React.FC<{ children: ReactNode }> = 
+  ({ children }) => {
+  const [language, setLanguageState] = useState<Language>('en');
+
+  useEffect(() => {
+    const saved = localStorage.getItem('language');
+    if (saved === 'pt-br' || saved === 'en') {
+      setLanguageState(saved);
+    } else {
+      const browserLang = navigator.language;
+      if (browserLang.startsWith('pt')) {
+        setLanguageState('pt-br');
+      }
+    }
+  }, []);
+
+  const t = (key: string, defaultValue?: string): string => {
+    const keys = key.split('.');
+    let value: any = translations[language];
+    for (const k of keys) {
+      if (value && typeof value === 'object' && k in value) {
+        value = value[k];
+      } else {
+        return defaultValue || key;
+      }
+    }
+    return typeof value === 'string' ? value : defaultValue || key;
+  };
+
+  return (
+    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+      {children}
+    </LanguageContext.Provider>
+  );
+};
+\end{lstlisting}
+
+\subsubsection{Estrutura dos Ficheiros de Tradução}
+
+Os ficheiros de tradução estão organizados em categorias semânticas:
+
+\begin{lstlisting}[language=JavaScript, caption=Estrutura do Ficheiro de Tradução pt-br.json]
+{
+  "common": {
+    "home": "Início",
+    "products": "Produtos",
+    "cart": "Carrinho",
+    "login": "Entrar"
+  },
+  "header": {
+    "title": "VeloTech",
+    "searchPlaceholder": "Buscar produtos..."
+  },
+  "cart": {
+    "title": "Carrinho de Compras",
+    "empty": "Seu carrinho está vazio",
+    "paymentMethods": "Métodos de pagamento aceitos"
+  },
+  "auth": {
+    "welcome": "Bem-vindo de volta!",
+    "createAccount": "Criar Conta"
+  }
+}
+\end{lstlisting}
+
+\subsection{Sistema de Carrinho de Compras}
+
+O carrinho de compras foi implementado utilizando a Context API do React, permitindo o acesso ao estado do carrinho em qualquer componente da aplicação.
+
+\subsubsection{Funcionalidades do Carrinho}
+
+\begin{itemize}[noitemsep]
+    \item Adicionar produtos ao carrinho
+    \item Remover produtos do carrinho
+    \item Atualizar quantidade de produtos
+    \item Limpar carrinho completo
+    \item Cálculo automático de subtotal, impostos e frete
+    \item Frete grátis para compras acima de 100€
+\end{itemize}
+
+\begin{lstlisting}[language=JavaScript, caption=Contexto do Carrinho - CartContext.tsx]
+interface CartContextType {
+  items: CartItem[];
+  addItem: (product: Product, quantity?: number) => void;
+  removeItem: (productId: string) => void;
+  updateQuantity: (productId: string, quantity: number) => void;
+  clearCart: () => void;
+  totalItems: number;
+  totalPrice: number;
+}
+
+export const CartProvider: React.FC<{ children: ReactNode }> = 
+  ({ children }) => {
+  const [items, setItems] = useState<CartItem[]>([]);
+
+  const addItem = useCallback((product: Product, quantity = 1) => {
+    setItems((prev) => {
+      const existingItem = prev.find((item) => item.id === product.id);
+      if (existingItem) {
+        return prev.map((item) =>
+          item.id === product.id
+            ? { ...item, quantity: item.quantity + quantity }
+            : item
+        );
+      }
+      return [...prev, { ...product, quantity }];
+    });
+  }, []);
+
+  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+  const totalPrice = items.reduce(
+    (sum, item) => sum + item.price * item.quantity, 0
+  );
+
+  return (
+    <CartContext.Provider value={{
+      items, addItem, removeItem, updateQuantity, 
+      clearCart, totalItems, totalPrice
+    }}>
+      {children}
+    </CartContext.Provider>
+  );
+};
+\end{lstlisting}
+
+\subsubsection{Cálculo de Valores}
+
+\begin{lstlisting}[language=JavaScript, caption=Cálculo de Totais no Carrinho]
+const Cart: React.FC = () => {
+  const { items, totalPrice } = useCart();
+  
+  // Frete grátis acima de 100€
+  const shipping = totalPrice > 100 ? 0 : 9.99;
+  
+  // IVA de 23% (Portugal)
+  const tax = totalPrice * 0.23;
+  
+  // Total final
+  const finalTotal = totalPrice + shipping + tax;
+  
+  return (
+    <div>
+      <p>Subtotal: €{totalPrice.toFixed(2)}</p>
+      <p>Frete: {shipping === 0 ? 'GRÁTIS' : `€${shipping.toFixed(2)}`}</p>
+      <p>IVA (23%): €{tax.toFixed(2)}</p>
+      <p>Total: €{finalTotal.toFixed(2)}</p>
+    </div>
+  );
+};
+\end{lstlisting}
+
+\subsection{Métodos de Pagamento}
+
+A plataforma suporta múltiplos métodos de pagamento, adaptados para o mercado português e brasileiro:
+
+\begin{longtable}{|p{3.5cm}|p{10.5cm}|}
+\hline
+\textbf{Método} & \textbf{Descrição} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Método} & \textbf{Descrição} \\
+\hline
+\endhead
+\hline
+\endfoot
+\hline
+\endlastfoot
+PIX & Sistema de pagamentos instantâneos do Banco Central do Brasil \\
+\hline
+MB WAY & Aplicação de pagamentos móveis em Portugal \\
+\hline
+MULTIBANCO & Rede de multibanco portuguesa \\
+\hline
+VISA & Cartão de crédito/débito internacional \\
+\hline
+MASTERCARD & Cartão de crédito/débito internacional \\
+\hline
+PayPal & Plataforma de pagamentos online internacional \\
+\hline
+Transferência & Transferência bancária tradicional \\
+\hline
+\end{longtable}
+
+\subsection{Catálogo de Produtos}
+
+O catálogo inclui produtos organizados por categorias:
+
+\begin{itemize}[noitemsep]
+    \item \textbf{Bicicletas}: Bicicletas de estrada, montanha e urbanas
+    \item \textbf{Capacetes}: Equipamentos de proteção
+    \item \textbf{Vestuário}: Camisolas, calções e roupa técnica
+    \item \textbf{Acessórios}: Luvas, óculos e outros acessórios
+\end{itemize}
+
+\begin{lstlisting}[language=JavaScript, caption=Estrutura de Dados dos Produtos]
+export const products: Product[] = [
+  {
+    id: "1",
+    name: "AeroSpeed Pro Helmet",
+    description: "Capacete aerodinâmico ultraleve com sistema MIPS",
+    price: 189.99,
+    originalPrice: 229.99,
+    image: productHelmet,
+    category: "Helmets",
+    brand: "VeloTech",
+    rating: 4.8,
+    reviewCount: 124,
+    inStock: true,
+    isNew: true,
+    isFeatured: true,
+    specs: {
+      Weight: "245g",
+      Material: "Carbon composite",
+      Ventilation: "24 vents",
+      Certification: "CE EN1078, CPSC"
+    }
+  },
+  // ... mais produtos
+];
+\end{lstlisting}
+
+\subsection{Páginas da Aplicação}
+
+A aplicação é composta pelas seguintes páginas:
+
+\begin{longtable}{|p{3cm}|p{3cm}|p{8cm}|}
+\hline
+\textbf{Página} & \textbf{Rota} & \textbf{Descrição} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Página} & \textbf{Rota} & \textbf{Descrição} \\
+\hline
+\endhead
+\hline
+\endfoot
+\hline
+\endlastfoot
+Início & / & Página principal com hero, categorias e produtos em destaque \\
+\hline
+Produtos & /products & Catálogo completo com filtros e ordenação \\
+\hline
+Detalhe do Produto & /products/:id & Página individual de cada produto \\
+\hline
+Carrinho & /cart & Gestão do carrinho de compras \\
+\hline
+Autenticação & /auth & Login e registo de utilizadores \\
+\hline
+Marcas & /brands & Lista de marcas disponíveis \\
+\hline
+Blog & /blog & Artigos e notícias sobre ciclismo \\
+\hline
+Contato & /contact & Formulário de contato e informações \\
+\hline
+Ajuda & /help & Centro de ajuda e FAQ \\
+\hline
+\end{longtable}
+
+% ============================================================================
+% 5. DESIGN E INTERFACE
+% ============================================================================
+\section{Design e Interface do Utilizador}
+
+\subsection{Sistema de Design}
+
+A interface foi desenvolvida seguindo um sistema de design consistente:
+
+\subsubsection{Cores}
+
+O sistema utiliza tokens semânticos CSS para garantir consistência:
+
+\begin{lstlisting}[language=CSS, caption=Variáveis CSS do Sistema de Design]
+:root {
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --primary: 222.2 47.4% 11.2%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 210 40% 96.1%;
+  --muted: 210 40% 96.1%;
+  --accent: 210 40% 96.1%;
+  --destructive: 0 84.2% 60.2%;
+  --border: 214.3 31.8% 91.4%;
+}
+\end{lstlisting}
+
+\subsubsection{Tipografia}
+
+A aplicação utiliza famílias tipográficas modernas:
+
+\begin{itemize}[noitemsep]
+    \item \textbf{Display}: Fonte para títulos e destaques
+    \item \textbf{Body}: Fonte para texto corrido
+    \item \textbf{Monospace}: Fonte para código e dados técnicos
+\end{itemize}
+
+\subsection{Responsividade}
+
+A interface é totalmente responsiva, adaptando-se a diferentes dispositivos:
+
+\begin{itemize}[noitemsep]
+    \item \textbf{Mobile}: < 640px
+    \item \textbf{Tablet}: 640px - 1024px
+    \item \textbf{Desktop}: > 1024px
+\end{itemize}
+
+\begin{lstlisting}[language=HTML, caption=Exemplo de Grid Responsivo]
+<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+  <div className="lg:col-span-2">
+    {/* Itens do carrinho */}
+  </div>
+  <div className="lg:col-span-1">
+    {/* Resumo do pedido */}
+  </div>
+</div>
+\end{lstlisting}
+
+\subsection{Componentes Reutilizáveis}
+
+A aplicação utiliza uma biblioteca de componentes reutilizáveis:
+
+\begin{itemize}[noitemsep]
+    \item \textbf{Button}: Botões com múltiplas variantes (default, outline, ghost, yellow)
+    \item \textbf{Card}: Contentor para informações agrupadas
+    \item \textbf{Input}: Campos de entrada de dados
+    \item \textbf{Toast}: Notificações temporárias
+    \item \textbf{Dialog}: Modais e diálogos
+    \item \textbf{Dropdown}: Menus suspensos
+\end{itemize}
+
+% ============================================================================
+% 6. SEGURANÇA
+% ============================================================================
+\section{Segurança}
+
+\subsection{Autenticação}
+
+\begin{itemize}[noitemsep]
+    \item Passwords encriptadas com bcrypt
+    \item Tokens JWT com expiração
+    \item Sessões geridas pelo Supabase Auth
+    \item HTTPS em produção
+\end{itemize}
+
+\subsection{Row Level Security}
+
+O PostgreSQL RLS garante que utilizadores só acedem aos seus próprios dados:
+
+\begin{itemize}[noitemsep]
+    \item Políticas definidas ao nível da base de dados
+    \item Verificação automática em cada query
+    \item Proteção contra acessos não autorizados
+\end{itemize}
+
+\subsection{Validação de Dados}
+
+\begin{itemize}[noitemsep]
+    \item Validação no frontend com react-hook-form e Zod
+    \item Validação no backend pelo Supabase
+    \item Sanitização de inputs
+    \item Prevenção de SQL Injection pelo ORM
+\end{itemize}
+
+% ============================================================================
+% 7. TESTES E QUALIDADE
+% ============================================================================
+\section{Testes e Qualidade de Código}
+
+\subsection{Ferramentas de Qualidade}
+
+\begin{itemize}[noitemsep]
+    \item \textbf{ESLint}: Análise estática de código JavaScript/TypeScript
+    \item \textbf{TypeScript}: Verificação de tipos em tempo de compilação
+    \item \textbf{Prettier}: Formatação consistente do código
+\end{itemize}
+
+\subsection{Boas Práticas Implementadas}
+
+\begin{itemize}[noitemsep]
+    \item Componentes funcionais com hooks
+    \item Separação de responsabilidades
+    \item Código tipado com TypeScript
+    \item Imports organizados e absolutos (@/...)
+    \item Comentários em código complexo
+\end{itemize}
+
+% ============================================================================
+% 8. DEPLOY E HOSPEDAGEM
+% ============================================================================
+\section{Deploy e Hospedagem}
+
+A aplicação está hospedada com as seguintes características:
+
+\begin{itemize}[noitemsep]
+    \item \textbf{Frontend}: Hospedado em plataforma cloud com CDN global
+    \item \textbf{Backend}: Supabase Cloud (PostgreSQL gerido)
+    \item \textbf{SSL}: Certificado HTTPS automático
+    \item \textbf{Build}: Processo automatizado com Vite
+\end{itemize}
+
+\subsection{Processo de Build}
+
+\begin{lstlisting}[language=bash, caption=Comandos de Build]
+# Instalar dependências
+npm install
+
+# Build de produção
+npm run build
+
+# Preview local do build
+npm run preview
+\end{lstlisting}
+
+% ============================================================================
+% 9. CONCLUSÃO
+% ============================================================================
+\section{Conclusão}
+
+O desenvolvimento da plataforma VeloTech permitiu aplicar conhecimentos avançados de programação web, desde a arquitetura de aplicações SPA com React até à integração com serviços de backend modernos como o Supabase.
+
+A escolha das tecnologias mostrou-se acertada, proporcionando:
+
+\begin{itemize}[noitemsep]
+    \item \textbf{Performance}: Aplicação rápida e responsiva
+    \item \textbf{Manutenibilidade}: Código organizado e tipado
+    \item \textbf{Escalabilidade}: Arquitetura preparada para crescimento
+    \item \textbf{Segurança}: Múltiplas camadas de proteção
+    \item \textbf{Acessibilidade}: Interface utilizável em múltiplos dispositivos e idiomas
+\end{itemize}
+
+O projeto demonstra competências em desenvolvimento frontend moderno, gestão de estado, integração com bases de dados, autenticação de utilizadores e boas práticas de desenvolvimento de software.
+
+\subsection{Trabalho Futuro}
+
+Melhorias possíveis para versões futuras:
+
+\begin{itemize}[noitemsep]
+    \item Integração com gateway de pagamentos real (Stripe, PayPal)
+    \item Sistema de gestão de inventário
+    \item Painel administrativo
+    \item Aplicação móvel nativa
+    \item Integração com sistemas de envio
+    \item Sistema de avaliações e comentários
+\end{itemize}
+
+% ============================================================================
+% REFERÊNCIAS BIBLIOGRÁFICAS
+% ============================================================================
+\newpage
+\section*{Referências Bibliográficas}
+\addcontentsline{toc}{section}{Referências Bibliográficas}
+
+\begin{thebibliography}{99}
+
+\bibitem{reactdocs}
+META PLATFORMS, INC. \textbf{React Documentation}. Disponível em: \url{https://react.dev/}. Acesso em: jan. 2026.
+
+\bibitem{supabasedocs}
+SUPABASE, INC. \textbf{Supabase Documentation}. Disponível em: \url{https://supabase.com/docs}. Acesso em: jan. 2026.
+
+\bibitem{typescript}
+MICROSOFT. \textbf{TypeScript Documentation}. Disponível em: \url{https://www.typescriptlang.org/docs/}. Acesso em: jan. 2026.
+
+\bibitem{tailwind}
+TAILWIND LABS. \textbf{Tailwind CSS Documentation}. Disponível em: \url{https://tailwindcss.com/docs}. Acesso em: jan. 2026.
+
+\bibitem{vite}
+EVAN YOU. \textbf{Vite Documentation}. Disponível em: \url{https://vitejs.dev/}. Acesso em: jan. 2026.
+
+\bibitem{postgresql}
+THE POSTGRESQL GLOBAL DEVELOPMENT GROUP. \textbf{PostgreSQL Documentation}. Disponível em: \url{https://www.postgresql.org/docs/}. Acesso em: jan. 2026.
+
+\bibitem{shadcn}
+SHADCN. \textbf{shadcn/ui Components}. Disponível em: \url{https://ui.shadcn.com/}. Acesso em: jan. 2026.
+
+\bibitem{jwt}
+AUTH0. \textbf{JSON Web Tokens}. Disponível em: \url{https://jwt.io/introduction}. Acesso em: jan. 2026.
+
+\bibitem{reactquery}
+TANSTACK. \textbf{TanStack Query Documentation}. Disponível em: \url{https://tanstack.com/query/latest}. Acesso em: jan. 2026.
+
+\bibitem{reactrouter}
+REMIX SOFTWARE. \textbf{React Router Documentation}. Disponível em: \url{https://reactrouter.com/}. Acesso em: jan. 2026.
+
+\bibitem{mdn}
+MOZILLA DEVELOPER NETWORK. \textbf{MDN Web Docs}. Disponível em: \url{https://developer.mozilla.org/}. Acesso em: jan. 2026.
+
+\bibitem{ecma}
+ECMA INTERNATIONAL. \textbf{ECMAScript 2024 Language Specification}. Disponível em: \url{https://tc39.es/ecma262/}. Acesso em: jan. 2026.
+
+\end{thebibliography}
+
+% ============================================================================
+% ANEXOS
+% ============================================================================
+\newpage
+\section*{Anexos}
+\addcontentsline{toc}{section}{Anexos}
+
+\subsection*{Anexo A - Dependências do Projeto}
+
+Lista completa das dependências utilizadas no projeto (package.json):
+
+\begin{lstlisting}[language=JavaScript, caption=Dependências Principais]
+{
+  "dependencies": {
+    "@supabase/supabase-js": "^2.90.1",
+    "@tanstack/react-query": "^5.83.0",
+    "class-variance-authority": "^0.7.1",
+    "date-fns": "^3.6.0",
+    "lucide-react": "^0.462.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-hook-form": "^7.61.1",
+    "react-router-dom": "^6.30.1",
+    "sonner": "^1.7.4",
+    "tailwind-merge": "^2.6.0",
+    "tailwindcss-animate": "^1.0.7",
+    "zod": "^3.25.76"
+  }
+}
+\end{lstlisting}
+
+\subsection*{Anexo B - Configuração do Vite}
+
+\begin{lstlisting}[language=JavaScript, caption=Configuração vite.config.ts]
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
+
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+  server: {
+    port: 8080,
+  },
+});
+\end{lstlisting}
+
+\end{document}

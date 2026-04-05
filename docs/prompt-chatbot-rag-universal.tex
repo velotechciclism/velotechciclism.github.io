@@ -1,0 +1,792 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[brazil]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{tcolorbox}
+
+% Configurações de cores
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\definecolor{promptbg}{rgb}{0.9,0.95,1}
+
+% Configuração de código
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    frame=single
+}
+\lstset{style=mystyle}
+
+% Cabeçalho
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{Prompt Universal - Chatbot RAG}
+\lhead{Documentação Técnica}
+\rfoot{Página \thepage}
+
+\title{
+    \vspace{-2cm}
+    \textbf{Prompt Universal para Implementação de Chatbot com RAG}\\
+    \large Sistema de Assistente Virtual Inteligente com Busca Vetorial\\
+    \vspace{0.5cm}
+    \normalsize Aplicável a Qualquer Segmento de Negócio
+}
+\author{Documentação Técnica - Template Replicável}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+% ============================================
+\section{Introdução}
+% ============================================
+
+Este documento apresenta um \textbf{prompt completo e universal} para implementação de um sistema de chatbot inteligente utilizando a técnica \textbf{RAG (Retrieval Augmented Generation)} com busca vetorial. O sistema pode ser adaptado para qualquer tipo de negócio, desde e-commerce até serviços, saúde, educação e muito mais.
+
+\begin{tcolorbox}[colback=promptbg,colframe=blue!50!black,title=Objetivo do Sistema]
+Criar um assistente virtual que responde perguntas dos usuários com base em dados reais do negócio, utilizando inteligência artificial para gerar respostas contextualizadas e precisas.
+\end{tcolorbox}
+
+% ============================================
+\section{Prompt Principal - Copiar e Usar}
+% ============================================
+
+\begin{tcolorbox}[colback=yellow!10,colframe=orange!50!black,title=PROMPT UNIVERSAL - COPIE E ADAPTE]
+\small
+\textbf{Quero criar um sistema de chatbot inteligente para minha aplicação [TIPO\_DO\_NEGÓCIO] que utilize a técnica RAG (Retrieval Augmented Generation) com busca vetorial.}
+
+\textbf{Requisitos do Sistema:}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Banco de Dados Vetorial:}
+    \begin{itemize}
+        \item Habilitar extensão pgvector para busca semântica
+        \item Criar tabela de embeddings para [ENTIDADE\_PRINCIPAL] (ex: produtos, serviços, artigos)
+        \item Implementar função de busca por similaridade de cosseno
+        \item Armazenar: ID, nome, descrição, categoria, preço/valor, e embedding vetorial
+    \end{itemize}
+    
+    \item \textbf{Histórico de Conversas:}
+    \begin{itemize}
+        \item Tabela de conversas com session\_id para usuários anônimos
+        \item Tabela de mensagens vinculadas às conversas
+        \item Suporte a usuários autenticados e não autenticados
+    \end{itemize}
+    
+    \item \textbf{Edge Function de Processamento:}
+    \begin{itemize}
+        \item Receber mensagem do usuário
+        \item Buscar [ENTIDADES] relevantes por similaridade textual/vetorial
+        \item Construir contexto com dados encontrados
+        \item Enviar para modelo de IA com system prompt personalizado
+        \item Salvar histórico e retornar resposta
+    \end{itemize}
+    
+    \item \textbf{Interface do Chatbot:}
+    \begin{itemize}
+        \item Widget flutuante no canto inferior direito
+        \item Design responsivo e acessível
+        \item Indicador de digitação durante processamento
+        \item Histórico de mensagens na sessão
+        \item Botão de minimizar/expandir
+    \end{itemize}
+    
+    \item \textbf{System Prompt do Assistente:}
+    \begin{itemize}
+        \item Definir persona e tom de voz
+        \item Especificar escopo de conhecimento
+        \item Instruir sobre uso do contexto de [ENTIDADES]
+        \item Definir limites e comportamentos esperados
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Tecnologias:} React, TypeScript, Supabase (PostgreSQL + pgvector), Edge Functions, Lovable AI Gateway
+
+\textbf{Adapte [PLACEHOLDERS] para seu negócio:}
+\begin{itemize}
+    \item [TIPO\_DO\_NEGÓCIO]: loja de roupas, clínica médica, escola, restaurante, etc.
+    \item [ENTIDADE\_PRINCIPAL]: produtos, serviços, cursos, pratos, tratamentos, etc.
+\end{itemize}
+\end{tcolorbox}
+
+% ============================================
+\section{Arquitetura do Sistema}
+% ============================================
+
+\subsection{Visão Geral}
+
+\begin{verbatim}
+┌─────────────────────────────────────────────────────────────┐
+│                    FRONTEND (React)                         │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │              ChatbotWidget Component                 │   │
+│  │  - Interface flutuante                              │   │
+│  │  - Gerenciamento de estado local                    │   │
+│  │  - Histórico de mensagens                           │   │
+│  └─────────────────────────────────────────────────────┘   │
+└─────────────────────┬───────────────────────────────────────┘
+                      │ HTTP POST
+                      ▼
+┌─────────────────────────────────────────────────────────────┐
+│                 EDGE FUNCTION (Deno)                        │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │              /functions/chatbot                      │   │
+│  │  1. Recebe mensagem                                 │   │
+│  │  2. Busca entidades relevantes (RAG)                │   │
+│  │  3. Constrói contexto                               │   │
+│  │  4. Chama API de IA                                 │   │
+│  │  5. Salva histórico                                 │   │
+│  │  6. Retorna resposta                                │   │
+│  └─────────────────────────────────────────────────────┘   │
+└─────────────────────┬───────────────────────────────────────┘
+                      │
+          ┌───────────┴───────────┐
+          ▼                       ▼
+┌─────────────────────┐ ┌─────────────────────┐
+│   SUPABASE DB       │ │   LOVABLE AI        │
+│   (PostgreSQL)      │ │   GATEWAY           │
+│                     │ │                     │
+│ - entity_embeddings │ │ - Gemini/GPT        │
+│ - chat_conversations│ │ - Processamento NLP │
+│ - chat_messages     │ │                     │
+└─────────────────────┘ └─────────────────────┘
+\end{verbatim}
+
+\subsection{Fluxo de Dados}
+
+\begin{enumerate}
+    \item \textbf{Usuário envia mensagem} → Widget captura e envia para Edge Function
+    \item \textbf{Edge Function processa}:
+    \begin{itemize}
+        \item Extrai termos relevantes da mensagem
+        \item Busca entidades similares no banco vetorial
+        \item Recupera histórico de conversa (se existir)
+        \item Monta prompt com contexto enriquecido
+    \end{itemize}
+    \item \textbf{IA gera resposta} → Modelo processa com conhecimento contextual
+    \item \textbf{Resposta salva e retornada} → Histórico atualizado, usuário recebe resposta
+\end{enumerate}
+
+% ============================================
+\section{Estrutura do Banco de Dados}
+% ============================================
+
+\subsection{Schema SQL Universal}
+
+\begin{lstlisting}[language=SQL,caption=Migração de Banco de Dados - Adapte os campos]
+-- =============================================
+-- HABILITAR EXTENSAO VETORIAL
+-- =============================================
+CREATE EXTENSION IF NOT EXISTS vector;
+
+-- =============================================
+-- TABELA DE EMBEDDINGS (ADAPTE PARA SUA ENTIDADE)
+-- =============================================
+-- Substitua "entity" pelo nome da sua entidade:
+-- product, service, course, article, treatment, etc.
+
+CREATE TABLE public.entity_embeddings (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  
+  -- Identificador unico da entidade no seu sistema
+  entity_id TEXT NOT NULL UNIQUE,
+  
+  -- Campos descritivos (adapte conforme necessidade)
+  entity_name TEXT NOT NULL,
+  entity_description TEXT,
+  entity_category TEXT,
+  entity_price NUMERIC,  -- Remova se nao aplicavel
+  
+  -- Campos adicionais especificos do seu negocio
+  -- entity_location TEXT,
+  -- entity_duration TEXT,
+  -- entity_availability BOOLEAN,
+  
+  -- Vetor de embedding (768 dimensoes para modelos padrao)
+  embedding vector(768),
+  
+  -- Timestamps
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- =============================================
+-- TABELA DE CONVERSAS
+-- =============================================
+CREATE TABLE public.chat_conversations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id),  -- NULL para anonimos
+  session_id TEXT NOT NULL,  -- Identificador de sessao
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- =============================================
+-- TABELA DE MENSAGENS
+-- =============================================
+CREATE TABLE public.chat_messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  conversation_id UUID NOT NULL 
+    REFERENCES public.chat_conversations(id) ON DELETE CASCADE,
+  role TEXT NOT NULL CHECK (role IN ('user', 'assistant', 'system')),
+  content TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- =============================================
+-- FUNCAO DE BUSCA POR SIMILARIDADE
+-- =============================================
+CREATE OR REPLACE FUNCTION public.search_similar_entities(
+  query_embedding vector(768),
+  match_threshold FLOAT DEFAULT 0.5,
+  match_count INT DEFAULT 5
+)
+RETURNS TABLE (
+  entity_id TEXT,
+  entity_name TEXT,
+  entity_description TEXT,
+  entity_category TEXT,
+  entity_price NUMERIC,
+  similarity FLOAT
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    e.entity_id,
+    e.entity_name,
+    e.entity_description,
+    e.entity_category,
+    e.entity_price,
+    1 - (e.embedding <=> query_embedding) AS similarity
+  FROM public.entity_embeddings e
+  WHERE e.embedding IS NOT NULL
+    AND 1 - (e.embedding <=> query_embedding) > match_threshold
+  ORDER BY e.embedding <=> query_embedding
+  LIMIT match_count;
+END;
+$$;
+
+-- =============================================
+-- INDICES PARA PERFORMANCE
+-- =============================================
+CREATE INDEX idx_entity_embeddings_vector 
+  ON public.entity_embeddings 
+  USING ivfflat (embedding vector_cosine_ops)
+  WITH (lists = 100);
+
+CREATE INDEX idx_chat_messages_conversation 
+  ON public.chat_messages(conversation_id);
+
+CREATE INDEX idx_chat_conversations_session 
+  ON public.chat_conversations(session_id);
+
+-- =============================================
+-- POLITICAS DE SEGURANCA (RLS)
+-- =============================================
+ALTER TABLE public.entity_embeddings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.chat_conversations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.chat_messages ENABLE ROW LEVEL SECURITY;
+
+-- Embeddings sao publicos para leitura
+CREATE POLICY "Embeddings publicos para leitura"
+  ON public.entity_embeddings FOR SELECT
+  USING (true);
+
+-- Conversas podem ser criadas por qualquer um
+CREATE POLICY "Criar conversas"
+  ON public.chat_conversations FOR INSERT
+  WITH CHECK (true);
+
+-- Usuarios veem suas proprias conversas
+CREATE POLICY "Ver conversas proprias"
+  ON public.chat_conversations FOR SELECT
+  USING (auth.uid() = user_id OR user_id IS NULL);
+
+-- Mensagens podem ser inseridas em conversas existentes
+CREATE POLICY "Inserir mensagens"
+  ON public.chat_messages FOR INSERT
+  WITH CHECK (true);
+
+-- Ver mensagens de conversas proprias
+CREATE POLICY "Ver mensagens proprias"
+  ON public.chat_messages FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.chat_conversations c
+      WHERE c.id = conversation_id
+      AND (c.user_id = auth.uid() OR c.user_id IS NULL)
+    )
+  );
+\end{lstlisting}
+
+% ============================================
+\section{Edge Function - Processador do Chatbot}
+% ============================================
+
+\begin{lstlisting}[language=JavaScript,caption=Edge Function Universal - supabase/functions/chatbot/index.ts]
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": 
+    "authorization, x-client-info, apikey, content-type",
+};
+
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
+
+// =============================================
+// SYSTEM PROMPT - PERSONALIZE PARA SEU NEGOCIO
+// =============================================
+const SYSTEM_PROMPT = `
+Voce e o assistente virtual da [NOME_DA_EMPRESA], 
+especializada em [AREA_DE_ATUACAO].
+
+Seu papel e:
+- Ajudar clientes a encontrar [ENTIDADES] ideais
+- Responder perguntas sobre [TOPICOS_RELEVANTES]
+- Fornecer recomendacoes personalizadas
+- Ser amigavel, prestativo e conhecedor
+
+Quando [ENTIDADES] relevantes forem encontradas no contexto,
+mencione-as naturalmente com nome e [ATRIBUTOS_IMPORTANTES].
+
+Mantenha respostas concisas mas informativas.
+Use emojis ocasionalmente para tornar a conversa amigavel.
+`;
+
+// Busca por texto (fallback simples)
+async function searchByText(supabase: any, query: string) {
+  const searchTerms = query.toLowerCase()
+    .split(" ")
+    .filter(t => t.length > 2);
+  
+  const { data, error } = await supabase
+    .from("entity_embeddings")
+    .select("*");
+  
+  if (error || !data) return [];
+
+  return data
+    .map((item: any) => {
+      const text = `${item.entity_name} ${item.entity_description} 
+        ${item.entity_category}`.toLowerCase();
+      let score = 0;
+      for (const term of searchTerms) {
+        if (text.includes(term)) score++;
+      }
+      return { ...item, score };
+    })
+    .filter((p: any) => p.score > 0)
+    .sort((a: any, b: any) => b.score - a.score)
+    .slice(0, 5);
+}
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { message, conversationId, sessionId } = await req.json();
+    
+    if (!message) {
+      return new Response(
+        JSON.stringify({ error: "Message is required" }), 
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" }}
+      );
+    }
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    // 1. Buscar entidades relevantes
+    const relevantEntities = await searchByText(supabase, message);
+
+    // 2. Construir contexto
+    let entityContext = "";
+    if (relevantEntities.length > 0) {
+      entityContext = "\n\n[ENTIDADES] encontradas:\n";
+      for (const e of relevantEntities) {
+        entityContext += `- ${e.entity_name}`;
+        if (e.entity_price) entityContext += `: R$${e.entity_price}`;
+        if (e.entity_category) entityContext += ` (${e.entity_category})`;
+        entityContext += "\n";
+        if (e.entity_description) {
+          entityContext += `  ${e.entity_description}\n`;
+        }
+      }
+    }
+
+    // 3. Gerenciar conversa
+    let currentConversationId = conversationId;
+    let conversationHistory: any[] = [];
+
+    if (currentConversationId) {
+      const { data: messages } = await supabase
+        .from("chat_messages")
+        .select("role, content")
+        .eq("conversation_id", currentConversationId)
+        .order("created_at", { ascending: true })
+        .limit(10);
+      
+      if (messages) conversationHistory = messages;
+    } else {
+      const { data: newConv } = await supabase
+        .from("chat_conversations")
+        .insert({ session_id: sessionId || crypto.randomUUID() })
+        .select()
+        .single();
+      
+      if (newConv) currentConversationId = newConv.id;
+    }
+
+    // 4. Salvar mensagem do usuario
+    if (currentConversationId) {
+      await supabase.from("chat_messages").insert({
+        conversation_id: currentConversationId,
+        role: "user",
+        content: message,
+      });
+    }
+
+    // 5. Chamar IA
+    const apiMessages = [
+      { role: "system", content: SYSTEM_PROMPT + entityContext },
+      ...conversationHistory,
+      { role: "user", content: message },
+    ];
+
+    const aiResponse = await fetch(
+      "https://ai.gateway.lovable.dev/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-3-flash-preview",
+          messages: apiMessages,
+          max_tokens: 500,
+        }),
+      }
+    );
+
+    if (!aiResponse.ok) {
+      throw new Error(`AI API error: ${aiResponse.status}`);
+    }
+
+    const aiData = await aiResponse.json();
+    const assistantMessage = aiData.choices?.[0]?.message?.content 
+      || "Desculpe, nao consegui processar sua pergunta.";
+
+    // 6. Salvar resposta
+    if (currentConversationId) {
+      await supabase.from("chat_messages").insert({
+        conversation_id: currentConversationId,
+        role: "assistant",
+        content: assistantMessage,
+      });
+    }
+
+    return new Response(
+      JSON.stringify({
+        message: assistantMessage,
+        conversationId: currentConversationId,
+        entities: relevantEntities,
+      }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" }}
+    );
+
+  } catch (error) {
+    console.error("Chatbot error:", error);
+    return new Response(
+      JSON.stringify({ error: "Erro interno do servidor" }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" }}
+    );
+  }
+});
+\end{lstlisting}
+
+% ============================================
+\section{Componente React - Widget do Chatbot}
+% ============================================
+
+\begin{lstlisting}[language=JavaScript,caption=ChatbotWidget.tsx - Componente Universal]
+import React, { useState, useRef, useEffect } from "react";
+import { MessageCircle, X, Send, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { supabase } from "@/integrations/supabase/client";
+
+interface Message {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+}
+
+export function ChatbotWidget() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [sessionId] = useState(() => crypto.randomUUID());
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Scroll automatico
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  // Mensagem inicial
+  useEffect(() => {
+    if (isOpen && messages.length === 0) {
+      setMessages([{
+        id: "welcome",
+        role: "assistant",
+        content: "Ola! Como posso ajudar voce hoje?",
+      }]);
+    }
+  }, [isOpen]);
+
+  const sendMessage = async () => {
+    if (!input.trim() || isLoading) return;
+
+    const userMessage: Message = {
+      id: crypto.randomUUID(),
+      role: "user",
+      content: input.trim(),
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+    setIsLoading(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("chatbot", {
+        body: {
+          message: userMessage.content,
+          conversationId,
+          sessionId,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data.conversationId) {
+        setConversationId(data.conversationId);
+      }
+
+      const assistantMessage: Message = {
+        id: crypto.randomUUID(),
+        role: "assistant",
+        content: data.message,
+      };
+
+      setMessages((prev) => [...prev, assistantMessage]);
+    } catch (error) {
+      console.error("Erro:", error);
+      setMessages((prev) => [...prev, {
+        id: crypto.randomUUID(),
+        role: "assistant",
+        content: "Desculpe, ocorreu um erro. Tente novamente.",
+      }]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
+
+  return (
+    <>
+      {/* Botao flutuante */}
+      <Button
+        onClick={() => setIsOpen(!isOpen)}
+        className="fixed bottom-6 right-6 h-14 w-14 rounded-full 
+          shadow-lg z-50"
+        size="icon"
+      >
+        {isOpen ? <X className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
+      </Button>
+
+      {/* Janela do chat */}
+      {isOpen && (
+        <div className="fixed bottom-24 right-6 w-96 h-[500px] 
+          bg-background border rounded-lg shadow-xl z-50 
+          flex flex-col">
+          {/* Header */}
+          <div className="p-4 border-b bg-primary text-primary-foreground 
+            rounded-t-lg">
+            <h3 className="font-semibold">Assistente Virtual</h3>
+            <p className="text-sm opacity-90">Como posso ajudar?</p>
+          </div>
+
+          {/* Mensagens */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {messages.map((message) => (
+              <div
+                key={message.id}
+                className={`flex ${
+                  message.role === "user" ? "justify-end" : "justify-start"
+                }`}
+              >
+                <div
+                  className={`max-w-[80%] p-3 rounded-lg ${
+                    message.role === "user"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted"
+                  }`}
+                >
+                  {message.content}
+                </div>
+              </div>
+            ))}
+            {isLoading && (
+              <div className="flex justify-start">
+                <div className="bg-muted p-3 rounded-lg">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Input */}
+          <div className="p-4 border-t">
+            <div className="flex gap-2">
+              <Input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Digite sua mensagem..."
+                disabled={isLoading}
+              />
+              <Button onClick={sendMessage} disabled={isLoading || !input.trim()}>
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+\end{lstlisting}
+
+% ============================================
+\section{Exemplos de Adaptacao por Segmento}
+% ============================================
+
+\subsection{E-commerce (Loja Virtual)}
+
+\begin{tcolorbox}[colback=green!5,colframe=green!50!black]
+\textbf{Entidade:} Produtos\\
+\textbf{Campos:} product\_name, product\_description, product\_category, product\_price, product\_brand, product\_stock\\
+\textbf{System Prompt:} ``Você é o assistente da [Loja], especializado em ajudar clientes a encontrar produtos ideais, comparar opções e tirar dúvidas sobre especificações técnicas.''
+\end{tcolorbox}
+
+\subsection{Clínica Médica / Saúde}
+
+\begin{tcolorbox}[colback=blue!5,colframe=blue!50!black]
+\textbf{Entidade:} Tratamentos/Serviços\\
+\textbf{Campos:} service\_name, service\_description, service\_specialty, service\_duration, service\_price\\
+\textbf{System Prompt:} ``Você é o assistente da [Clínica], ajudando pacientes a entender nossos serviços, agendar consultas e tirar dúvidas sobre procedimentos. Nunca forneça diagnósticos médicos.''
+\end{tcolorbox}
+
+\subsection{Escola / Educação}
+
+\begin{tcolorbox}[colback=purple!5,colframe=purple!50!black]
+\textbf{Entidade:} Cursos\\
+\textbf{Campos:} course\_name, course\_description, course\_level, course\_duration, course\_price, course\_instructor\\
+\textbf{System Prompt:} ``Você é o assistente da [Escola], ajudando alunos a escolher cursos adequados ao seu nível e objetivos, explicando metodologias e respondendo sobre matrículas.''
+\end{tcolorbox}
+
+\subsection{Restaurante / Alimentação}
+
+\begin{tcolorbox}[colback=orange!5,colframe=orange!50!black]
+\textbf{Entidade:} Pratos/Menu\\
+\textbf{Campos:} dish\_name, dish\_description, dish\_category, dish\_price, dish\_ingredients, dish\_allergens\\
+\textbf{System Prompt:} ``Você é o assistente do [Restaurante], ajudando clientes a conhecer nosso cardápio, fazer recomendações baseadas em preferências e informar sobre ingredientes e alergênicos.''
+\end{tcolorbox}
+
+\subsection{Imobiliária}
+
+\begin{tcolorbox}[colback=cyan!5,colframe=cyan!50!black]
+\textbf{Entidade:} Imóveis\\
+\textbf{Campos:} property\_name, property\_description, property\_type, property\_price, property\_location, property\_area, property\_bedrooms\\
+\textbf{System Prompt:} ``Você é o assistente da [Imobiliária], ajudando clientes a encontrar imóveis ideais para compra ou aluguel, apresentando opções e agendando visitas.''
+\end{tcolorbox}
+
+% ============================================
+\section{Checklist de Implementacao}
+% ============================================
+
+\begin{enumerate}[label=\checkmark]
+    \item Habilitar extensão pgvector no banco de dados
+    \item Criar tabela de embeddings com campos adaptados ao negócio
+    \item Criar tabelas de conversas e mensagens
+    \item Implementar função de busca por similaridade
+    \item Configurar políticas RLS para segurança
+    \item Criar Edge Function com system prompt personalizado
+    \item Desenvolver componente React do widget
+    \item Integrar widget na aplicação principal
+    \item Popular banco com dados iniciais (seed)
+    \item Testar fluxo completo de conversa
+\end{enumerate}
+
+% ============================================
+\section{Consideracoes Finais}
+% ============================================
+
+Este template fornece uma base sólida para implementação de chatbots inteligentes em qualquer segmento de negócio. As principais vantagens são:
+
+\begin{itemize}
+    \item \textbf{Escalabilidade:} Arquitetura preparada para crescimento
+    \item \textbf{Personalização:} Fácil adaptação para diferentes contextos
+    \item \textbf{Segurança:} RLS implementado por padrão
+    \item \textbf{Performance:} Busca vetorial otimizada com índices
+    \item \textbf{Manutenibilidade:} Código modular e documentado
+\end{itemize}
+
+\vspace{1cm}
+\begin{center}
+\textit{Documento gerado automaticamente - Template Universal RAG Chatbot}
+\end{center}
+
+\end{document}

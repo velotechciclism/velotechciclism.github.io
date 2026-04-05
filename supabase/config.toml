@@ -1,0 +1,7 @@
+project_id = "xfprxdqfumsdbjmsoghd"
+
+[functions.chatbot]
+verify_jwt = false
+
+[functions.seed-products]
+verify_jwt = false

@@ -1,0 +1,1185 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[portuguese]{babel}
+\usepackage{geometry}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{tcolorbox}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+
+\geometry{margin=2.5cm}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\definecolor{primary}{RGB}{34,139,34}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2,
+    frame=single
+}
+\lstset{style=mystyle}
+
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{Sistema Web Completo Universal}
+\lhead{Documentação Técnica}
+\rfoot{Página \thepage}
+
+\title{\textbf{PROMPT UNIVERSAL: Sistema Web Completo}\\
+\large Plataforma E-commerce com Autenticação, Carrinho Persistente,\\
+Histórico de Pedidos, Chatbot Inteligente e Suporte Multilíngue\\[1cm]
+\normalsize Aplicável a Qualquer Segmento de Negócio}
+\author{Documentação Técnica para Replicação}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+%==============================================================================
+\section{Introdução e Visão Geral}
+%==============================================================================
+
+Este documento apresenta um guia completo para construção de uma plataforma web moderna, escalável e segura. O sistema descrito pode ser adaptado para qualquer tipo de negócio: e-commerce, serviços, educação, saúde, restaurantes, imobiliárias, entre outros.
+
+\subsection{Capacidades do Sistema}
+
+\begin{tcolorbox}[colback=green!5!white,colframe=primary,title=Funcionalidades Implementadas]
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Autenticação Robusta}: Registro, login e gestão de perfis de usuários
+    \item \textbf{Carrinho Persistente}: Sincronizado com banco de dados por usuário
+    \item \textbf{Sistema de Pedidos}: Histórico completo com itens e status
+    \item \textbf{Chatbot Inteligente (RAG)}: Assistente com busca vetorial semântica
+    \item \textbf{Internacionalização}: Suporte a múltiplos idiomas
+    \item \textbf{Temas}: Modo claro e escuro
+    \item \textbf{Design Responsivo}: Adaptável a todos os dispositivos
+    \item \textbf{Segurança}: Row Level Security (RLS) em todas as tabelas
+\end{enumerate}
+\end{tcolorbox}
+
+\subsection{Stack Tecnológico}
+
+\begin{itemize}
+    \item \textbf{Frontend}: React 18 + TypeScript + Vite
+    \item \textbf{Estilização}: Tailwind CSS + shadcn/ui
+    \item \textbf{Backend}: Supabase (PostgreSQL + Edge Functions)
+    \item \textbf{IA}: Lovable AI Gateway (Gemini/GPT)
+    \item \textbf{Busca Vetorial}: pgvector para RAG
+    \item \textbf{Roteamento}: React Router DOM
+    \item \textbf{Estado}: React Context API + React Query
+\end{itemize}
+
+%==============================================================================
+\section{Prompt Universal para Criação do Sistema}
+%==============================================================================
+
+\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=PROMPT COMPLETO PARA IA]
+\small
+\textbf{Crie uma plataforma web completa para [NOME DO NEGÓCIO], um(a) [TIPO DE NEGÓCIO] especializado(a) em [SEGMENTO].}
+
+\textbf{REQUISITOS OBRIGATÓRIOS:}
+
+\textbf{1. ARQUITETURA E TECNOLOGIAS}
+\begin{itemize}[leftmargin=*,nosep]
+    \item React 18 com TypeScript e Vite
+    \item Tailwind CSS com design system customizado
+    \item Componentes shadcn/ui
+    \item Supabase para backend (PostgreSQL)
+    \item React Router para navegação SPA
+\end{itemize}
+
+\textbf{2. SISTEMA DE AUTENTICAÇÃO}
+\begin{itemize}[leftmargin=*,nosep]
+    \item Página /auth com formulários de login e registro
+    \item Campos: email, senha, nome, telefone (opcional), endereço (opcional)
+    \item Tabela profiles vinculada ao auth.users via trigger
+    \item Context AuthProvider global com useAuth hook
+    \item Proteção de rotas para usuários autenticados
+    \item Mensagens de erro amigáveis (email já cadastrado, senha inválida)
+\end{itemize}
+
+\textbf{3. CARRINHO DE COMPRAS PERSISTENTE}
+\begin{itemize}[leftmargin=*,nosep]
+    \item Tabela cart\_items com: user\_id, product\_id, product\_name, product\_image, product\_price, quantity
+    \item Sincronização automática com banco quando usuário logado
+    \item Funcionamento local quando não logado
+    \item Funções: addItem, removeItem, updateQuantity, clearCart
+    \item Context CartProvider com useCart hook
+\end{itemize}
+
+\textbf{4. SISTEMA DE PEDIDOS}
+\begin{itemize}[leftmargin=*,nosep]
+    \item Tabela orders: user\_id, total, status, payment\_method, shipping\_address
+    \item Tabela order\_items: order\_id, product\_id, product\_name, product\_price, quantity
+    \item Página /orders com histórico do usuário
+    \item Função checkout que cria pedido e limpa carrinho
+    \item Status: pending, processing, shipped, delivered, cancelled
+\end{itemize}
+
+\textbf{5. CHATBOT INTELIGENTE COM RAG}
+\begin{itemize}[leftmargin=*,nosep]
+    \item Extensão pgvector habilitada
+    \item Tabela entity\_embeddings com campo embedding vector(1536)
+    \item Função search\_similar\_entities para busca semântica
+    \item Edge Function /chatbot usando Lovable AI Gateway
+    \item Widget flutuante em todas as páginas
+    \item Histórico de conversas persistido
+\end{itemize}
+
+\textbf{6. INTERNACIONALIZAÇÃO (i18n)}
+\begin{itemize}[leftmargin=*,nosep]
+    \item Arquivos JSON: locales/pt-br.json, locales/en.json
+    \item Context LanguageProvider com useLanguage hook
+    \item Função t() para tradução de chaves
+    \item Seletor de idioma no header
+    \item Persistência da preferência em localStorage
+\end{itemize}
+
+\textbf{7. SISTEMA DE TEMAS}
+\begin{itemize}[leftmargin=*,nosep]
+    \item Context ThemeProvider com useTheme hook
+    \item Tokens CSS em index.css para :root e .dark
+    \item Toggle de tema no header
+    \item Persistência em localStorage
+    \item Respeitar preferência do sistema (prefers-color-scheme)
+\end{itemize}
+
+\textbf{8. PÁGINAS NECESSÁRIAS}
+\begin{itemize}[leftmargin=*,nosep]
+    \item / - Home com hero, categorias, produtos destaque, depoimentos
+    \item /products - Catálogo com filtros (categoria, preço, marca)
+    \item /products/:id - Detalhe do produto com especificações
+    \item /cart - Carrinho com resumo e checkout
+    \item /auth - Login e registro
+    \item /orders - Histórico de pedidos (protegida)
+    \item /contact - Formulário de contato
+    \item /help - FAQ e suporte
+    \item /* - Página 404 NotFound
+\end{itemize}
+
+\textbf{9. SEGURANÇA (RLS)}
+\begin{itemize}[leftmargin=*,nosep]
+    \item Todas as tabelas com Row Level Security habilitado
+    \item Políticas: usuários só acessam próprios dados (auth.uid() = user\_id)
+    \item Trigger para criar profile automaticamente no registro
+    \item Validação de inputs com Zod
+\end{itemize}
+
+\textbf{10. DESIGN E UX}
+\begin{itemize}[leftmargin=*,nosep]
+    \item Layout responsivo (mobile-first)
+    \item Header com navegação, busca, carrinho, perfil
+    \item Footer com links, contato, redes sociais
+    \item Loading states e skeleton loaders
+    \item Toast notifications para feedback
+    \item Animações suaves com Framer Motion (opcional)
+\end{itemize}
+\end{tcolorbox}
+
+%==============================================================================
+\section{Estrutura do Banco de Dados}
+%==============================================================================
+
+\subsection{Schema Completo SQL}
+
+\begin{lstlisting}[language=SQL,caption=Migração Completa do Banco de Dados]
+-- ============================================
+-- 1. EXTENSOES NECESSARIAS
+-- ============================================
+CREATE EXTENSION IF NOT EXISTS vector;
+
+-- ============================================
+-- 2. TABELA DE PERFIS DE USUARIOS
+-- ============================================
+CREATE TABLE public.profiles (
+  id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID NOT NULL UNIQUE,
+  name TEXT NOT NULL,
+  phone TEXT,
+  address TEXT,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+  updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own profile" 
+  ON public.profiles FOR SELECT 
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own profile" 
+  ON public.profiles FOR UPDATE 
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own profile" 
+  ON public.profiles FOR INSERT 
+  WITH CHECK (auth.uid() = user_id);
+
+-- Trigger para criar perfil automaticamente
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.profiles (user_id, name)
+  VALUES (NEW.id, COALESCE(NEW.raw_user_meta_data->>'name', 'Usuario'));
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- ============================================
+-- 3. TABELA DE ITENS DO CARRINHO
+-- ============================================
+CREATE TABLE public.cart_items (
+  id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID NOT NULL,
+  product_id TEXT NOT NULL,
+  product_name TEXT NOT NULL,
+  product_image TEXT,
+  product_price NUMERIC NOT NULL,
+  quantity INTEGER NOT NULL DEFAULT 1,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+  updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.cart_items ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own cart" 
+  ON public.cart_items FOR SELECT 
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own cart" 
+  ON public.cart_items FOR INSERT 
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own cart" 
+  ON public.cart_items FOR UPDATE 
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own cart" 
+  ON public.cart_items FOR DELETE 
+  USING (auth.uid() = user_id);
+
+-- ============================================
+-- 4. TABELA DE PEDIDOS
+-- ============================================
+CREATE TABLE public.orders (
+  id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID NOT NULL,
+  total NUMERIC NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending',
+  payment_method TEXT,
+  shipping_address TEXT,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+  updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own orders" 
+  ON public.orders FOR SELECT 
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can create own orders" 
+  ON public.orders FOR INSERT 
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own orders" 
+  ON public.orders FOR UPDATE 
+  USING (auth.uid() = user_id);
+
+-- ============================================
+-- 5. TABELA DE ITENS DO PEDIDO
+-- ============================================
+CREATE TABLE public.order_items (
+  id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  order_id UUID NOT NULL REFERENCES public.orders(id),
+  product_id TEXT NOT NULL,
+  product_name TEXT NOT NULL,
+  product_image TEXT,
+  product_price NUMERIC NOT NULL,
+  quantity INTEGER NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.order_items ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own order items" 
+  ON public.order_items FOR SELECT 
+  USING (EXISTS (
+    SELECT 1 FROM orders 
+    WHERE orders.id = order_items.order_id 
+    AND orders.user_id = auth.uid()
+  ));
+
+CREATE POLICY "Users can insert own order items" 
+  ON public.order_items FOR INSERT 
+  WITH CHECK (EXISTS (
+    SELECT 1 FROM orders 
+    WHERE orders.id = order_items.order_id 
+    AND orders.user_id = auth.uid()
+  ));
+
+-- ============================================
+-- 6. TABELA DE EMBEDDINGS PARA RAG
+-- ============================================
+CREATE TABLE public.entity_embeddings (
+  id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  entity_id TEXT NOT NULL,
+  entity_name TEXT NOT NULL,
+  entity_description TEXT,
+  entity_category TEXT,
+  entity_price NUMERIC,
+  embedding vector(1536),
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+  updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.entity_embeddings ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Embeddings are public" 
+  ON public.entity_embeddings FOR SELECT 
+  USING (true);
+
+-- Indice para busca vetorial
+CREATE INDEX ON public.entity_embeddings 
+  USING ivfflat (embedding vector_cosine_ops) 
+  WITH (lists = 100);
+
+-- Funcao de busca semantica
+CREATE OR REPLACE FUNCTION public.search_similar_entities(
+  query_embedding vector,
+  match_threshold FLOAT DEFAULT 0.5,
+  match_count INT DEFAULT 5
+)
+RETURNS TABLE (
+  entity_id TEXT,
+  entity_name TEXT,
+  entity_description TEXT,
+  entity_category TEXT,
+  entity_price NUMERIC,
+  similarity FLOAT
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    e.entity_id,
+    e.entity_name,
+    e.entity_description,
+    e.entity_category,
+    e.entity_price,
+    1 - (e.embedding <=> query_embedding) AS similarity
+  FROM entity_embeddings e
+  WHERE 1 - (e.embedding <=> query_embedding) > match_threshold
+  ORDER BY e.embedding <=> query_embedding
+  LIMIT match_count;
+END;
+$$;
+
+-- ============================================
+-- 7. TABELAS DE CHAT
+-- ============================================
+CREATE TABLE public.chat_conversations (
+  id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID,
+  session_id TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.chat_conversations ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Anyone can create conversations" 
+  ON public.chat_conversations FOR INSERT 
+  WITH CHECK (true);
+
+CREATE POLICY "Users can view own conversations" 
+  ON public.chat_conversations FOR SELECT 
+  USING (auth.uid() = user_id OR user_id IS NULL);
+
+CREATE TABLE public.chat_messages (
+  id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  conversation_id UUID NOT NULL REFERENCES public.chat_conversations(id),
+  role TEXT NOT NULL,
+  content TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.chat_messages ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Anyone can insert messages" 
+  ON public.chat_messages FOR INSERT 
+  WITH CHECK (true);
+
+CREATE POLICY "Users can view conversation messages" 
+  ON public.chat_messages FOR SELECT 
+  USING (EXISTS (
+    SELECT 1 FROM chat_conversations 
+    WHERE chat_conversations.id = chat_messages.conversation_id 
+    AND (chat_conversations.user_id = auth.uid() OR chat_conversations.user_id IS NULL)
+  ));
+
+-- ============================================
+-- 8. FUNCAO DE ATUALIZACAO DE TIMESTAMP
+-- ============================================
+CREATE OR REPLACE FUNCTION public.update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Aplicar triggers de updated_at
+CREATE TRIGGER update_profiles_updated_at
+  BEFORE UPDATE ON public.profiles
+  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+
+CREATE TRIGGER update_cart_items_updated_at
+  BEFORE UPDATE ON public.cart_items
+  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+
+CREATE TRIGGER update_orders_updated_at
+  BEFORE UPDATE ON public.orders
+  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+\end{lstlisting}
+
+%==============================================================================
+\section{Arquitetura de Contextos React}
+%==============================================================================
+
+\subsection{AuthContext - Autenticação}
+
+\begin{lstlisting}[language=JavaScript,caption=Hook useAuth Completo]
+// src/hooks/useAuth.ts
+import { useState, useEffect } from 'react';
+import { User, Session } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
+
+interface Profile {
+  id: string;
+  user_id: string;
+  name: string;
+  phone: string | null;
+  address: string | null;
+}
+
+export function useAuth() {
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Listener PRIMEIRO
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          setTimeout(() => fetchProfile(session.user.id), 0);
+        } else {
+          setProfile(null);
+        }
+      }
+    );
+
+    // DEPOIS verificar sessao existente
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      if (session?.user) fetchProfile(session.user.id);
+      setIsLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const fetchProfile = async (userId: string) => {
+    const { data } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('user_id', userId)
+      .maybeSingle();
+    setProfile(data);
+  };
+
+  const register = async (email: string, name: string, password: string) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/`,
+        data: { name }
+      }
+    });
+    if (error) throw error;
+    return data;
+  };
+
+  const login = async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error) throw error;
+    return data;
+  };
+
+  const logout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setSession(null);
+    setProfile(null);
+  };
+
+  return {
+    user,
+    profile,
+    session,
+    isLoading,
+    isAuthenticated: !!session,
+    register,
+    login,
+    logout,
+  };
+}
+\end{lstlisting}
+
+\subsection{CartContext - Carrinho Persistente}
+
+\begin{lstlisting}[language=JavaScript,caption=Hook useCartPersistence]
+// src/hooks/useCartPersistence.ts
+import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuthContext } from '@/context/AuthContext';
+
+export function useCartPersistence() {
+  const { user, isAuthenticated } = useAuthContext();
+  const [items, setItems] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const loadCartItems = useCallback(async () => {
+    if (!isAuthenticated || !user) {
+      setItems([]);
+      setIsLoading(false);
+      return;
+    }
+
+    const { data } = await supabase
+      .from('cart_items')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at');
+
+    setItems(data?.map(item => ({
+      id: item.product_id,
+      name: item.product_name,
+      image: item.product_image,
+      price: Number(item.product_price),
+      quantity: item.quantity,
+    })) || []);
+    setIsLoading(false);
+  }, [isAuthenticated, user]);
+
+  useEffect(() => {
+    loadCartItems();
+  }, [loadCartItems]);
+
+  const addItem = useCallback(async (product, quantity = 1) => {
+    if (!isAuthenticated || !user) {
+      // Modo local
+      setItems(prev => {
+        const existing = prev.find(i => i.id === product.id);
+        if (existing) {
+          return prev.map(i => 
+            i.id === product.id 
+              ? { ...i, quantity: i.quantity + quantity } 
+              : i
+          );
+        }
+        return [...prev, { ...product, quantity }];
+      });
+      return;
+    }
+
+    // Modo persistido
+    const { data: existing } = await supabase
+      .from('cart_items')
+      .select('id, quantity')
+      .eq('user_id', user.id)
+      .eq('product_id', product.id)
+      .maybeSingle();
+
+    if (existing) {
+      await supabase
+        .from('cart_items')
+        .update({ quantity: existing.quantity + quantity })
+        .eq('id', existing.id);
+    } else {
+      await supabase.from('cart_items').insert({
+        user_id: user.id,
+        product_id: product.id,
+        product_name: product.name,
+        product_image: product.image,
+        product_price: product.price,
+        quantity,
+      });
+    }
+    await loadCartItems();
+  }, [isAuthenticated, user, loadCartItems]);
+
+  const checkout = useCallback(async (paymentMethod, shippingAddress) => {
+    if (!isAuthenticated || !user || items.length === 0) {
+      throw new Error('Checkout invalido');
+    }
+
+    const total = items.reduce((sum, item) => 
+      sum + item.price * item.quantity, 0
+    );
+
+    const { data: order } = await supabase
+      .from('orders')
+      .insert({
+        user_id: user.id,
+        total,
+        status: 'pending',
+        payment_method: paymentMethod,
+        shipping_address: shippingAddress,
+      })
+      .select()
+      .single();
+
+    await supabase.from('order_items').insert(
+      items.map(item => ({
+        order_id: order.id,
+        product_id: item.id,
+        product_name: item.name,
+        product_image: item.image,
+        product_price: item.price,
+        quantity: item.quantity,
+      }))
+    );
+
+    await supabase
+      .from('cart_items')
+      .delete()
+      .eq('user_id', user.id);
+
+    setItems([]);
+    return order;
+  }, [isAuthenticated, user, items]);
+
+  return {
+    items,
+    addItem,
+    removeItem,
+    updateQuantity,
+    clearCart,
+    checkout,
+    totalItems: items.reduce((sum, i) => sum + i.quantity, 0),
+    totalPrice: items.reduce((sum, i) => sum + i.price * i.quantity, 0),
+    isLoading,
+  };
+}
+\end{lstlisting}
+
+\subsection{LanguageContext - Internacionalização}
+
+\begin{lstlisting}[language=JavaScript,caption=Sistema de Internacionalização]
+// src/context/LanguageContext.tsx
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import ptBR from '@/locales/pt-br.json';
+import en from '@/locales/en.json';
+
+type Language = 'pt-BR' | 'en';
+type Translations = typeof ptBR;
+
+interface LanguageContextType {
+  language: Language;
+  setLanguage: (lang: Language) => void;
+  t: (key: string) => string;
+}
+
+const translations: Record<Language, Translations> = {
+  'pt-BR': ptBR,
+  'en': en,
+};
+
+const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+
+export function LanguageProvider({ children }) {
+  const [language, setLanguageState] = useState<Language>(() => {
+    const saved = localStorage.getItem('language');
+    return (saved as Language) || 'pt-BR';
+  });
+
+  const setLanguage = (lang: Language) => {
+    setLanguageState(lang);
+    localStorage.setItem('language', lang);
+  };
+
+  const t = (key: string): string => {
+    const keys = key.split('.');
+    let value: any = translations[language];
+    
+    for (const k of keys) {
+      value = value?.[k];
+    }
+    
+    return value || key;
+  };
+
+  return (
+    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+      {children}
+    </LanguageContext.Provider>
+  );
+}
+
+export const useLanguage = () => {
+  const context = useContext(LanguageContext);
+  if (!context) throw new Error('useLanguage must be within LanguageProvider');
+  return context;
+};
+\end{lstlisting}
+
+%==============================================================================
+\section{Edge Functions para Backend}
+%==============================================================================
+
+\subsection{Chatbot com RAG}
+
+\begin{lstlisting}[language=JavaScript,caption=Edge Function do Chatbot]
+// supabase/functions/chatbot/index.ts
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
+  }
+
+  try {
+    const { message, conversationId, sessionId } = await req.json();
+
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+
+    // Buscar entidades similares (RAG)
+    const { data: entities } = await supabase
+      .from("entity_embeddings")
+      .select("entity_name, entity_description, entity_category, entity_price")
+      .limit(10);
+
+    // Construir contexto
+    const context = entities?.map(e => 
+      `- ${e.entity_name}: ${e.entity_description} (${e.entity_category}) - R$ ${e.entity_price}`
+    ).join("\n") || "";
+
+    // Chamar IA via Lovable AI Gateway
+    const aiResponse = await fetch("https://ai.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${Deno.env.get("LOVABLE_API_KEY")}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-3-flash-preview",
+        messages: [
+          {
+            role: "system",
+            content: `Voce e um assistente de [NOME DO NEGOCIO].
+            
+INFORMACOES DISPONIVEIS:
+${context}
+
+DIRETRIZES:
+- Responda sempre em portugues
+- Seja prestativo e amigavel
+- Recomende itens baseado no contexto
+- Se nao souber, diga que vai verificar`
+          },
+          { role: "user", content: message }
+        ],
+        max_tokens: 1000,
+      }),
+    });
+
+    const aiData = await aiResponse.json();
+    const reply = aiData.choices[0].message.content;
+
+    // Salvar mensagens
+    await supabase.from("chat_messages").insert([
+      { conversation_id: conversationId, role: "user", content: message },
+      { conversation_id: conversationId, role: "assistant", content: reply },
+    ]);
+
+    return new Response(
+      JSON.stringify({ reply, conversationId }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  } catch (error) {
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+});
+\end{lstlisting}
+
+%==============================================================================
+\section{Componentes de Interface}
+%==============================================================================
+
+\subsection{Widget do Chatbot}
+
+\begin{lstlisting}[language=JavaScript,caption=Componente ChatbotWidget]
+// src/components/chatbot/ChatbotWidget.tsx
+import React, { useState } from 'react';
+import { MessageCircle, X, Send } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
+
+export default function ChatbotWidget() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const sendMessage = async () => {
+    if (!input.trim() || isLoading) return;
+
+    const userMessage = input.trim();
+    setInput('');
+    setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+    setIsLoading(true);
+
+    try {
+      const { data } = await supabase.functions.invoke('chatbot', {
+        body: { message: userMessage, sessionId: 'session-id' }
+      });
+
+      setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
+    } catch (error) {
+      setMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: 'Desculpe, ocorreu um erro.' 
+      }]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <>
+      {/* Botao flutuante */}
+      <Button
+        onClick={() => setIsOpen(true)}
+        className="fixed bottom-6 right-6 rounded-full w-14 h-14 shadow-lg"
+      >
+        <MessageCircle className="w-6 h-6" />
+      </Button>
+
+      {/* Janela do chat */}
+      {isOpen && (
+        <div className="fixed bottom-24 right-6 w-96 h-[500px] 
+                        bg-background border rounded-lg shadow-xl flex flex-col">
+          {/* Header */}
+          <div className="p-4 border-b flex justify-between items-center">
+            <h3 className="font-semibold">Assistente Virtual</h3>
+            <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+
+          {/* Mensagens */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {messages.map((msg, i) => (
+              <div key={i} className={`flex ${
+                msg.role === 'user' ? 'justify-end' : 'justify-start'
+              }`}>
+                <div className={`max-w-[80%] p-3 rounded-lg ${
+                  msg.role === 'user' 
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'bg-muted'
+                }`}>
+                  {msg.content}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Input */}
+          <div className="p-4 border-t flex gap-2">
+            <input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+              placeholder="Digite sua mensagem..."
+              className="flex-1 px-3 py-2 border rounded-lg"
+            />
+            <Button onClick={sendMessage} disabled={isLoading}>
+              <Send className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+\end{lstlisting}
+
+%==============================================================================
+\section{Estrutura de Arquivos do Projeto}
+%==============================================================================
+
+\begin{lstlisting}[caption=Estrutura Completa de Diretórios]
+projeto/
+├── public/
+│   ├── favicon.svg
+│   └── robots.txt
+├── src/
+│   ├── assets/                    # Imagens e recursos
+│   ├── components/
+│   │   ├── ui/                    # Componentes shadcn/ui
+│   │   ├── layout/
+│   │   │   ├── Header.tsx
+│   │   │   └── Footer.tsx
+│   │   ├── home/
+│   │   │   ├── HeroSection.tsx
+│   │   │   ├── CategorySection.tsx
+│   │   │   └── FeaturedProducts.tsx
+│   │   ├── product/
+│   │   │   └── ProductCard.tsx
+│   │   └── chatbot/
+│   │       └── ChatbotWidget.tsx
+│   ├── context/
+│   │   ├── AuthContext.tsx
+│   │   ├── CartContext.tsx
+│   │   ├── LanguageContext.tsx
+│   │   └── ThemeContext.tsx
+│   ├── hooks/
+│   │   ├── useAuth.ts
+│   │   ├── useCartPersistence.ts
+│   │   └── useOrders.ts
+│   ├── integrations/
+│   │   └── supabase/
+│   │       ├── client.ts          # Auto-gerado
+│   │       └── types.ts           # Auto-gerado
+│   ├── locales/
+│   │   ├── pt-br.json
+│   │   └── en.json
+│   ├── pages/
+│   │   ├── Index.tsx
+│   │   ├── Products.tsx
+│   │   ├── ProductDetail.tsx
+│   │   ├── Cart.tsx
+│   │   ├── Auth.tsx
+│   │   ├── OrderHistory.tsx
+│   │   ├── Contact.tsx
+│   │   ├── Help.tsx
+│   │   └── NotFound.tsx
+│   ├── types/
+│   │   └── product.ts
+│   ├── lib/
+│   │   └── utils.ts
+│   ├── App.tsx
+│   ├── main.tsx
+│   └── index.css
+├── supabase/
+│   ├── config.toml
+│   ├── functions/
+│   │   └── chatbot/
+│   │       └── index.ts
+│   └── migrations/
+│       └── *.sql
+├── index.html
+├── vite.config.ts
+├── tailwind.config.ts
+├── tsconfig.json
+└── package.json
+\end{lstlisting}
+
+%==============================================================================
+\section{Configuração do App Principal}
+%==============================================================================
+
+\begin{lstlisting}[language=JavaScript,caption=App.tsx com Todos os Providers]
+// src/App.tsx
+import { Toaster } from "@/components/ui/toaster";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { CartProvider } from "@/context/CartContext";
+import { AuthProvider } from "@/context/AuthContext";
+import { LanguageProvider } from "@/context/LanguageContext";
+import { ThemeProvider } from "@/context/ThemeContext";
+import ChatbotWidget from "@/components/chatbot/ChatbotWidget";
+
+// Paginas
+import Index from "./pages/Index";
+import Products from "./pages/Products";
+import ProductDetail from "./pages/ProductDetail";
+import Cart from "./pages/Cart";
+import Auth from "./pages/Auth";
+import OrderHistory from "./pages/OrderHistory";
+import Contact from "./pages/Contact";
+import Help from "./pages/Help";
+import NotFound from "./pages/NotFound";
+
+const queryClient = new QueryClient();
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <ThemeProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <CartProvider>
+            <TooltipProvider>
+              <Toaster />
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/products" element={<Products />} />
+                  <Route path="/products/:id" element={<ProductDetail />} />
+                  <Route path="/cart" element={<Cart />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/orders" element={<OrderHistory />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/help" element={<Help />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+                <ChatbotWidget />
+              </BrowserRouter>
+            </TooltipProvider>
+          </CartProvider>
+        </AuthProvider>
+      </LanguageProvider>
+    </ThemeProvider>
+  </QueryClientProvider>
+);
+
+export default App;
+\end{lstlisting}
+
+%==============================================================================
+\section{Adaptação para Diferentes Negócios}
+%==============================================================================
+
+\subsection{Exemplos de Customização}
+
+\begin{tcolorbox}[colback=yellow!5!white,colframe=orange!75!black,title=Templates por Segmento]
+
+\textbf{E-COMMERCE (Loja Virtual)}
+\begin{itemize}[nosep]
+    \item Entidades: Produtos, Categorias, Marcas
+    \item Páginas extras: Wishlist, Comparador, Rastreamento
+    \item Métodos pagamento: PIX, Cartão, Boleto
+\end{itemize}
+
+\textbf{RESTAURANTE / DELIVERY}
+\begin{itemize}[nosep]
+    \item Entidades: Pratos, Categorias, Ingredientes
+    \item Páginas extras: Cardápio Digital, Reservas
+    \item Integrações: iFood, Rappi, Google Maps
+\end{itemize}
+
+\textbf{CLÍNICA / CONSULTÓRIO}
+\begin{itemize}[nosep]
+    \item Entidades: Serviços, Profissionais, Horários
+    \item Páginas extras: Agendamento, Prontuário
+    \item Compliance: LGPD, Dados sensíveis
+\end{itemize}
+
+\textbf{IMOBILIÁRIA}
+\begin{itemize}[nosep]
+    \item Entidades: Imóveis, Bairros, Tipos
+    \item Páginas extras: Busca avançada, Visita virtual
+    \item Integrações: Google Maps, Tour 360
+\end{itemize}
+
+\textbf{ESCOLA / CURSOS}
+\begin{itemize}[nosep]
+    \item Entidades: Cursos, Módulos, Instrutores
+    \item Páginas extras: Área do aluno, Certificados
+    \item Integrações: Vídeo (Vimeo), Pagamentos recorrentes
+\end{itemize}
+
+\end{tcolorbox}
+
+%==============================================================================
+\section{Checklist de Implementação}
+%==============================================================================
+
+\begin{tcolorbox}[colback=green!5!white,colframe=green!75!black,title=Verificação Final]
+\begin{enumerate}[leftmargin=*]
+    \item[$\square$] Banco de dados criado com todas as tabelas
+    \item[$\square$] RLS habilitado em todas as tabelas
+    \item[$\square$] Trigger de criação de perfil funcionando
+    \item[$\square$] Autenticação com login e registro
+    \item[$\square$] Carrinho sincronizando com banco
+    \item[$\square$] Checkout criando pedidos corretamente
+    \item[$\square$] Histórico de pedidos exibindo dados
+    \item[$\square$] Chatbot respondendo com contexto
+    \item[$\square$] Troca de idioma funcionando
+    \item[$\square$] Tema claro/escuro alternando
+    \item[$\square$] Layout responsivo em mobile
+    \item[$\square$] Todas as rotas navegáveis
+    \item[$\square$] Tratamento de erros implementado
+    \item[$\square$] Loading states visíveis
+    \item[$\square$] SEO básico configurado
+\end{enumerate}
+\end{tcolorbox}
+
+%==============================================================================
+\section{Conclusão}
+%==============================================================================
+
+Este documento apresenta uma arquitetura completa e replicável para construção de plataformas web modernas. O sistema descrito inclui todas as funcionalidades essenciais para operação de um negócio digital:
+
+\begin{itemize}
+    \item \textbf{Segurança}: Autenticação robusta e RLS em banco de dados
+    \item \textbf{Escalabilidade}: Arquitetura serverless com Edge Functions
+    \item \textbf{Inteligência}: Chatbot com RAG para atendimento automatizado
+    \item \textbf{Globalização}: Suporte multilíngue nativo
+    \item \textbf{Experiência}: Interface responsiva com temas personalizáveis
+\end{itemize}
+
+A combinação de React, TypeScript, Supabase e IA generativa proporciona uma base sólida para qualquer tipo de aplicação web, desde pequenos negócios até grandes corporações.
+
+\end{document}

@@ -1,0 +1,704 @@
+\documentclass[12pt,a4paper]{article}
+
+% Pacotes essenciais
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{tcolorbox}
+\usepackage{booktabs}
+
+% Configuração de página
+\geometry{
+    a4paper,
+    top=2.5cm,
+    bottom=2.5cm,
+    left=3cm,
+    right=3cm
+}
+
+% Configuração de cores
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\definecolor{hanacolor}{rgb}{0.0,0.32,0.65}
+\definecolor{lovablecolor}{rgb}{0.6,0.2,0.8}
+
+% Configuração de listings para código
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    frame=single
+}
+
+\lstset{style=mystyle}
+
+% Configuração de hyperlinks
+\hypersetup{
+    colorlinks=true,
+    linkcolor=hanacolor,
+    filecolor=magenta,      
+    urlcolor=lovablecolor,
+}
+
+% Cabeçalho e rodapé
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{VeloTech - Integração de Banco de Dados}
+\lhead{Documentação Técnica}
+\rfoot{Página \thepage}
+
+% Início do documento
+\begin{document}
+
+% Capa
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+    
+    {\Huge\bfseries Integração de Banco de Dados\\[0.5cm]}
+    {\Large\bfseries Lovable Cloud + SAP HANA\\[1cm]}
+    
+    \vspace{1cm}
+    
+    {\large Guia Completo de Conexão via DBeaver\\e Autenticação Corporativa}
+    
+    \vspace{2cm}
+    
+    \begin{tcolorbox}[colback=backcolour,colframe=hanacolor,title=Tecnologias Abordadas]
+        \begin{itemize}[noitemsep]
+            \item PostgreSQL (Lovable Cloud)
+            \item SAP HANA Database
+            \item DBeaver Universal Database Tool
+            \item Autenticação Corporativa
+        \end{itemize}
+    \end{tcolorbox}
+    
+    \vfill
+    
+    {\large\textbf{Projeto VeloTech}}\\[0.3cm]
+    {\large \today}
+    
+\end{titlepage}
+
+% Sumário
+\tableofcontents
+\newpage
+
+% ============================================
+% PARTE 1: CONEXÃO VIA DBEAVER
+% ============================================
+
+\section{Conexão do Banco de Dados Lovable via DBeaver}
+
+O Lovable Cloud utiliza PostgreSQL como banco de dados subjacente. Este guia demonstra como conectar-se ao banco de dados usando o DBeaver para visualização, consultas e gerenciamento.
+
+\subsection{Pré-requisitos}
+
+Antes de iniciar, certifique-se de ter:
+
+\begin{enumerate}
+    \item \textbf{DBeaver instalado} - Disponível em \url{https://dbeaver.io/download/}
+    \item \textbf{Acesso ao projeto Lovable} com Cloud habilitado
+    \item \textbf{Credenciais do banco de dados} (obtidas através do painel Lovable)
+\end{enumerate}
+
+\subsection{Passo 1: Obter Credenciais de Conexão}
+
+\begin{tcolorbox}[colback=yellow!10,colframe=orange!70,title=Informações de Conexão do Projeto]
+As credenciais de conexão do seu projeto Lovable Cloud são:
+
+\begin{lstlisting}[language=bash,numbers=none]
+Host: db.xfprxdqfumsdbjmsoghd.supabase.co
+Porta: 5432
+Banco de Dados: postgres
+Usuario: postgres
+Senha: [Disponivel no painel Lovable Cloud]
+SSL: Habilitado (Obrigatorio)
+\end{lstlisting}
+\end{tcolorbox}
+
+\subsubsection{Como obter a senha do banco:}
+
+\begin{enumerate}
+    \item Acesse o painel do seu projeto Lovable
+    \item Navegue até \textbf{Settings → Cloud → Database}
+    \item Clique em \textbf{"View Connection String"}
+    \item Copie a senha exibida
+\end{enumerate}
+
+\subsection{Passo 2: Configurar Conexão no DBeaver}
+
+\subsubsection{2.1 Criar Nova Conexão}
+
+\begin{enumerate}
+    \item Abra o DBeaver
+    \item Clique em \textbf{Database → New Database Connection} (ou Ctrl+Shift+N)
+    \item Na lista de bancos, selecione \textbf{PostgreSQL}
+    \item Clique em \textbf{Next}
+\end{enumerate}
+
+\subsubsection{2.2 Preencher Dados de Conexão}
+
+Na aba \textbf{Main}, preencha os campos:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{ll}
+\toprule
+\textbf{Campo} & \textbf{Valor} \\
+\midrule
+Host & \texttt{db.xfprxdqfumsdbjmsoghd.supabase.co} \\
+Port & \texttt{5432} \\
+Database & \texttt{postgres} \\
+Username & \texttt{postgres} \\
+Password & \texttt{[sua\_senha\_do\_painel]} \\
+\bottomrule
+\end{tabular}
+\caption{Configuração de conexão PostgreSQL}
+\end{table}
+
+\subsubsection{2.3 Configurar SSL (Obrigatório)}
+
+\begin{enumerate}
+    \item Clique na aba \textbf{"SSL"}
+    \item Marque a opção \textbf{"Use SSL"}
+    \item Em \textbf{SSL Mode}, selecione \textbf{"require"}
+    \item Deixe os campos de certificado vazios (não são necessários)
+\end{enumerate}
+
+\begin{lstlisting}[language=SQL,caption=Configuração SSL no DBeaver]
+SSL Mode: require
+SSL Factory: (deixar vazio)
+SSL Certificate: (deixar vazio)
+SSL Key: (deixar vazio)
+\end{lstlisting}
+
+\subsubsection{2.4 Testar e Finalizar}
+
+\begin{enumerate}
+    \item Clique em \textbf{"Test Connection"}
+    \item Se aparecer \textbf{"Connected"}, clique em \textbf{OK}
+    \item Dê um nome para sua conexão (ex: "VeloTech - Lovable Cloud")
+    \item Clique em \textbf{Finish}
+\end{enumerate}
+
+\subsection{Passo 3: Explorar o Banco de Dados}
+
+Após conectar, você verá a estrutura:
+
+\begin{lstlisting}[language=SQL,caption=Estrutura do Banco VeloTech]
+postgres
+├── Schemas
+│   ├── public
+│   │   ├── Tables
+│   │   │   ├── profiles
+│   │   │   ├── cart_items
+│   │   │   ├── orders
+│   │   │   ├── order_items
+│   │   │   ├── product_embeddings
+│   │   │   ├── chat_conversations
+│   │   │   └── chat_messages
+│   │   ├── Functions
+│   │   │   └── search_similar_products
+│   │   └── Extensions
+│   │       └── vector
+│   ├── auth (sistema de autenticacao)
+│   └── storage (armazenamento de arquivos)
+\end{lstlisting}
+
+\subsection{Passo 4: Executar Consultas}
+
+\begin{lstlisting}[language=SQL,caption=Exemplo de consulta aos produtos]
+-- Listar todos os produtos com embeddings
+SELECT 
+    product_id,
+    product_name,
+    product_category,
+    product_price
+FROM public.product_embeddings
+ORDER BY product_category, product_name;
+
+-- Ver historico de conversas do chatbot
+SELECT 
+    cc.id as conversation_id,
+    cc.session_id,
+    cm.role,
+    cm.content,
+    cm.created_at
+FROM public.chat_conversations cc
+JOIN public.chat_messages cm ON cm.conversation_id = cc.id
+ORDER BY cc.created_at DESC, cm.created_at ASC
+LIMIT 50;
+\end{lstlisting}
+
+% ============================================
+% PARTE 2: INTEGRAÇÃO COM SAP HANA
+% ============================================
+
+\section{Integração com SAP HANA para Autenticação Corporativa}
+
+Esta seção demonstra como configurar autenticação corporativa utilizando credenciais do SAP HANA para usuários de uma organização.
+
+\subsection{Arquitetura da Solução}
+
+\begin{tcolorbox}[colback=blue!5,colframe=hanacolor,title=Fluxo de Autenticação]
+\begin{enumerate}
+    \item Usuário insere credenciais HANA (usuário/senha)
+    \item Frontend envia para Edge Function do Lovable
+    \item Edge Function conecta ao HANA e valida credenciais
+    \item Se válido, cria/atualiza usuário no Lovable Cloud
+    \item Retorna token JWT para o frontend
+\end{enumerate}
+\end{tcolorbox}
+
+\subsection{Passo 1: Configurar Credenciais HANA}
+
+Primeiro, adicione as credenciais do HANA como secrets no Lovable:
+
+\begin{lstlisting}[language=bash,caption=Secrets necessários]
+HANA_HOST=seu-servidor-hana.empresa.com
+HANA_PORT=30015
+HANA_USER=SYSTEM
+HANA_PASSWORD=sua_senha_hana
+HANA_DATABASE=HDB
+\end{lstlisting}
+
+\subsection{Passo 2: Edge Function de Autenticação HANA}
+
+\begin{lstlisting}[language=JavaScript,caption=supabase/functions/hana-auth/index.ts]
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": 
+    "authorization, x-client-info, apikey, content-type",
+};
+
+// Funcao para validar credenciais no HANA
+async function validateHanaCredentials(
+  username: string, 
+  password: string
+): Promise<{valid: boolean; userData?: any}> {
+  const hanaHost = Deno.env.get("HANA_HOST");
+  const hanaPort = Deno.env.get("HANA_PORT") || "30015";
+  
+  // Conexao HANA via ODBC/REST API
+  // Nota: HANA expoe APIs REST que podem ser usadas
+  const hanaUrl = `https://${hanaHost}:${hanaPort}/sap/hana/xs/formLogin/token.xsjs`;
+  
+  try {
+    const response = await fetch(hanaUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        "xs-username": username,
+        "xs-password": password,
+      }),
+    });
+    
+    if (response.ok) {
+      // Buscar dados do usuario no HANA
+      const userDataResponse = await fetch(
+        `https://${hanaHost}:${hanaPort}/api/users/${username}`,
+        {
+          headers: {
+            "Authorization": `Bearer ${await response.text()}`,
+          },
+        }
+      );
+      
+      const userData = await userDataResponse.json();
+      return { valid: true, userData };
+    }
+    
+    return { valid: false };
+  } catch (error) {
+    console.error("Erro ao conectar ao HANA:", error);
+    return { valid: false };
+  }
+}
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { username, password } = await req.json();
+    
+    if (!username || !password) {
+      return new Response(
+        JSON.stringify({ error: "Usuario e senha sao obrigatorios" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Validar no HANA
+    const { valid, userData } = await validateHanaCredentials(username, password);
+    
+    if (!valid) {
+      return new Response(
+        JSON.stringify({ error: "Credenciais HANA invalidas" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Criar/atualizar usuario no Supabase
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    );
+
+    // Email corporativo baseado no username HANA
+    const email = `${username}@empresa.com.br`;
+    
+    // Verificar se usuario existe
+    const { data: existingUser } = await supabaseAdmin.auth.admin.listUsers();
+    const user = existingUser.users.find(u => u.email === email);
+    
+    let authUser;
+    if (user) {
+      // Usuario existe, fazer login
+      authUser = user;
+    } else {
+      // Criar novo usuario
+      const { data: newUser, error } = await supabaseAdmin.auth.admin.createUser({
+        email,
+        password: crypto.randomUUID(), // Senha aleatoria (nao usada)
+        email_confirm: true,
+        user_metadata: {
+          name: userData?.fullName || username,
+          hana_username: username,
+          department: userData?.department,
+          corporate_user: true,
+        },
+      });
+      
+      if (error) throw error;
+      authUser = newUser.user;
+      
+      // Criar perfil
+      await supabaseAdmin.from("profiles").insert({
+        user_id: authUser.id,
+        name: userData?.fullName || username,
+        phone: userData?.phone,
+        address: userData?.address,
+      });
+    }
+
+    // Gerar token JWT
+    const { data: session, error: signInError } = 
+      await supabaseAdmin.auth.admin.generateLink({
+        type: "magiclink",
+        email,
+      });
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        user: {
+          id: authUser.id,
+          email: authUser.email,
+          name: userData?.fullName || username,
+        },
+        redirect_url: session.properties?.action_link,
+      }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+
+  } catch (error) {
+    console.error("Erro na autenticacao HANA:", error);
+    return new Response(
+      JSON.stringify({ error: "Erro interno de autenticacao" }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+});
+\end{lstlisting}
+
+\subsection{Passo 3: Componente de Login HANA}
+
+\begin{lstlisting}[language=JavaScript,caption=src/components/auth/HanaLogin.tsx]
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { supabase } from "@/integrations/supabase/client";
+import { Building2, Lock, User } from "lucide-react";
+
+export function HanaLogin() {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleHanaLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    try {
+      const { data, error } = await supabase.functions.invoke("hana-auth", {
+        body: { username, password },
+      });
+
+      if (error) throw error;
+
+      if (data.redirect_url) {
+        // Redirecionar para magic link
+        window.location.href = data.redirect_url;
+      }
+    } catch (err) {
+      setError(err.message || "Erro ao autenticar com HANA");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Card className="w-full max-w-md">
+      <CardHeader className="text-center">
+        <div className="flex justify-center mb-4">
+          <Building2 className="h-12 w-12 text-primary" />
+        </div>
+        <CardTitle>Login Corporativo</CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Use suas credenciais SAP HANA
+        </p>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleHanaLogin} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="hana-user">Usuario HANA</Label>
+            <div className="relative">
+              <User className="absolute left-3 top-3 h-4 w-4" />
+              <Input
+                id="hana-user"
+                placeholder="seu.usuario"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="pl-10"
+                required
+              />
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="hana-pass">Senha HANA</Label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-3 h-4 w-4" />
+              <Input
+                id="hana-pass"
+                type="password"
+                placeholder="********"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="pl-10"
+                required
+              />
+            </div>
+          </div>
+
+          {error && (
+            <div className="text-sm text-red-500 text-center">
+              {error}
+            </div>
+          )}
+
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? "Autenticando..." : "Entrar com HANA"}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+\end{lstlisting}
+
+\subsection{Passo 4: Conexão Direta DBeaver → HANA}
+
+Para conectar o DBeaver diretamente ao SAP HANA:
+
+\subsubsection{4.1 Baixar Driver JDBC do HANA}
+
+\begin{enumerate}
+    \item Acesse \url{https://tools.hana.ondemand.com/#hanatools}
+    \item Baixe o \textbf{SAP HANA Client}
+    \item Localize o arquivo \texttt{ngdbc.jar} na instalação
+\end{enumerate}
+
+\subsubsection{4.2 Configurar Driver no DBeaver}
+
+\begin{enumerate}
+    \item Vá em \textbf{Database → Driver Manager}
+    \item Clique em \textbf{New}
+    \item Preencha:
+    \begin{itemize}
+        \item Driver Name: \texttt{SAP HANA}
+        \item Class Name: \texttt{com.sap.db.jdbc.Driver}
+        \item URL Template: \texttt{jdbc:sap://\{host\}:\{port\}}
+    \end{itemize}
+    \item Na aba \textbf{Libraries}, adicione o \texttt{ngdbc.jar}
+    \item Clique em \textbf{OK}
+\end{enumerate}
+
+\subsubsection{4.3 Criar Conexão HANA}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{ll}
+\toprule
+\textbf{Campo} & \textbf{Valor} \\
+\midrule
+Host & \texttt{seu-servidor-hana.empresa.com} \\
+Port & \texttt{30015} (ou porta configurada) \\
+Database & \texttt{HDB} \\
+Username & \texttt{SYSTEM} (ou seu usuário) \\
+Password & \texttt{[sua\_senha\_hana]} \\
+\bottomrule
+\end{tabular}
+\caption{Configuração de conexão SAP HANA}
+\end{table}
+
+\subsection{Passo 5: Sincronização de Dados}
+
+\begin{lstlisting}[language=SQL,caption=Exemplo de sincronizacao HANA → PostgreSQL]
+-- No HANA: Criar view dos usuarios
+CREATE VIEW CORP_USERS AS
+SELECT 
+    USER_NAME,
+    FULL_NAME,
+    EMAIL_ADDRESS,
+    DEPARTMENT,
+    IS_ACTIVE
+FROM SYS.USERS
+WHERE IS_ACTIVE = 'TRUE';
+
+-- Script de sincronizacao (executar via ETL ou script)
+-- Exportar do HANA para CSV
+-- Importar no PostgreSQL usando:
+COPY profiles(name, user_id, phone, address)
+FROM '/path/to/hana_users_export.csv'
+WITH (FORMAT csv, HEADER true);
+\end{lstlisting}
+
+% ============================================
+% PARTE 3: SEGURANÇA E BOAS PRÁTICAS
+% ============================================
+
+\section{Segurança e Boas Práticas}
+
+\subsection{Proteção de Credenciais}
+
+\begin{tcolorbox}[colback=red!5,colframe=red!70,title=Importante: Segurança]
+\begin{itemize}
+    \item \textbf{Nunca} armazene senhas em código-fonte
+    \item Use \textbf{secrets/variáveis de ambiente} para credenciais
+    \item Ative \textbf{SSL/TLS} em todas as conexões
+    \item Implemente \textbf{rotação de senhas} regular
+    \item Use \textbf{contas de serviço} com permissões mínimas
+\end{itemize}
+\end{tcolorbox}
+
+\subsection{Auditoria de Acessos}
+
+\begin{lstlisting}[language=SQL,caption=Tabela de auditoria de logins]
+-- Criar tabela de auditoria no Lovable Cloud
+CREATE TABLE public.login_audit (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES auth.users(id),
+    login_type VARCHAR(20), -- 'standard' ou 'hana'
+    ip_address INET,
+    user_agent TEXT,
+    success BOOLEAN,
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Habilitar RLS
+ALTER TABLE public.login_audit ENABLE ROW LEVEL SECURITY;
+
+-- Apenas admins podem ver
+CREATE POLICY "Admins can view audit logs"
+ON public.login_audit FOR SELECT
+USING (auth.jwt() ->> 'role' = 'admin');
+\end{lstlisting}
+
+% ============================================
+% CONCLUSÃO
+% ============================================
+
+\section{Conclusão}
+
+Este documento apresentou os procedimentos para:
+
+\begin{enumerate}
+    \item \textbf{Conectar ao banco Lovable Cloud via DBeaver} - Permitindo visualização e gerenciamento do PostgreSQL subjacente
+    \item \textbf{Integrar autenticação corporativa HANA} - Possibilitando que usuários de uma organização utilizem suas credenciais existentes
+    \item \textbf{Configurar conexão direta DBeaver → HANA} - Para administração do banco SAP HANA
+\end{enumerate}
+
+\begin{tcolorbox}[colback=green!5,colframe=green!70,title=Próximos Passos]
+\begin{itemize}
+    \item Configurar SSO (Single Sign-On) com SAML/OAuth
+    \item Implementar sincronização automática de usuários
+    \item Configurar replicação de dados HANA → PostgreSQL
+    \item Implementar dashboard de monitoramento
+\end{itemize}
+\end{tcolorbox}
+
+% ============================================
+% ANEXOS
+% ============================================
+
+\appendix
+
+\section{String de Conexão Completa}
+
+\begin{lstlisting}[language=bash,caption=Connection String PostgreSQL]
+postgresql://postgres:[SUA_SENHA]@db.xfprxdqfumsdbjmsoghd.supabase.co:5432/postgres?sslmode=require
+\end{lstlisting}
+
+\section{Variáveis de Ambiente Necessárias}
+
+\begin{lstlisting}[language=bash,caption=.env para integracao HANA]
+# Lovable Cloud (ja configurado automaticamente)
+SUPABASE_URL=https://xfprxdqfumsdbjmsoghd.supabase.co
+SUPABASE_ANON_KEY=eyJhbGc...
+SUPABASE_SERVICE_ROLE_KEY=[obtido no painel]
+
+# SAP HANA (adicionar via Secrets)
+HANA_HOST=seu-servidor-hana.empresa.com
+HANA_PORT=30015
+HANA_USER=SYSTEM
+HANA_PASSWORD=[sua_senha_segura]
+HANA_DATABASE=HDB
+\end{lstlisting}
+
+\end{document}
