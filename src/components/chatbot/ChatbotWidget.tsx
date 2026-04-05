@@ -6,6 +6,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { contactInfo } from "@/config/contact";
 import { getApiUrl } from "@/lib/api";
+import { askLocalRag } from "@/lib/chatbotLocalRag";
+import { Link } from "react-router-dom";
 
 interface Message {
   id: string;
@@ -19,6 +21,7 @@ interface ProductSuggestion {
   product_name: string;
   product_price: number;
   product_category: string;
+  path?: string;
 }
 
 const API_URL = getApiUrl();
@@ -32,6 +35,46 @@ const ChatbotWidget: React.FC = () => {
   const [sessionId] = useState(() => crypto.randomUUID());
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const [suggestionsByMessage, setSuggestionsByMessage] = useState<Record<string, ProductSuggestion[]>>({});
+
+  const formatMarkdownLinks = (text: string) => {
+    const pattern = /\[([^\]]+)\]\(([^)]+)\)/g;
+    const parts: React.ReactNode[] = [];
+    let lastIndex = 0;
+    let match = pattern.exec(text);
+
+    while (match) {
+      const [full, label, href] = match;
+      const startIndex = match.index;
+      if (startIndex > lastIndex) {
+        parts.push(text.slice(lastIndex, startIndex));
+      }
+
+      if (href.startsWith('/')) {
+        parts.push(
+          <Link key={`${href}-${startIndex}`} to={href} className="underline underline-offset-2 font-semibold text-orange-300 hover:text-orange-200">
+            {label}
+          </Link>
+        );
+      } else {
+        parts.push(
+          <a key={`${href}-${startIndex}`} href={href} target="_blank" rel="noreferrer" className="underline underline-offset-2 font-semibold text-orange-300 hover:text-orange-200">
+            {label}
+          </a>
+        );
+      }
+
+      lastIndex = startIndex + full.length;
+      match = pattern.exec(text);
+    }
+
+    if (lastIndex < text.length) {
+      parts.push(text.slice(lastIndex));
+    }
+
+    return parts.length > 0 ? parts : text;
+  };
 
   // Mensagem de boas-vindas
   useEffect(() => {
@@ -94,7 +137,7 @@ const ChatbotWidget: React.FC = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Erro ao chamar o chatbot");
+        throw new Error("Backend indisponivel para chatbot");
       }
 
       const data = (await response.json()) as {
@@ -114,16 +157,43 @@ const ChatbotWidget: React.FC = () => {
         timestamp: new Date(),
       };
 
+      const productSuggestions = (data.products || []).map((product) => ({
+        ...product,
+        path: `/products/${product.product_id}`,
+      }));
+
+      if (productSuggestions.length > 0) {
+        setSuggestionsByMessage((prev) => ({
+          ...prev,
+          [assistantMessage.id]: productSuggestions,
+        }));
+      }
+
       setMessages((prev) => [...prev, assistantMessage]);
-    } catch (error) {
-      console.error("Chat error:", error);
-      const errorMessage: Message = {
+    } catch {
+      const localRag = askLocalRag(userMessage.content);
+
+      const assistantMessage: Message = {
         id: crypto.randomUUID(),
         role: "assistant",
-        content: "Desculpe, ocorreu um erro ao processar sua mensagem. Por favor, tente novamente. 😔",
+        content: localRag.message,
         timestamp: new Date(),
       };
-      setMessages((prev) => [...prev, errorMessage]);
+
+      if (localRag.products.length > 0) {
+        setSuggestionsByMessage((prev) => ({
+          ...prev,
+          [assistantMessage.id]: localRag.products.map((product) => ({
+            product_id: product.id,
+            product_name: product.name,
+            product_price: product.price,
+            product_category: product.category,
+            path: product.path,
+          })),
+        }));
+      }
+
+      setMessages((prev) => [...prev, assistantMessage]);
     } finally {
       setIsLoading(false);
     }
@@ -197,7 +267,20 @@ const ChatbotWidget: React.FC = () => {
                       : "bg-muted text-foreground rounded-bl-md"
                   )}
                 >
-                  <p className="whitespace-pre-wrap">{message.content}</p>
+                  <p className="whitespace-pre-wrap">{formatMarkdownLinks(message.content)}</p>
+                  {message.role === "assistant" && suggestionsByMessage[message.id]?.length ? (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {suggestionsByMessage[message.id].map((suggestion) => (
+                        <Link
+                          key={`${message.id}-${suggestion.product_id}`}
+                          to={suggestion.path || `/products/${suggestion.product_id}`}
+                          className="rounded-md bg-primary/20 px-2 py-1 text-[11px] font-medium hover:bg-primary/30"
+                        >
+                          {suggestion.product_name}
+                        </Link>
+                      ))}
+                    </div>
+                  ) : null}
                   <p
                     className={cn(
                       "text-[10px] mt-1",
