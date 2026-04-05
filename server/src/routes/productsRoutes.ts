@@ -10,8 +10,8 @@ router.get('/meta', async (_req: Request, res: Response) => {
   ]);
 
   res.json({
-    categories: categories.map((c) => ({ id: c.slug, name: c.name })),
-    brands: brands.map((b) => b.name),
+    categories: categories.map((c: (typeof categories)[number]) => ({ id: c.slug, name: c.name })),
+    brands: brands.map((b: (typeof brands)[number]) => b.name),
   });
 });
 
@@ -81,7 +81,9 @@ router.get('/', async (req: Request, res: Response) => {
       inStock: (p.inventory?.stock || 0) > 0,
       isNew: p.isNew,
       isFeatured: p.isFeatured,
-      specs: Object.fromEntries(p.specs.map((spec) => [spec.name, spec.value])),
+      specs: Object.fromEntries(
+        p.specs.map((spec: (typeof p.specs)[number]) => [spec.name, spec.value])
+      ),
     }))
   );
 });
@@ -110,7 +112,7 @@ router.get('/:id', async (req: Request, res: Response) => {
     price: product.price,
     originalPrice: product.originalPrice,
     image: product.images[0]?.url || '/placeholder.svg',
-    images: product.images.map((image) => image.url),
+    images: product.images.map((image: (typeof product.images)[number]) => image.url),
     category: product.category.name,
     brand: product.brand.name,
     rating: product.ratingAvg,
@@ -118,7 +120,9 @@ router.get('/:id', async (req: Request, res: Response) => {
     inStock: (product.inventory?.stock || 0) > 0,
     isNew: product.isNew,
     isFeatured: product.isFeatured,
-    specs: Object.fromEntries(product.specs.map((spec) => [spec.name, spec.value])),
+    specs: Object.fromEntries(
+      product.specs.map((spec: (typeof product.specs)[number]) => [spec.name, spec.value])
+    ),
   });
 });
 

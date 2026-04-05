@@ -45,7 +45,7 @@ async function getCartPayload(userId: number) {
   });
 
   return {
-    items: items.map((item) => ({
+    items: items.map((item: (typeof items)[number]) => ({
       id: item.product.id,
       name: item.product.name,
       description: item.product.description,
@@ -192,7 +192,10 @@ router.post('/checkout', authMiddleware, async (req: AuthRequest, res: Response)
     return;
   }
 
-  const subtotal = items.reduce((sum, item) => sum + item.unitPriceSnapshot * item.quantity, 0);
+  const subtotal = items.reduce<number>(
+    (sum: number, item: (typeof items)[number]) => sum + item.unitPriceSnapshot * item.quantity,
+    0
+  );
   const shippingCost = subtotal > 100 ? 0 : 9.99;
   const tax = subtotal * 0.23;
   const total = subtotal + shippingCost + tax;
@@ -214,7 +217,7 @@ router.post('/checkout', authMiddleware, async (req: AuthRequest, res: Response)
         },
       },
       items: {
-        create: items.map((item) => ({
+        create: items.map((item: (typeof items)[number]) => ({
           productId: item.productId,
           productName: item.product.name,
           productImage: item.product.images[0]?.url,

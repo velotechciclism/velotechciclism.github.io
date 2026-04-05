@@ -19,7 +19,7 @@ router.get('/me', authMiddleware, async (req: AuthRequest, res: Response) => {
   });
 
   res.json(
-    orders.map((order) => ({
+    orders.map((order: (typeof orders)[number]) => ({
       id: order.id,
       user_id: String(order.userId),
       total: order.total,
@@ -28,7 +28,7 @@ router.get('/me', authMiddleware, async (req: AuthRequest, res: Response) => {
       shipping_address: order.shippingAddressSnapshot,
       created_at: order.createdAt.toISOString(),
       updated_at: order.updatedAt.toISOString(),
-      items: order.items.map((item) => ({
+      items: order.items.map((item: (typeof order.items)[number]) => ({
         id: item.id,
         product_id: item.productId,
         product_name: item.productName,
