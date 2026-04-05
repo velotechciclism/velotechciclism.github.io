@@ -39,8 +39,88 @@ function findProducts(query: string) {
     .map((entry) => entry.product);
 }
 
+function normalizeText(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function hasAny(text: string, words: string[]): boolean {
+  return words.some((word) => text.includes(word));
+}
+
+function isGenericFollowUp(text: string): boolean {
+  return hasAny(text, [
+    'me ajuda',
+    'ajuda',
+    'quais itens tem',
+    'quais produtos tem',
+    'o que voces tem',
+    'o que tem',
+    'tem opcoes',
+    'me mostra',
+  ]);
+}
+
+function buildContextualMessage(message: string, recentUserMessages: string[]): string {
+  const normalized = normalizeText(message);
+  const hasBudgetOnly = /\b(ate|até|max|maximo|máximo)\b/.test(normalized) && /\d/.test(normalized);
+  const genericFollowUp = isGenericFollowUp(normalized);
+
+  if (!hasBudgetOnly && !genericFollowUp) {
+    return message;
+  }
+
+  const lastInformative = [...recentUserMessages]
+    .reverse()
+    .map((item) => item.trim())
+    .find((item) => {
+      const normalizedItem = normalizeText(item);
+      return normalizedItem.length >= 8 && !isGenericFollowUp(normalizedItem);
+    });
+
+  if (!lastInformative) {
+    return message;
+  }
+
+  return `${lastInformative} ${message}`;
+}
+
 function generateAssistantReply(message: string, products: ReturnType<typeof findProducts>) {
-  const lowerMessage = message.toLowerCase();
+  const normalized = normalizeText(message);
+
+  const isGreeting = hasAny(normalized, ['oi', 'ola', 'hello', 'bom dia', 'boa tarde', 'boa noite']);
+  const asksHelp = hasAny(normalized, ['me ajuda', 'me ajude', 'ajuda', 'suporte']);
+  const asksCatalog = hasAny(normalized, [
+    'quais itens tem',
+    'quais produtos tem',
+    'o que voces tem',
+    'catalogo',
+    'mostrar itens',
+    'lista de produtos',
+  ]);
+  const asksSupportContact = hasAny(normalized, ['contato', 'atendente', 'humano', 'whatsapp', 'email', 'telefone']);
+
+  if (asksSupportContact) {
+    return 'Posso te dar suporte por aqui e tambem pelos canais diretos: WhatsApp +351 966 601 839, email c.eduardoteixeiraguinsber@gmail.com e telefone +351 210 123 456.';
+  }
+
+  if ((isGreeting || asksHelp) && products.length === 0) {
+    return 'Oi! Posso te ajudar a escolher por tipo de uso (urbano, estrada, trilha), categoria e faixa de preco. Exemplos: "quais itens tem", "bike ate 900", "capacete para estrada".';
+  }
+
+  if (asksCatalog) {
+    const sample = catalog
+      .slice(0, 4)
+      .map((p) => `- ${p.name} (${p.category}) por EUR ${p.price.toFixed(2)}`)
+      .join('\n');
+
+    return `Temos bicicletas, capacetes, vestuario e acessorios. Aqui vai uma amostra:\n${sample}\n\nSe quiser, eu filtro agora por categoria ou faixa de preco.`;
+  }
 
   if (products.length > 0) {
     const productLines = products
@@ -50,11 +130,11 @@ function generateAssistantReply(message: string, products: ReturnType<typeof fin
     return `Encontrei algumas opcoes que combinam com o que voce pediu:\n${productLines}\n\nSe quiser, eu te ajudo a comparar por categoria, faixa de preco e uso (urbano, estrada ou trilha).`;
   }
 
-  if (lowerMessage.includes('frete') || lowerMessage.includes('envio')) {
+  if (hasAny(normalized, ['frete', 'envio', 'entrega', 'shipping'])) {
     return 'O frete e calculado no carrinho com base no total e no endereco. Posso te ajudar a simular uma compra para ver o valor final.';
   }
 
-  if (lowerMessage.includes('pagamento') || lowerMessage.includes('cartao') || lowerMessage.includes('mb way')) {
+  if (hasAny(normalized, ['pagamento', 'cartao', 'mb way', 'multibanco', 'paypal', 'pix'])) {
     return 'Aceitamos cartao, MB WAY, multibanco e transferencia. Se quiser, eu te sugiro os produtos e voce finaliza no carrinho.';
   }
 
@@ -80,8 +160,27 @@ export async function handleChatbotMessage(input: unknown) {
     },
   });
 
-  const products = findProducts(message);
-  const assistantMessage = generateAssistantReply(message, products);
+  const recentUserMessages = await prisma.chatMessage.findMany({
+    where: {
+      conversationId: conversation.id,
+      role: 'user',
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+    take: 6,
+    select: {
+      content: true,
+    },
+  });
+
+  const contextualMessage = buildContextualMessage(
+    message,
+    recentUserMessages.map((item) => item.content)
+  );
+
+  const products = findProducts(contextualMessage);
+  const assistantMessage = generateAssistantReply(contextualMessage, products);
 
   await prisma.chatMessage.create({
     data: {

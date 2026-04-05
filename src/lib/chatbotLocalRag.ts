@@ -16,6 +16,10 @@ export type LocalRagResponse = {
   products: RagProduct[];
 };
 
+type LocalRagContext = {
+  recentUserMessages?: string[];
+};
+
 const synonymMap: Record<string, string[]> = {
   bike: ['bicicleta', 'bici', 'speed', 'estrada', 'road', 'mtb', 'gravel', 'urbana'],
   bicicleta: ['bike', 'bici', 'speed', 'estrada', 'road', 'mtb', 'gravel', 'urbana'],
@@ -34,11 +38,23 @@ const synonymMap: Record<string, string[]> = {
 };
 
 const intentLexicon = {
+  greeting: ['oi', 'ola', 'hello', 'eae', 'salve', 'bom', 'boa', 'hey'],
   help: ['ajuda', 'help', 'suporte', 'como', 'funciona', 'orienta'],
+  catalog: ['itens', 'item', 'catalogo', 'produtos', 'quais', 'tem', 'mostrar', 'lista'],
+  support: ['atendimento', 'suporte', 'contato', 'whatsapp', 'email', 'telefone', 'humano'],
   shipping: ['frete', 'envio', 'entrega', 'shipping', 'prazo'],
   payment: ['pagamento', 'cartao', 'mb way', 'multibanco', 'paypal', 'pix'],
   recommendation: ['recomenda', 'sugere', 'ideal', 'indica', 'melhor', 'quero'],
   checkout: ['comprar', 'compra', 'checkout', 'finalizar', 'pedido', 'carrinho'],
+};
+
+const typoMap: Record<string, string> = {
+  oiie: 'oi',
+  oii: 'oi',
+  olaa: 'ola',
+  ajdua: 'ajuda',
+  ajuada: 'ajuda',
+  palavreas: 'palavras',
 };
 
 function normalize(text: string): string {
@@ -54,7 +70,12 @@ function normalize(text: string): string {
 function tokenize(text: string): string[] {
   return normalize(text)
     .split(' ')
+    .map((token) => typoMap[token] || token)
     .filter((token) => token.length > 1);
+}
+
+function hasPhrase(query: string, phrases: string[]): boolean {
+  return phrases.some((phrase) => query.includes(phrase));
 }
 
 function expandTokens(tokens: string[]): string[] {
@@ -146,8 +167,53 @@ function formatProductList(items: RagProduct[]): string {
 }
 
 function buildNaturalAnswer(query: string, productsRanked: RagProduct[]): string {
-  const expandedTokens = expandTokens(tokenize(query));
+  const normalizedQuery = normalize(query);
+  const expandedTokens = expandTokens(tokenize(normalizedQuery));
   const intent = detectIntent(expandedTokens);
+
+  const wantsCatalog =
+    intent === 'catalog' ||
+    hasPhrase(normalizedQuery, [
+      'quais itens tem',
+      'quais produtos tem',
+      'o que voces tem',
+      'oque voces tem',
+      'mostrar itens',
+    ]);
+
+  const wantsGreeting =
+    intent === 'greeting' ||
+    hasPhrase(normalizedQuery, ['oi', 'ola', 'bom dia', 'boa tarde', 'boa noite']);
+
+  const wantsHelp = intent === 'help' || hasPhrase(normalizedQuery, ['me ajuda', 'me ajude']);
+
+  if (intent === 'support') {
+    return 'Claro. Posso te atender por suporte direto tambem: WhatsApp +351 966 601 839, email c.eduardoteixeiraguinsber@gmail.com e telefone +351 210 123 456. Se preferir, eu continuo por aqui com recomendacoes.';
+  }
+
+  if (wantsGreeting && productsRanked.length === 0) {
+    return 'Oi! Estou aqui para ajudar voce a encontrar o produto certo. Posso recomendar por uso (urbano, estrada ou trilha), por faixa de preco e por categoria. Exemplos: "me ajuda a escolher uma bike", "quais itens tem", "capacete ate 120", "itens para trilha".';
+  }
+
+  if (wantsCatalog) {
+    const topCatalog = products
+      .filter((product) => product.inStock)
+      .slice(0, 6)
+      .map((product) => ({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        category: product.category,
+        brand: product.brand,
+        description: product.description,
+        score: 1,
+        path: `/products/${product.id}`,
+      }));
+
+    return `Temos itens em bicicletas, capacetes, vestuario e acessorios. Aqui vai uma amostra rapida:\n${formatProductList(
+      topCatalog
+    )}\n\nSe quiser, eu filtro agora por categoria, uso ou faixa de preco.`;
+  }
 
   if (intent === 'shipping') {
     return 'Claro. O frete e calculado no carrinho com base no valor total e no endereco. Se quiser, eu posso te indicar produtos e voce finaliza a compra em seguida.';
@@ -157,8 +223,8 @@ function buildNaturalAnswer(query: string, productsRanked: RagProduct[]): string
     return 'Perfeito. Atualmente voce pode concluir com cartao, MB WAY, multibanco e outras opcoes exibidas no checkout. Posso te sugerir itens para seguir para compra.';
   }
 
-  if (intent === 'help' && productsRanked.length === 0) {
-    return 'Estou aqui para te ajudar na compra. Me diga seu objetivo (estrada, trilha, urbano), seu nivel e faixa de preco. Com isso eu monto uma recomendacao certeira.';
+  if (wantsHelp && productsRanked.length === 0) {
+    return 'Estou aqui para te ajudar na compra. Me diga seu objetivo (estrada, trilha, urbano), seu nivel e faixa de preco. Com isso eu monto uma recomendacao certeira. Se preferir, comece com: "quais itens tem".';
   }
 
   if (productsRanked.length > 0) {
@@ -178,9 +244,51 @@ function buildNaturalAnswer(query: string, productsRanked: RagProduct[]): string
   return 'Nao achei um item exato ainda, mas consigo te guiar. Me diga categoria (bicicleta, capacete, roupa, acessorio), faixa de preco e tipo de uso.';
 }
 
-export function askLocalRag(query: string): LocalRagResponse {
-  const ranked = rankProducts(query);
-  const message = buildNaturalAnswer(query, ranked);
+function isGenericFollowUp(normalizedQuery: string): boolean {
+  return hasPhrase(normalizedQuery, [
+    'me ajuda',
+    'ajuda',
+    'quais itens tem',
+    'quais produtos tem',
+    'o que voces tem',
+    'o que tem',
+    'tem opcoes',
+    'me mostra',
+  ]);
+}
+
+function buildContextualQuery(query: string, recentUserMessages: string[]): string {
+  const normalized = normalize(query);
+  if (recentUserMessages.length === 0) {
+    return query;
+  }
+
+  const hasBudgetOnly = /\b(ate|até|max|maximo|máximo)\b/.test(normalized) && /\d/.test(normalized);
+  const genericFollowUp = isGenericFollowUp(normalized);
+
+  if (!hasBudgetOnly && !genericFollowUp) {
+    return query;
+  }
+
+  const lastInformative = [...recentUserMessages]
+    .reverse()
+    .map((message) => message.trim())
+    .find((message) => {
+      const normalizedMessage = normalize(message);
+      return normalizedMessage.length >= 8 && !isGenericFollowUp(normalizedMessage);
+    });
+
+  if (!lastInformative) {
+    return query;
+  }
+
+  return `${lastInformative} ${query}`;
+}
+
+export function askLocalRag(query: string, context: LocalRagContext = {}): LocalRagResponse {
+  const contextualQuery = buildContextualQuery(query, context.recentUserMessages || []);
+  const ranked = rankProducts(contextualQuery);
+  const message = buildNaturalAnswer(contextualQuery, ranked);
   return {
     message,
     products: ranked,

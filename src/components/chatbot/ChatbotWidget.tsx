@@ -131,6 +131,11 @@ const ChatbotWidget: React.FC = () => {
       timestamp: new Date(),
     };
 
+    const recentUserMessages = [
+      ...messages.filter((message) => message.role === "user").map((message) => message.content),
+      userMessage.content,
+    ].slice(-5);
+
     setMessages((prev) => [...prev, userMessage]);
     setInputValue("");
     setIsLoading(true);
@@ -183,7 +188,9 @@ const ChatbotWidget: React.FC = () => {
 
       setMessages((prev) => [...prev, assistantMessage]);
     } catch {
-      const localRag = askLocalRag(userMessage.content);
+      const localRag = askLocalRag(userMessage.content, {
+        recentUserMessages,
+      });
 
       const assistantMessage: Message = {
         id: crypto.randomUUID(),
