@@ -2,6 +2,39 @@ import { getApiUrl, getBackendUnavailableMessage } from './api';
 
 const API_URL = getApiUrl();
 
+async function readErrorMessage(response: Response, fallbackMessage: string): Promise<string> {
+  const contentType = response.headers.get('content-type') || '';
+
+  if (contentType.includes('application/json')) {
+    try {
+      const payload = (await response.json()) as { error?: string; message?: string };
+      return payload.error || payload.message || fallbackMessage;
+    } catch {
+      return fallbackMessage;
+    }
+  }
+
+  try {
+    const text = await response.text();
+
+    if (text.trim().startsWith('<')) {
+      return 'Resposta invalida da API. Verifique se VITE_API_URL aponta para o backend correto.';
+    }
+
+    return text || fallbackMessage;
+  } catch {
+    return fallbackMessage;
+  }
+}
+
+async function readJsonOrThrow<T>(response: Response, fallbackMessage: string): Promise<T> {
+  try {
+    return (await response.json()) as T;
+  } catch {
+    throw new Error('Resposta invalida da API. Verifique se o backend esta ativo e respondendo JSON.');
+  }
+}
+
 export interface User {
   id: number;
   email: string;
@@ -31,11 +64,10 @@ export async function registerUser(
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Erro ao registrar');
+      throw new Error(await readErrorMessage(response, 'Erro ao registrar'));
     }
 
-    return response.json();
+    return readJsonOrThrow<AuthResponse>(response, 'Erro ao registrar');
   } catch (error) {
     if (error instanceof TypeError && error.message === 'Failed to fetch') {
       throw new Error(getBackendUnavailableMessage());
@@ -53,11 +85,10 @@ export async function loginUser(email: string, password: string): Promise<AuthRe
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Erro ao fazer login');
+      throw new Error(await readErrorMessage(response, 'Erro ao fazer login'));
     }
 
-    return response.json();
+    return readJsonOrThrow<AuthResponse>(response, 'Erro ao fazer login');
   } catch (error) {
     if (error instanceof TypeError && error.message === 'Failed to fetch') {
       throw new Error(getBackendUnavailableMessage());
@@ -73,10 +104,10 @@ export async function getProfile(token: string): Promise<User> {
     });
 
     if (!response.ok) {
-      throw new Error('Erro ao buscar perfil');
+      throw new Error(await readErrorMessage(response, 'Erro ao buscar perfil'));
     }
 
-    return response.json();
+    return readJsonOrThrow<User>(response, 'Erro ao buscar perfil');
   } catch (error) {
     if (error instanceof TypeError && error.message === 'Failed to fetch') {
       throw new Error(getBackendUnavailableMessage());
