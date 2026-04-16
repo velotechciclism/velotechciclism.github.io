@@ -38,7 +38,7 @@ const Cart: React.FC = () => {
     return (
       <div className="min-h-screen flex flex-col">
         <Header />
-        <main className="flex-1 flex items-center justify-center bg-muted">
+        <main className="flex-1 flex items-center justify-center bg-black text-white">
           <div className="text-center py-16">
             <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-muted-foreground/10 flex items-center justify-center">
               <ShoppingBag className="w-12 h-12 text-muted-foreground" />
@@ -65,9 +65,9 @@ const Cart: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-1 bg-muted py-8">
+      <main className="flex-1 bg-black text-white py-8">
         <div className="container mx-auto px-4">
-          <h1 className="font-display text-3xl font-bold text-foreground mb-8">
+            <h1 className="font-display text-3xl font-bold text-white mb-8">
             {t("cart.title")}
             <span className="text-muted-foreground font-normal text-lg ml-2">
               ({items.length} {t("cart.items")})
@@ -80,7 +80,7 @@ const Cart: React.FC = () => {
               {items.map((item) => (
                 <div
                   key={item.id}
-                  className="flex gap-4 bg-background rounded-2xl p-4 border border-border"
+                  className="flex gap-4 bg-zinc-900 rounded-2xl p-4 border border-zinc-700"
                 >
                   {/* Image */}
                   <Link to={`/products/${item.id}`} className="flex-shrink-0">
@@ -95,11 +95,11 @@ const Cart: React.FC = () => {
                   <div className="flex-1 min-w-0">
                     <Link
                       to={`/products/${item.id}`}
-                      className="font-display font-semibold text-foreground hover:text-primary transition-colors line-clamp-2"
+                      className="font-display font-semibold text-white hover:text-primary transition-colors line-clamp-2"
                     >
                       {item.name}
                     </Link>
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <p className="text-sm text-zinc-300 mt-1">
                       {item.category}
                     </p>
 
@@ -133,11 +133,11 @@ const Cart: React.FC = () => {
 
                       {/* Price */}
                       <div className="text-right">
-                        <div className="font-display font-bold text-foreground">
+                        <div className="font-display font-bold text-white">
                           €{(item.price * item.quantity).toFixed(2)}
                         </div>
                         {item.quantity > 1 && (
-                          <div className="text-xs text-muted-foreground">
+                          <div className="text-xs text-zinc-300">
                             €{item.price.toFixed(2)} {t("cart.each")}
                           </div>
                         )}
@@ -168,8 +168,8 @@ const Cart: React.FC = () => {
 
             {/* Order Summary */}
             <div className="lg:col-span-1">
-              <div className="bg-background rounded-2xl p-6 border border-border sticky top-24">
-                <h2 className="font-display text-xl font-bold text-foreground mb-6">
+              <div className="bg-zinc-900 rounded-2xl p-6 border border-zinc-700 sticky top-24">
+                <h2 className="font-display text-xl font-bold text-white mb-6">
                   {t("cart.orderSummary")}
                 </h2>
 

@@ -4,6 +4,23 @@ import { ArrowUpRight } from "lucide-react";
 import { categories } from "@/data/products";
 import { useLanguage } from "@/context/LanguageContext";
 
+function getCategoryLabel(categoryId: string, t: (key: string) => string): string {
+  switch (categoryId) {
+    case "bicycles":
+      return t("home.categories.bikes");
+    case "helmets":
+      return t("home.categories.helmets");
+    case "apparel":
+      return t("home.categories.clothing");
+    case "accessories":
+      return t("home.categories.accessories");
+    case "parts":
+      return t("home.categories.parts") || "Peças";
+    default:
+      return categoryId;
+  }
+}
+
 const CategorySection: React.FC = () => {
   const { t } = useLanguage();
   
@@ -21,7 +38,7 @@ const CategorySection: React.FC = () => {
         </div>
 
         {/* Categories Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
           {categories.map((category, index) => (
             <Link
               key={category.id}
@@ -44,7 +61,7 @@ const CategorySection: React.FC = () => {
                 <div className="flex items-end justify-between">
                   <div>
                     <h3 className="font-display text-2xl font-bold text-secondary-foreground mb-1">
-                      {category.name}
+                      {getCategoryLabel(category.id, t)}
                     </h3>
                     <p className="text-secondary-foreground/70 text-sm">
                       {category.productCount} {t("home.categories.productsCount")}

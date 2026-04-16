@@ -30,10 +30,28 @@ const categorySlugMap: Record<string, string> = {
   helmets: "helmets",
   apparel: "apparel",
   accessories: "accessories",
+  parts: "parts",
 };
 
 function normalizeCategoryToSlug(category: string): string {
   return categorySlugMap[category.toLowerCase()] || category.toLowerCase();
+}
+
+function getCategoryLabel(categoryId: string, t: (key: string) => string): string {
+  switch (categoryId) {
+    case "bicycles":
+      return t("home.categories.bikes");
+    case "helmets":
+      return t("home.categories.helmets");
+    case "apparel":
+      return t("home.categories.clothing");
+    case "accessories":
+      return t("home.categories.accessories");
+    case "parts":
+      return t("home.categories.parts") || "Peças";
+    default:
+      return categoryId;
+  }
 }
 
 const Products: React.FC = () => {
@@ -159,7 +177,7 @@ const Products: React.FC = () => {
                 onCheckedChange={() => toggleCategory(category.id)}
               />
               <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
-                {category.name}
+                {getCategoryLabel(category.id, t)}
               </span>
               <span className="text-xs text-muted-foreground ml-auto">
                 ({category.productCount})

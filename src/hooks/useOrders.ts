@@ -39,7 +39,20 @@ export function useOrders() {
     return `velotech:orders:${user.id}`;
   }, [user]);
 
+  const getLocalOrders = useCallback((): Order[] => {
+    const storageKey = getStorageKey();
+
+    if (!storageKey) {
+      return [];
+    }
+
+    const raw = localStorage.getItem(storageKey);
+    return raw ? (JSON.parse(raw) as Order[]) : [];
+  }, [getStorageKey]);
+
   const loadOrders = useCallback(async () => {
+    setIsLoading(true);
+
     if (!isAuthenticated || !user) {
       setOrders([]);
       setIsLoading(false);
@@ -58,28 +71,20 @@ export function useOrders() {
 
         if (response.ok) {
           const data = (await response.json()) as Order[];
-          setOrders(data);
+          const localOrders = getLocalOrders();
+          setOrders(data.length > 0 ? data : localOrders);
           return;
         }
       }
 
-      const storageKey = getStorageKey();
-
-      if (!storageKey) {
-        setOrders([]);
-        return;
-      }
-
-      const raw = localStorage.getItem(storageKey);
-      const parsedOrders: Order[] = raw ? (JSON.parse(raw) as Order[]) : [];
-      setOrders(parsedOrders);
+      setOrders(getLocalOrders());
     } catch (error) {
       console.error('Erro ao carregar pedidos:', error);
-      setOrders([]);
+      setOrders(getLocalOrders());
     } finally {
       setIsLoading(false);
     }
-  }, [apiUrl, getStorageKey, isAuthenticated, user]);
+  }, [apiUrl, getLocalOrders, isAuthenticated, user]);
 
   useEffect(() => {
     loadOrders();

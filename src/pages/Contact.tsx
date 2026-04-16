@@ -109,7 +109,7 @@ const Contact: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-1 bg-background">
+      <main className="flex-1 bg-green-950/90">
         {/* Page Header */}
         <div className="bg-secondary py-12">
           <div className="container mx-auto px-4">
@@ -130,6 +130,12 @@ const Contact: React.FC = () => {
                 <a
                   key={method.title}
                   href={method.link}
+                  onClick={(event) => {
+                    if (method.link?.startsWith("mailto:")) {
+                      event.preventDefault();
+                      window.location.href = method.link;
+                    }
+                  }}
                   target={method.link.startsWith("http") ? "_blank" : undefined}
                   rel={method.link.startsWith("http") ? "noopener noreferrer" : undefined}
                   className={`${cardClassName} cursor-pointer`}

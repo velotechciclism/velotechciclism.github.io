@@ -29,7 +29,7 @@ const HeroSection: React.FC = () => {
           alt="Cyclist riding on mountain road"
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-secondary/95 via-secondary/70 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/70 to-transparent" />
       </div>
 
       {/* Content */}

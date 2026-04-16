@@ -94,7 +94,8 @@ const Help: React.FC = () => {
   const filteredFAQ = faqItems.filter(
     (item) =>
       item.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.answer.toLowerCase().includes(searchQuery.toLowerCase())
+      item.answer.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const categories = Array.from(new Set(faqItems.map((item) => item.category)));
@@ -102,7 +103,7 @@ const Help: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-1 bg-muted/50">
+      <main className="flex-1 bg-green-950/90">
         {/* Page Header */}
         <div className="bg-secondary py-12">
           <div className="container mx-auto px-4">
@@ -160,7 +161,9 @@ const Help: React.FC = () => {
               <Button
                 variant="outline"
                 className="w-full"
-                onClick={() => window.open("mailto:support@velotech.com", "_self")}
+                onClick={() => {
+                  window.location.href = "mailto:support@velotech.com";
+                }}
               >
                 {t("help.sendEmail")}
               </Button>

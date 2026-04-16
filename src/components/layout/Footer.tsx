@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/context/LanguageContext";
 import { contactInfo } from "@/config/contact";
 import { getApiUrl } from "@/lib/api";
+import { toast } from "sonner";
 import logo from "@/assets/logo.png";
 
 const Footer: React.FC = () => {
@@ -28,15 +29,15 @@ const Footer: React.FC = () => {
       { name: t("common.contact"), href: "/contact" },
     ],
     company: [
-      { name: t("footer.about"), href: "/brands" },
+      { name: t("footer.about"), href: "/blog" },
       { name: t("common.blog"), href: "/blog" },
-      { name: t("footer.careers"), href: "/help?topic=careers" },
-      { name: t("footer.press"), href: "/help?topic=press" },
+      { name: t("footer.careers"), href: "/blog" },
+      { name: t("footer.press"), href: "/blog" },
     ],
     legal: [
-      { name: t("footer.privacy"), href: "/help?topic=privacy" },
-      { name: t("footer.terms"), href: "/help?topic=terms" },
-      { name: t("footer.cookiePolicy"), href: "/help?topic=cookies" },
+      { name: t("footer.privacy"), href: "/privacy" },
+      { name: t("footer.terms"), href: "/terms" },
+      { name: t("footer.cookiePolicy"), href: "/cookies" },
     ],
   };
 
@@ -47,13 +48,21 @@ const Footer: React.FC = () => {
     }
 
     try {
-      await fetch(`${API_URL}/newsletter/subscribe`, {
+      const response = await fetch(`${API_URL}/newsletter/subscribe`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ email: newsletterEmail.trim() }),
       });
+
+      if (!response.ok) {
+        throw new Error("Falha ao inscrever email");
+      }
+
+      toast.success("Inscricao realizada com sucesso.");
+    } catch {
+      toast.error("Nao foi possivel concluir a inscricao agora.");
     } finally {
       setNewsletterEmail("");
     }
