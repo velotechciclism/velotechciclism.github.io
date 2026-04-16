@@ -4,9 +4,11 @@ import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Mail, Phone, MapPin, Send, MessageCircle } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
+import { getApiUrl } from "@/lib/api";
 
 const Contact: React.FC = () => {
   const { t } = useLanguage();
+  const API_URL = getApiUrl();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -15,6 +17,7 @@ const Contact: React.FC = () => {
   });
 
   const [submitted, setSubmitted] = useState(false);
+  const [isSending, setIsSending] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -26,19 +29,49 @@ const Contact: React.FC = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    // Reset form after 3 seconds
-    setTimeout(() => {
+    setIsSending(true);
+
+    try {
+      const response = await fetch(`${API_URL}/contact/messages`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          subject: formData.subject,
+          message: formData.message,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Falha ao enviar mensagem");
+      }
+
+      setSubmitted(true);
       setFormData({
         name: "",
         email: "",
         subject: "",
         message: "",
       });
-      setSubmitted(false);
-    }, 3000);
+
+      setTimeout(() => {
+        setSubmitted(false);
+      }, 3000);
+    } catch {
+      const mailToUrl = `mailto:c.eduardoteixeiraguinsber@gmail.com?subject=${encodeURIComponent(
+        formData.subject
+      )}&body=${encodeURIComponent(
+        `Nome: ${formData.name}\nEmail: ${formData.email}\n\nMensagem:\n${formData.message}`
+      )}`;
+      window.location.href = mailToUrl;
+    } finally {
+      setIsSending(false);
+    }
   };
 
   const contactMethods = [
@@ -47,7 +80,6 @@ const Contact: React.FC = () => {
       title: t("contact.phone"),
       details: t("contact.phoneDetails"),
       description: t("contact.phoneHours"),
-      link: "tel:+351210123456",
     },
     {
       icon: Mail,
@@ -210,9 +242,9 @@ const Contact: React.FC = () => {
                   />
                 </div>
 
-                <Button type="submit" className="w-full group">
+                <Button type="submit" className="w-full group" disabled={isSending}>
                   <Send className="w-4 h-4 mr-2 group-hover:-translate-y-1 transition-transform" />
-                  {t("contact.send")}
+                  {isSending ? "Enviando..." : t("contact.send")}
                 </Button>
               </form>
             )}

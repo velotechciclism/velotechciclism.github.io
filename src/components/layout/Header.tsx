@@ -46,7 +46,7 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
+    <header className="sticky top-0 z-50 bg-secondary/95 text-secondary-foreground backdrop-blur-md border-b border-white/10">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 lg:h-20">
           {/* Logo - Removed */}
@@ -60,7 +60,7 @@ const Header: React.FC = () => {
               <Link
                 key={link.name}
                 to={link.href}
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors relative group"
+                className="text-sm font-medium text-secondary-foreground/80 hover:text-secondary-foreground transition-colors relative group"
               >
                 {link.name}
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full" />
@@ -71,7 +71,7 @@ const Header: React.FC = () => {
           {/* Right Actions */}
           <div className="flex items-center gap-2 lg:gap-4">
             {/* Search */}
-            <Button variant="ghost" size="icon" className="hidden sm:flex">
+              <Button variant="ghost" size="icon" className="hidden sm:flex hover:bg-white/10">
               <Search className="w-5 h-5" />
             </Button>
 
@@ -81,7 +81,7 @@ const Header: React.FC = () => {
             {/* Language Switcher */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="hidden sm:flex gap-1">
+                <Button variant="ghost" size="sm" className="hidden sm:flex gap-1 hover:bg-white/10">
                   <Globe className="w-4 h-4" />
                   <span className="text-xs font-medium">
                     {language === "en" ? "EN" : "PT"}
@@ -103,7 +103,7 @@ const Header: React.FC = () => {
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="gap-2">
+                  <Button variant="ghost" size="sm" className="gap-2 hover:bg-white/10">
                     <User className="w-5 h-5" />
                     <span className="hidden md:inline text-sm font-medium max-w-24 truncate">
                       {profile?.name || 'Usuário'}
@@ -135,7 +135,7 @@ const Header: React.FC = () => {
               </DropdownMenu>
             ) : (
               <Link to="/auth">
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" className="hover:bg-white/10">
                   <User className="w-5 h-5" />
                 </Button>
               </Link>
@@ -143,7 +143,7 @@ const Header: React.FC = () => {
 
             {/* Cart */}
             <Link to="/cart">
-              <Button variant="ghost" size="icon" className="relative">
+              <Button variant="ghost" size="icon" className="relative hover:bg-white/10">
                 <ShoppingCart className="w-5 h-5" />
                 {totalItems > 0 && (
                   <span className="absolute -top-1 -right-1 w-5 h-5 bg-accent text-accent-foreground text-xs font-bold rounded-full flex items-center justify-center animate-scale-in">
@@ -157,7 +157,7 @@ const Header: React.FC = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="lg:hidden"
+              className="lg:hidden hover:bg-white/10"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               {isMenuOpen ? (

@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { ArrowRight, Calendar, User } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
+import { getApiUrl } from "@/lib/api";
 
 interface BlogPost {
   id: string;
@@ -18,6 +19,9 @@ interface BlogPost {
 
 const Blog: React.FC = () => {
   const { t, language } = useLanguage();
+  const [searchParams] = useSearchParams();
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const API_URL = getApiUrl();
 
   const blogPosts: BlogPost[] = [
     {
@@ -125,10 +129,33 @@ const Blog: React.FC = () => {
     };
   };
 
+  const selectedPostId = searchParams.get("post") || blogPosts[0].id;
+  const selectedPost = blogPosts.find((post) => post.id === selectedPostId) || blogPosts[0];
+  const selectedPostContent = getPostContent(selectedPost);
+
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newsletterEmail.trim()) {
+      return;
+    }
+
+    try {
+      await fetch(`${API_URL}/newsletter/subscribe`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: newsletterEmail.trim() }),
+      });
+    } finally {
+      setNewsletterEmail("");
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-1 bg-background">
+      <main className="flex-1 bg-muted/50">
         {/* Page Header */}
         <div className="bg-secondary py-12">
           <div className="container mx-auto px-4">
@@ -150,26 +177,28 @@ const Blog: React.FC = () => {
                   {t("blog.featured")}
                 </span>
                 <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground mb-4">
-                  {getPostContent(blogPosts[0]).title}
+                  {selectedPostContent.title}
                 </h2>
-                <p className="text-muted-foreground mb-6">{getPostContent(blogPosts[0]).excerpt}</p>
+                <p className="text-muted-foreground mb-6">{selectedPostContent.excerpt}</p>
                 <div className="flex gap-4 mb-6 text-sm text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <User className="w-4 h-4" />
-                    {blogPosts[0].author}
+                    {selectedPost.author}
                   </div>
                   <div className="flex items-center gap-1">
                     <Calendar className="w-4 h-4" />
-                    {getPostContent(blogPosts[0]).date}
+                    {selectedPostContent.date}
                   </div>
                 </div>
-                <Button className="group">
-                  {t("blog.readArticle")}
-                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                </Button>
+                <Link to={`/blog?post=${selectedPost.id}`}>
+                  <Button className="group">
+                    {t("blog.readArticle")}
+                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                </Link>
               </div>
               <div className="flex items-center justify-center h-64 bg-muted rounded-xl text-6xl">
-                {blogPosts[0].image}
+                {selectedPost.image}
               </div>
             </div>
           </div>
@@ -192,7 +221,7 @@ const Blog: React.FC = () => {
                   </div>
                   <div className="p-6">
                     <span className="inline-block px-2 py-1 bg-primary/10 text-primary rounded text-xs font-semibold mb-3">
-                      {content.category}
+                      <Link to={`/blog?post=${post.id}`}>{content.category}</Link>
                     </span>
                     <h3 className="font-display font-bold text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
                       {content.title}
@@ -210,10 +239,12 @@ const Blog: React.FC = () => {
                         {content.date}
                       </div>
                     </div>
-                    <Button variant="outline" className="w-full group">
-                      {t("blog.readMore")}
-                      <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                    </Button>
+                    <Link to={`/blog?post=${post.id}`}>
+                      <Button variant="outline" className="w-full group">
+                        {t("blog.readMore")}
+                        <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                      </Button>
+                    </Link>
                   </div>
                 </article>
               );
@@ -231,13 +262,15 @@ const Blog: React.FC = () => {
               <p className="text-muted-foreground mb-6">
                 {t("blog.subscribeSubtitle")}
               </p>
-              <form className="flex gap-2 max-w-md mx-auto">
+              <form className="flex gap-2 max-w-md mx-auto" onSubmit={handleNewsletterSubmit}>
                 <input
                   type="email"
+                  value={newsletterEmail}
+                  onChange={(e) => setNewsletterEmail(e.target.value)}
                   placeholder={t("blog.enterEmail")}
                   className="flex-1 px-4 py-2 rounded-lg bg-background border border-border focus:outline-none focus:ring-2 focus:ring-primary"
                 />
-                <Button>{t("common.subscribe")}</Button>
+                <Button type="submit">{t("common.subscribe")}</Button>
               </form>
             </div>
           </div>

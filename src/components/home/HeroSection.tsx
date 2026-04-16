@@ -3,14 +3,18 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/LanguageContext";
+import { products } from "@/data/products";
 import heroImage from "@/assets/hero-cycling.jpg";
+
+const EXPLANATION_VIDEO_URL =
+  "https://www.youtube.com/watch?v=9No-FiEInLA";
 
 const HeroSection: React.FC = () => {
   const { t } = useLanguage();
 
   const handleWatchVideo = () => {
     window.open(
-      "https://www.youtube.com/watch?v=9No-FiEInLA",
+      EXPLANATION_VIDEO_URL,
       "_blank",
       "noopener,noreferrer"
     );
@@ -77,7 +81,7 @@ const HeroSection: React.FC = () => {
           >
             <div>
               <div className="font-display text-3xl font-bold text-accent">
-                500+
+                {products.length}+
               </div>
               <div className="text-sm text-secondary-foreground/60">
                 {t("home.hero.stats.products")}

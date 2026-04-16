@@ -1,13 +1,18 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Facebook, Instagram, Twitter, Youtube, Mail, MessageCircle } from "lucide-react";
+import { Mail, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/context/LanguageContext";
+import { contactInfo } from "@/config/contact";
+import { getApiUrl } from "@/lib/api";
 import logo from "@/assets/logo.png";
 
 const Footer: React.FC = () => {
   const { t, language } = useLanguage();
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const API_URL = getApiUrl();
+
   const footerLinks = {
     shop: [
       { name: t("home.categories.bikes"), href: "/products?category=bicycles" },
@@ -18,30 +23,41 @@ const Footer: React.FC = () => {
     ],
     support: [
       { name: t("common.help"), href: "/help" },
-      { name: t("footer.support"), href: "/shipping" },
-      { name: t("footer.returns"), href: "/returns" },
-      { name: t("footer.trackOrder"), href: "/track-order" },
+      { name: t("footer.support"), href: "/help?topic=support" },
+      { name: t("footer.returns"), href: "/help?topic=returns" },
       { name: t("common.contact"), href: "/contact" },
     ],
     company: [
-      { name: t("footer.about"), href: "/about" },
+      { name: t("footer.about"), href: "/brands" },
       { name: t("common.blog"), href: "/blog" },
-      { name: t("footer.careers"), href: "/careers" },
-      { name: t("footer.press"), href: "/press" },
+      { name: t("footer.careers"), href: "/help?topic=careers" },
+      { name: t("footer.press"), href: "/help?topic=press" },
     ],
     legal: [
-      { name: t("footer.privacy"), href: "/privacy" },
-      { name: t("footer.terms"), href: "/terms" },
-      { name: t("footer.cookiePolicy"), href: "/cookies" },
+      { name: t("footer.privacy"), href: "/help?topic=privacy" },
+      { name: t("footer.terms"), href: "/help?topic=terms" },
+      { name: t("footer.cookiePolicy"), href: "/help?topic=cookies" },
     ],
   };
 
-  const socialLinks = [
-    { icon: Facebook, href: "#", label: "Facebook" },
-    { icon: Instagram, href: "#", label: "Instagram" },
-    { icon: Twitter, href: "#", label: "Twitter" },
-    { icon: Youtube, href: "#", label: "YouTube" },
-  ];
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newsletterEmail.trim()) {
+      return;
+    }
+
+    try {
+      await fetch(`${API_URL}/newsletter/subscribe`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: newsletterEmail.trim() }),
+      });
+    } finally {
+      setNewsletterEmail("");
+    }
+  };
 
   return (
     <footer className="bg-secondary text-secondary-foreground">
@@ -55,9 +71,11 @@ const Footer: React.FC = () => {
             <p className="text-secondary-foreground/70 mb-6">
               {t("footer.newsletterSubtitle")}
             </p>
-            <form className="flex gap-2 max-w-md mx-auto">
+            <form className="flex gap-2 max-w-md mx-auto" onSubmit={handleNewsletterSubmit}>
               <Input
                 type="email"
+                value={newsletterEmail}
+                onChange={(e) => setNewsletterEmail(e.target.value)}
                 placeholder={t("footer.emailPlaceholder")}
                 className="bg-white/10 border-white/20 text-secondary-foreground placeholder:text-secondary-foreground/50"
               />
@@ -85,18 +103,6 @@ const Footer: React.FC = () => {
             <p className="text-secondary-foreground/70 mb-6 max-w-sm">
               {t("footer.brandDescription")}
             </p>
-            <div className="flex gap-4">
-              {socialLinks.map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-accent hover:text-accent-foreground transition-colors"
-                  aria-label={social.label}
-                >
-                  <social.icon className="w-5 h-5" />
-                </a>
-              ))}
-            </div>
           </div>
 
           {/* Shop */}
@@ -188,7 +194,7 @@ const Footer: React.FC = () => {
 
       {/* WhatsApp Button */}
       <a
-        href="https://wa.me/5571912345678"
+        href={contactInfo.whatsapp.link}
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-green-500 hover:bg-green-600 text-white rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110"

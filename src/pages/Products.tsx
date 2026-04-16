@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Filter, SlidersHorizontal, Grid3X3, LayoutList, X } from "lucide-react";
 import Header from "@/components/layout/Header";
@@ -25,17 +25,42 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { products, categories, brands } from "@/data/products";
 import { useLanguage } from "@/context/LanguageContext";
 
+const categorySlugMap: Record<string, string> = {
+  bicycles: "bicycles",
+  helmets: "helmets",
+  apparel: "apparel",
+  accessories: "accessories",
+};
+
+function normalizeCategoryToSlug(category: string): string {
+  return categorySlugMap[category.toLowerCase()] || category.toLowerCase();
+}
+
 const Products: React.FC = () => {
   const { t } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
+  const maxProductPrice = useMemo(
+    () => Math.ceil(Math.max(...products.map((product) => product.price))),
+    []
+  );
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [priceRange, setPriceRange] = useState([0, 5000]);
+  const [priceRange, setPriceRange] = useState([0, maxProductPrice]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
     searchParams.get("category") ? [searchParams.get("category")!] : []
   );
-  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
+  const [selectedBrands, setSelectedBrands] = useState<string[]>(
+    searchParams.get("brand") ? [searchParams.get("brand")!] : []
+  );
   const [sortBy, setSortBy] = useState("featured");
   const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    const categoryParam = searchParams.get("category");
+    const brandParam = searchParams.get("brand");
+
+    setSelectedCategories(categoryParam ? [categoryParam] : []);
+    setSelectedBrands(brandParam ? [brandParam] : []);
+  }, [searchParams]);
 
   const filteredProducts = useMemo(() => {
     let result = [...products];
@@ -53,7 +78,7 @@ const Products: React.FC = () => {
     if (selectedCategories.length > 0) {
       result = result.filter((p) =>
         selectedCategories.some(
-          (c) => c.toLowerCase() === p.category.toLowerCase()
+          (c) => c.toLowerCase() === normalizeCategoryToSlug(p.category)
         )
       );
     }
@@ -108,7 +133,7 @@ const Products: React.FC = () => {
   const clearFilters = () => {
     setSelectedCategories([]);
     setSelectedBrands([]);
-    setPriceRange([0, 5000]);
+    setPriceRange([0, maxProductPrice]);
     setSearchQuery("");
     setSearchParams({});
   };
@@ -116,7 +141,7 @@ const Products: React.FC = () => {
   const activeFiltersCount =
     selectedCategories.length +
     selectedBrands.length +
-    (priceRange[0] > 0 || priceRange[1] < 5000 ? 1 : 0);
+    (priceRange[0] > 0 || priceRange[1] < maxProductPrice ? 1 : 0);
 
   const FilterContent = () => (
     <div className="space-y-6">
@@ -150,8 +175,8 @@ const Products: React.FC = () => {
         <Slider
           value={priceRange}
           onValueChange={setPriceRange}
-          max={5000}
-          step={50}
+          max={maxProductPrice}
+          step={1}
           className="mb-4"
         />
         <div className="flex items-center gap-2">
