@@ -92,7 +92,7 @@ function expandTokens(tokens: string[]): string[] {
 }
 
 function detectBudget(query: string): number | null {
-  const matches = query.match(/(\d+[\.,]?\d*)/g);
+  const matches = query.match(/(\d+[.,]?\d*)/g);
   if (!matches || matches.length === 0) {
     return null;
   }

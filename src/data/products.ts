@@ -432,13 +432,79 @@ const rawProducts: Product[] = [
   },
 ];
 
-export const products: Product[] = rawProducts.map((product) => ({
-  ...product,
-  price: Math.min(product.price, MAX_PRODUCT_PRICE_EUR),
-  originalPrice: product.originalPrice
+type CategoryKey = "Bicycles" | "Helmets" | "Apparel" | "Accessories" | "Parts";
+
+const categoryImageMap: Record<CategoryKey, string> = {
+  Bicycles: productBike,
+  Helmets: productHelmet,
+  Apparel: productJersey,
+  Accessories: productGloves,
+  Parts: productGloves,
+};
+
+// Keeps brand representation more coherent while staying within current image assets.
+const brandImageMatrix: Record<string, Partial<Record<CategoryKey, string>>> = {
+  Shimano: {
+    Bicycles: productBike,
+    Parts: productBike,
+  },
+  SRAM: {
+    Bicycles: productBike,
+    Parts: productGloves,
+  },
+  Continental: {
+    Bicycles: productBike,
+    Parts: productBike,
+    Accessories: productBike,
+  },
+  Garmin: {
+    Accessories: productGloves,
+    Helmets: productHelmet,
+  },
+  Fizik: {
+    Apparel: productJersey,
+    Parts: productGloves,
+    Accessories: productGloves,
+  },
+  Castelli: {
+    Apparel: productJersey,
+    Bicycles: productBike,
+    Helmets: productHelmet,
+  },
+  Giro: {
+    Helmets: productHelmet,
+    Apparel: productJersey,
+    Bicycles: productBike,
+  },
+};
+
+function resolveProductImage(product: Product): string {
+  const category = product.category as CategoryKey;
+  const brandSpecificImage = brandImageMatrix[product.brand]?.[category];
+
+  if (brandSpecificImage) {
+    return brandSpecificImage;
+  }
+
+  return categoryImageMap[category] || product.image;
+}
+
+export const products: Product[] = rawProducts.map((product) => {
+  const cappedPrice = Math.min(product.price, MAX_PRODUCT_PRICE_EUR);
+  const cappedOriginalPrice = product.originalPrice
     ? Math.min(product.originalPrice, MAX_PRODUCT_PRICE_EUR)
-    : undefined,
-}));
+    : undefined;
+
+  return {
+    ...product,
+    image: resolveProductImage(product),
+    price: cappedPrice,
+    originalPrice:
+      cappedOriginalPrice && cappedOriginalPrice > cappedPrice
+        ? cappedOriginalPrice
+        : undefined,
+  };
+});
 
 const CATEGORY_LABELS: Record<string, string> = {
   bicycles: "Bicycles",
