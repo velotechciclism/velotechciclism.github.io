@@ -4,18 +4,18 @@ import { ArrowUpRight } from "lucide-react";
 import { categories } from "@/data/products";
 import { useLanguage } from "@/context/LanguageContext";
 
-function getCategoryLabel(categoryId: string, t: (key: string) => string): string {
+function getCategoryLabel(categoryId: string): string {
   switch (categoryId) {
     case "bicycles":
-      return t("home.categories.bikes");
+      return "Bicicletas";
     case "helmets":
-      return t("home.categories.helmets");
+      return "Capacetes";
     case "apparel":
-      return t("home.categories.clothing");
+      return "Roupas e Calçados";
     case "accessories":
-      return t("home.categories.accessories");
+      return "Acessórios";
     case "parts":
-      return t("home.categories.parts") || "Peças";
+      return "Peças";
     default:
       return categoryId;
   }
@@ -61,7 +61,7 @@ const CategorySection: React.FC = () => {
                 <div className="flex items-end justify-between">
                   <div>
                     <h3 className="font-display text-2xl font-bold text-secondary-foreground mb-1">
-                      {getCategoryLabel(category.id, t)}
+                      {getCategoryLabel(category.id)}
                     </h3>
                     <p className="text-secondary-foreground/70 text-sm">
                       {category.productCount} {t("home.categories.productsCount")}
