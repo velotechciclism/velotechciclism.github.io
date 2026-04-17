@@ -546,10 +546,21 @@ function resolveProductImage(product: Product): string {
   return categoryImageMap[category] || product.image;
 }
 
+const PRICE_REDUCTION_FACTOR = 0.55;
+
+function applyPriceReduction(value: number): number {
+  return Math.max(1, Math.round(value * PRICE_REDUCTION_FACTOR));
+}
+
 export const products: Product[] = rawProducts.map((product) => {
-  const cappedPrice = Math.min(product.price, MAX_PRODUCT_PRICE_EUR);
-  const cappedOriginalPrice = product.originalPrice
-    ? Math.min(product.originalPrice, MAX_PRODUCT_PRICE_EUR)
+  const reducedPrice = applyPriceReduction(product.price);
+  const reducedOriginalPrice = product.originalPrice
+    ? applyPriceReduction(product.originalPrice)
+    : undefined;
+
+  const cappedPrice = Math.min(reducedPrice, MAX_PRODUCT_PRICE_EUR);
+  const cappedOriginalPrice = reducedOriginalPrice
+    ? Math.min(reducedOriginalPrice, MAX_PRODUCT_PRICE_EUR)
     : undefined;
 
   return {
