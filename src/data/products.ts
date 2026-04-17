@@ -8,7 +8,7 @@ import productGloves from "@/assets/product-gloves.jpg";
 const rawProducts: Product[] = [
   {
     id: "1",
-    name: "Bicicleta Urbana City 700",
+    name: "Bicicleta Urbana Cidade 700",
     description: "Bicicleta urbana leve e confortavel para deslocamentos diarios.",
     price: 523,
     originalPrice: 560,
@@ -22,7 +22,7 @@ const rawProducts: Product[] = [
   },
   {
     id: "2",
-    name: "Bicicleta de Trilha Explorer MTB",
+    name: "Bicicleta de Trilha Aventura MTB",
     description: "Modelo MTB para trilhas com excelente controle e estabilidade.",
     price: 429,
     originalPrice: 489,
@@ -36,7 +36,7 @@ const rawProducts: Product[] = [
   },
   {
     id: "3",
-    name: "Bicicleta Speed Sprint Pro",
+    name: "Bicicleta de Velocidade Sprint Pro",
     description: "Bicicleta de estrada para treinos de velocidade e performance.",
     price: 560,
     originalPrice: 560,
@@ -64,7 +64,7 @@ const rawProducts: Product[] = [
   },
   {
     id: "5",
-    name: "Bicicleta Infantil Pedal Kids",
+    name: "Bicicleta Infantil Pedal Jovem",
     description: "Modelo infantil com componentes reforcados e condução suave.",
     price: 329,
     originalPrice: 379,
@@ -77,7 +77,7 @@ const rawProducts: Product[] = [
   },
   {
     id: "6",
-    name: "Bicicleta Dobravel Compact Move",
+    name: "Bicicleta Dobravel Compacta Mobilidade",
     description: "Ideal para mobilidade urbana e transporte facil.",
     price: 389,
     originalPrice: 449,
@@ -90,7 +90,7 @@ const rawProducts: Product[] = [
   },
   {
     id: "7",
-    name: "Bicicleta Endurance Long Ride",
+    name: "Bicicleta Resistencia Longo Percurso",
     description: "Bicicleta de longa distancia com foco em conforto.",
     price: 547,
     originalPrice: 560,
@@ -103,7 +103,7 @@ const rawProducts: Product[] = [
   },
   {
     id: "8",
-    name: "Bicicleta Hibrida Versa City",
+    name: "Bicicleta Hibrida Versatil Cidade",
     description: "Hibrida para cidade e estrada leve com otima eficiencia.",
     price: 459,
     originalPrice: 519,
@@ -116,7 +116,7 @@ const rawProducts: Product[] = [
   },
   {
     id: "9",
-    name: "Capacete Aero Protec",
+    name: "Capacete Aerodinamico Protecao",
     description: "Capacete aerodinamico com conforto para longos pedais.",
     price: 99,
     originalPrice: 119,
@@ -130,7 +130,7 @@ const rawProducts: Product[] = [
   },
   {
     id: "10",
-    name: "Capacete Urbano Safe Ride",
+    name: "Capacete Urbano Passeio Seguro",
     description: "Modelo urbano com ventilacao eficiente e ajuste pratico.",
     price: 79,
     originalPrice: 99,
@@ -156,7 +156,7 @@ const rawProducts: Product[] = [
   },
   {
     id: "12",
-    name: "Capacete Speed Carbon Lite",
+    name: "Capacete Velocidade Carbono Leve",
     description: "Capacete leve com excelente aerodinamica para estrada.",
     price: 95,
     originalPrice: 119,
@@ -169,7 +169,7 @@ const rawProducts: Product[] = [
   },
   {
     id: "13",
-    name: "Capacete Performance Tour",
+    name: "Capacete Desempenho de Passeio",
     description: "Capacete versatil para treino diario e cicloviagem.",
     price: 69,
     originalPrice: 89,
@@ -182,7 +182,7 @@ const rawProducts: Product[] = [
   },
   {
     id: "14",
-    name: "Jersey Pro Team",
+    name: "Camisa de Ciclismo Equipe Pro",
     description: "Camisa de ciclismo com tecido respiravel de secagem rapida.",
     price: 89,
     originalPrice: 109,
@@ -196,7 +196,7 @@ const rawProducts: Product[] = [
   },
   {
     id: "15",
-    name: "Jaqueta Corta Vento Ride",
+    name: "Jaqueta Corta Vento para Pedal",
     description: "Jaqueta leve para vento e garoa durante o pedal.",
     price: 109,
     originalPrice: 139,
@@ -209,7 +209,7 @@ const rawProducts: Product[] = [
   },
   {
     id: "16",
-    name: "Bermuda de Ciclismo Endurance",
+    name: "Bermuda de Ciclismo Resistencia",
     description: "Bermuda com forro anatomico para pedais longos.",
     price: 79,
     originalPrice: 99,
@@ -222,7 +222,7 @@ const rawProducts: Product[] = [
   },
   {
     id: "17",
-    name: "Macaquinho Race Fit",
+    name: "Macaquinho Ajuste de Corrida",
     description: "Macaquinho de ciclismo para alta performance.",
     price: 129,
     originalPrice: 149,
@@ -235,7 +235,7 @@ const rawProducts: Product[] = [
   },
   {
     id: "18",
-    name: "Camisa Termica Winter Ride",
+    name: "Camisa Termica Inverno",
     description: "Camisa termica para treinos em baixas temperaturas.",
     price: 69,
     originalPrice: 89,
@@ -262,7 +262,7 @@ const rawProducts: Product[] = [
   },
   {
     id: "20",
-    name: "Ciclocomputador GPS Edge",
+    name: "Ciclocomputador GPS Avancado",
     description: "Computador de bordo para monitorar treinos e rotas.",
     price: 199,
     originalPrice: 229,
@@ -328,7 +328,7 @@ const rawProducts: Product[] = [
   },
   {
     id: "25",
-    name: "Pneu Speed 700x25",
+    name: "Pneu Velocidade 700x25",
     description: "Pneu de estrada com baixa resistencia ao rolamento.",
     price: 59,
     originalPrice: 79,
@@ -354,7 +354,7 @@ const rawProducts: Product[] = [
   },
   {
     id: "27",
-    name: "Pedivela Hollow Pro",
+    name: "Pedivela Leve Pro",
     description: "Pedivela leve com excelente transferencia de potencia.",
     price: 149,
     originalPrice: 179,
@@ -367,7 +367,7 @@ const rawProducts: Product[] = [
   },
   {
     id: "28",
-    name: "Corrente 12v Performance",
+    name: "Corrente 12v Desempenho",
     description: "Corrente com alta durabilidade para uso intenso.",
     price: 49,
     originalPrice: 69,
@@ -380,7 +380,7 @@ const rawProducts: Product[] = [
   },
   {
     id: "29",
-    name: "Selim Confort Endurance",
+    name: "Selim Conforto Resistencia",
     description: "Selim ergonomico para longas distancias.",
     price: 89,
     originalPrice: 109,
@@ -406,7 +406,7 @@ const rawProducts: Product[] = [
   },
   {
     id: "31",
-    name: "Capacete Urbano Smart Safe",
+    name: "Capacete Urbano Seguro Inteligente",
     description: "Capacete com sinalizacao traseira para uso urbano.",
     price: 89,
     originalPrice: 109,
@@ -419,7 +419,7 @@ const rawProducts: Product[] = [
   },
   {
     id: "32",
-    name: "Jersey Manga Longa Confort",
+    name: "Camisa Manga Longa Conforto",
     description: "Jersey de manga longa para meia estacao.",
     price: 79,
     originalPrice: 99,
