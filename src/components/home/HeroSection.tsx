@@ -7,7 +7,7 @@ import { products } from "@/data/products";
 import heroImage from "@/assets/hero-cycling.jpg";
 
 const EXPLANATION_VIDEO_URL =
-  "https://www.youtube.com/watch?v=9No-FiEInLA";
+  "https://youtu.be/Nb8dH9x5hN4";
 
 const HeroSection: React.FC = () => {
   const { t } = useLanguage();
