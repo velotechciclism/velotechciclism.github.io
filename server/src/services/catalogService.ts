@@ -13,12 +13,6 @@ function slugify(value: string): string {
 }
 
 export async function ensureCatalogSeeded(): Promise<void> {
-  const count = await prisma.product.count();
-
-  if (count > 0) {
-    return;
-  }
-
   for (const category of seedCategories) {
     await prisma.category.upsert({
       where: { slug: category.slug },

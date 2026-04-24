@@ -19,6 +19,35 @@ const Cart: React.FC = () => {
   const tax = totalPrice * 0.23;
   const finalTotal = totalPrice + shipping + tax;
 
+  const showCartError = (error: unknown) => {
+    const message = error instanceof Error ? error.message : t("notifications.checkoutError");
+    toast.error(message);
+  };
+
+  const handleUpdateQuantity = async (productId: string, quantity: number) => {
+    try {
+      await updateQuantity(productId, quantity);
+    } catch (error) {
+      showCartError(error);
+    }
+  };
+
+  const handleRemoveItem = async (productId: string) => {
+    try {
+      await removeItem(productId);
+    } catch (error) {
+      showCartError(error);
+    }
+  };
+
+  const handleClearCart = async () => {
+    try {
+      await clearCart();
+    } catch (error) {
+      showCartError(error);
+    }
+  };
+
   const handleCheckout = async () => {
     if (!isAuthenticated) {
       toast.error("Faça login para finalizar a compra");
@@ -111,7 +140,7 @@ const Cart: React.FC = () => {
                           size="icon"
                           className="h-8 w-8"
                           onClick={() =>
-                            updateQuantity(item.id, item.quantity - 1)
+                            handleUpdateQuantity(item.id, item.quantity - 1)
                           }
                         >
                           <Minus className="w-4 h-4" />
@@ -124,7 +153,7 @@ const Cart: React.FC = () => {
                           size="icon"
                           className="h-8 w-8"
                           onClick={() =>
-                            updateQuantity(item.id, item.quantity + 1)
+                            handleUpdateQuantity(item.id, item.quantity + 1)
                           }
                         >
                           <Plus className="w-4 h-4" />
@@ -150,7 +179,7 @@ const Cart: React.FC = () => {
                     variant="ghost"
                     size="icon"
                     className="flex-shrink-0 text-muted-foreground hover:text-destructive"
-                    onClick={() => removeItem(item.id)}
+                    onClick={() => handleRemoveItem(item.id)}
                   >
                     <Trash2 className="w-5 h-5" />
                   </Button>
@@ -159,7 +188,7 @@ const Cart: React.FC = () => {
 
               {/* Clear Cart */}
               <div className="flex justify-end">
-                <Button variant="ghost" onClick={clearCart}>
+                <Button variant="ghost" onClick={handleClearCart}>
                   <Trash2 className="w-4 h-4 mr-2" />
                   {t("cart.clearCart")}
                 </Button>

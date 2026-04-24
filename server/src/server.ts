@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import { ZodError } from 'zod';
 import authRoutes from './routes/authRoutes.js';
 import chatbotRoutes from './routes/chatbotRoutes.js';
 import productsRoutes from './routes/productsRoutes.js';
@@ -67,6 +68,27 @@ app.use('/api', engagementRoutes);
 // Health check
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'OK', message: 'VeloTech server is running' });
+});
+
+app.use((error: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  if (error instanceof ZodError) {
+    res.status(400).json({
+      error: 'Dados invalidos',
+      details: error.errors.map((issue) => ({
+        field: issue.path.join('.'),
+        message: issue.message,
+      })),
+    });
+    return;
+  }
+
+  if (error instanceof Error && error.name === 'CheckoutError') {
+    res.status(400).json({ error: error.message });
+    return;
+  }
+
+  console.error('Erro nao tratado na API:', error);
+  res.status(500).json({ error: 'Erro interno do servidor' });
 });
 
 // Iniciar servidor

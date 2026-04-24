@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import { z } from 'zod';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
+import { asyncHandler } from '../middleware/asyncHandler.js';
 import { prisma } from '../prisma.js';
 
 const router = express.Router();
@@ -22,7 +23,7 @@ const activitySchema = z.object({
   metadata: z.string().max(4000).optional(),
 });
 
-router.post('/contact/messages', async (req: Request, res: Response) => {
+router.post('/contact/messages', asyncHandler(async (req: Request, res: Response) => {
   const payload = contactSchema.parse(req.body);
 
   const message = await prisma.contactMessage.create({
@@ -30,9 +31,9 @@ router.post('/contact/messages', async (req: Request, res: Response) => {
   });
 
   res.status(201).json({ id: message.id });
-});
+}));
 
-router.post('/newsletter/subscribe', async (req: Request, res: Response) => {
+router.post('/newsletter/subscribe', asyncHandler(async (req: Request, res: Response) => {
   const payload = newsletterSchema.parse(req.body);
 
   const subscriber = await prisma.newsletterSubscriber.upsert({
@@ -48,9 +49,9 @@ router.post('/newsletter/subscribe', async (req: Request, res: Response) => {
   });
 
   res.status(201).json({ id: subscriber.id, status: subscriber.status });
-});
+}));
 
-router.post('/activity/events', async (req: Request, res: Response) => {
+router.post('/activity/events', asyncHandler(async (req: Request, res: Response) => {
   const payload = activitySchema.parse(req.body);
 
   const activity = await prisma.userActivityEvent.create({
@@ -62,9 +63,9 @@ router.post('/activity/events', async (req: Request, res: Response) => {
   });
 
   res.status(201).json({ id: activity.id });
-});
+}));
 
-router.post('/audit/events', authMiddleware, async (req: AuthRequest, res: Response) => {
+router.post('/audit/events', authMiddleware, asyncHandler<AuthRequest>(async (req, res: Response) => {
   if (!req.userId) {
     res.status(401).json({ error: 'Usuario nao identificado' });
     return;
@@ -90,6 +91,6 @@ router.post('/audit/events', authMiddleware, async (req: AuthRequest, res: Respo
   });
 
   res.status(201).json({ id: auditEvent.id });
-});
+}));
 
 export default router;

@@ -193,6 +193,11 @@ export async function handleChatbotMessage(input: unknown) {
   return {
     conversationId: conversation.id,
     message: assistantMessage,
-    products,
+    products: products.map((product) => ({
+      product_id: product.id,
+      product_name: product.name,
+      product_price: product.price,
+      product_category: product.category,
+    })),
   };
 }

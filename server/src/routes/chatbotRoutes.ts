@@ -1,9 +1,10 @@
 import express, { Request, Response } from 'express';
+import { asyncHandler } from '../middleware/asyncHandler.js';
 import { handleChatbotMessage } from './chatbot.js';
 
 const router = express.Router();
 
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', asyncHandler(async (req: Request, res: Response) => {
   try {
     const data = await handleChatbotMessage(req.body);
     res.json(data);
@@ -15,6 +16,6 @@ router.post('/', async (req: Request, res: Response) => {
 
     res.status(500).json({ error: 'Erro interno no chatbot' });
   }
-});
+}));
 
 export default router;

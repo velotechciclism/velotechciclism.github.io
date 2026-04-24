@@ -1,10 +1,11 @@
 import express, { Response } from 'express';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
+import { asyncHandler } from '../middleware/asyncHandler.js';
 import { prisma } from '../prisma.js';
 
 const router = express.Router();
 
-router.get('/me', authMiddleware, async (req: AuthRequest, res: Response) => {
+router.get('/me', authMiddleware, asyncHandler<AuthRequest>(async (req, res: Response) => {
   if (!req.userId) {
     res.status(401).json({ error: 'Usuario nao identificado' });
     return;
@@ -38,6 +39,6 @@ router.get('/me', authMiddleware, async (req: AuthRequest, res: Response) => {
       })),
     }))
   );
-});
+}));
 
 export default router;

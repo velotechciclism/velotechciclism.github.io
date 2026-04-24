@@ -60,9 +60,9 @@ const ProductDetail: React.FC = () => {
     .filter((p) => p.category === product.category && p.id !== product.id)
     .slice(0, 4);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     try {
-      addItem(product, quantity);
+      await addItem(product, quantity);
       toast.success(`${quantity}x ${product.name} ${t("notifications.addedToCart")}`);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Nao foi possivel adicionar ao carrinho";

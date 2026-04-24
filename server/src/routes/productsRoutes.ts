@@ -1,9 +1,10 @@
 import express, { Request, Response } from 'express';
+import { asyncHandler } from '../middleware/asyncHandler.js';
 import { prisma } from '../prisma.js';
 
 const router = express.Router();
 
-router.get('/meta', async (_req: Request, res: Response) => {
+router.get('/meta', asyncHandler(async (_req: Request, res: Response) => {
   const [categories, brands] = await Promise.all([
     prisma.category.findMany({ where: { isActive: true }, orderBy: { name: 'asc' } }),
     prisma.brand.findMany({ orderBy: { name: 'asc' } }),
@@ -13,9 +14,9 @@ router.get('/meta', async (_req: Request, res: Response) => {
     categories: categories.map((c: (typeof categories)[number]) => ({ id: c.slug, name: c.name })),
     brands: brands.map((b: (typeof brands)[number]) => b.name),
   });
-});
+}));
 
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', asyncHandler(async (req: Request, res: Response) => {
   const search = String(req.query.search || '').trim();
   const category = String(req.query.category || '').trim();
   const brand = String(req.query.brand || '').trim();
@@ -86,9 +87,9 @@ router.get('/', async (req: Request, res: Response) => {
       ),
     }))
   );
-});
+}));
 
-router.get('/:id', async (req: Request, res: Response) => {
+router.get('/:id', asyncHandler(async (req: Request, res: Response) => {
   const product = await prisma.product.findUnique({
     where: { id: req.params.id },
     include: {
@@ -124,6 +125,6 @@ router.get('/:id', async (req: Request, res: Response) => {
       product.specs.map((spec: (typeof product.specs)[number]) => [spec.name, spec.value])
     ),
   });
-});
+}));
 
 export default router;

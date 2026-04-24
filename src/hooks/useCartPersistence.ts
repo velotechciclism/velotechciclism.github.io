@@ -1,37 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Product, CartItem } from '@/types/product';
 import { useAuthContext } from '@/context/AuthContext';
-import { getApiUrl } from '@/lib/api';
+import { getApiUrl, getBackendUnavailableMessage } from '@/lib/api';
 import { getAuthToken } from '@/lib/auth';
 import { MAX_UNITS_PER_PRODUCT } from '@/lib/cartRules';
 
-interface StoredOrderItem {
-  id: string;
-  product_id: string;
-  product_name: string;
-  product_image: string | null;
-  product_price: number;
-  quantity: number;
-}
-
-interface StoredOrder {
-  id: string;
-  user_id: string;
-  total: number;
-  status: string;
-  payment_method: string;
-  shipping_address: string;
-  created_at: string;
-  updated_at: string;
-  items: StoredOrderItem[];
-}
-
 function getCartKey(userId: number | undefined) {
   return userId ? `velotech:cart:${userId}` : 'velotech:cart:guest';
-}
-
-function getOrderKey(userId: number) {
-  return `velotech:orders:${userId}`;
 }
 
 function readJson<T>(key: string, fallback: T): T {
@@ -57,14 +32,24 @@ async function fetchAuthJson<T>(path: string, init: RequestInit = {}): Promise<T
     throw new Error('Usuario nao autenticado');
   }
 
-  const response = await fetch(`${API_URL}${path}`, {
-    ...init,
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-      ...(init.headers || {}),
-    },
-  });
+  let response: Response;
+
+  try {
+    response = await fetch(`${API_URL}${path}`, {
+      ...init,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+        ...(init.headers || {}),
+      },
+    });
+  } catch (error) {
+    if (error instanceof TypeError && error.message === 'Failed to fetch') {
+      throw new Error(getBackendUnavailableMessage());
+    }
+
+    throw error;
+  }
 
   if (!response.ok) {
     const contentType = response.headers.get('content-type') || '';
@@ -91,6 +76,8 @@ export function useCartPersistence() {
   );
 
   const loadCartItems = useCallback(async () => {
+    setIsLoading(true);
+
     try {
       if (isAuthenticated && user) {
         const data = await fetchAuthJson<{ items: CartItem[] }>('/cart');
@@ -99,13 +86,18 @@ export function useCartPersistence() {
         const storedItems = readJson<CartItem[]>(getCartKey(user?.id), []);
         setItems(storedItems);
       }
-    } catch {
-      const storedItems = readJson<CartItem[]>(getCartKey(user?.id), []);
-      setItems(storedItems);
+    } catch (error) {
+      if (isAuthenticated) {
+        setItems([]);
+        console.error('Erro ao carregar carrinho autenticado:', error);
+      } else {
+        const storedItems = readJson<CartItem[]>(getCartKey(user?.id), []);
+        setItems(storedItems);
+      }
     } finally {
       setIsLoading(false);
     }
-  }, [isAuthenticated, user, user?.id]);
+  }, [isAuthenticated, user]);
 
   useEffect(() => {
     void loadCartItems();
@@ -113,16 +105,12 @@ export function useCartPersistence() {
 
   const addItem = useCallback(async (product: Product, quantity = 1) => {
     if (isAuthenticated && user) {
-      try {
-        const data = await fetchAuthJson<{ items: CartItem[] }>('/cart/items', {
-          method: 'POST',
-          body: JSON.stringify({ productId: product.id, quantity }),
-        });
-        setItems(data.items || []);
-        return;
-      } catch {
-        // fallback abaixo
-      }
+      const data = await fetchAuthJson<{ items: CartItem[] }>('/cart/items', {
+        method: 'POST',
+        body: JSON.stringify({ productId: product.id, quantity }),
+      });
+      setItems(data.items || []);
+      return;
     }
 
     const existingItem = items.find((item) => item.id === product.id);
@@ -148,15 +136,11 @@ export function useCartPersistence() {
 
   const removeItem = useCallback(async (productId: string) => {
     if (isAuthenticated && user) {
-      try {
-        const data = await fetchAuthJson<{ items: CartItem[] }>(`/cart/items/${productId}`, {
-          method: 'DELETE',
-        });
-        setItems(data.items || []);
-        return;
-      } catch {
-        // fallback abaixo
-      }
+      const data = await fetchAuthJson<{ items: CartItem[] }>(`/cart/items/${productId}`, {
+        method: 'DELETE',
+      });
+      setItems(data.items || []);
+      return;
     }
 
     setItems((prev) => {
@@ -172,16 +156,12 @@ export function useCartPersistence() {
     }
 
     if (isAuthenticated && user) {
-      try {
-        const data = await fetchAuthJson<{ items: CartItem[] }>(`/cart/items/${productId}`, {
-          method: 'PATCH',
-          body: JSON.stringify({ quantity }),
-        });
-        setItems(data.items || []);
-        return;
-      } catch {
-        // fallback abaixo
-      }
+      const data = await fetchAuthJson<{ items: CartItem[] }>(`/cart/items/${productId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ quantity }),
+      });
+      setItems(data.items || []);
+      return;
     }
 
     if (quantity <= 0) {
@@ -200,11 +180,7 @@ export function useCartPersistence() {
 
   const clearCart = useCallback(async () => {
     if (isAuthenticated && user) {
-      try {
-        await fetchAuthJson<{ ok: boolean }>('/cart/items', { method: 'DELETE' });
-      } catch {
-        // fallback abaixo
-      }
+      await fetchAuthJson<{ ok: boolean }>('/cart/items', { method: 'DELETE' });
     }
 
     setItems([]);
@@ -216,46 +192,14 @@ export function useCartPersistence() {
       throw new Error('Usuário não autenticado ou carrinho vazio');
     }
 
-    try {
-      const order = await fetchAuthJson<{ id: string }>('/cart/checkout', {
-        method: 'POST',
-        body: JSON.stringify({ paymentMethod, shippingAddress }),
-      });
-      setItems([]);
-      persistCart([]);
-      return order;
-    } catch {
-      // fallback abaixo
-    }
-
-    const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    const now = new Date().toISOString();
-    const order: StoredOrder = {
-      id: crypto.randomUUID(),
-      user_id: String(user.id),
-      total,
-      status: 'pending',
-      payment_method: paymentMethod,
-      shipping_address: shippingAddress,
-      created_at: now,
-      updated_at: now,
-      items: items.map((item) => ({
-        id: crypto.randomUUID(),
-        product_id: item.id,
-        product_name: item.name,
-        product_image: item.image,
-        product_price: item.price,
-        quantity: item.quantity,
-      })),
-    };
-
-    const storageKey = getOrderKey(user.id);
-    const existingOrders = readJson<StoredOrder[]>(storageKey, []);
-    localStorage.setItem(storageKey, JSON.stringify([order, ...existingOrders]));
-
-    await clearCart();
+    const order = await fetchAuthJson<{ id: string }>('/cart/checkout', {
+      method: 'POST',
+      body: JSON.stringify({ paymentMethod, shippingAddress }),
+    });
+    setItems([]);
+    persistCart([]);
     return order;
-  }, [isAuthenticated, user, items, clearCart, persistCart]);
+  }, [isAuthenticated, user, items.length, persistCart]);
 
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = items.reduce((sum, item) => sum + item.price * item.quantity, 0);

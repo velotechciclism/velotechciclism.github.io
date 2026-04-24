@@ -15,11 +15,16 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { addItem } = useCart();
   const { t } = useLanguage();
 
-  const handleAddToCart = (e: React.MouseEvent) => {
+  const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    addItem(product);
-    toast.success(t("notifications.addedToCart"));
+    try {
+      await addItem(product);
+      toast.success(t("notifications.addedToCart"));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Nao foi possivel adicionar ao carrinho";
+      toast.error(message);
+    }
   };
 
   const discount = product.originalPrice

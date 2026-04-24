@@ -13,7 +13,7 @@ import { useAuthContext } from "@/context/AuthContext";
 const OrderHistory: React.FC = () => {
   const { t } = useLanguage();
   const { isAuthenticated, isLoading: authLoading } = useAuthContext();
-  const { orders, isLoading } = useOrders();
+  const { orders, isLoading, error } = useOrders();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -111,10 +111,10 @@ const OrderHistory: React.FC = () => {
               <ShoppingBag className="w-12 h-12 text-muted-foreground" />
             </div>
             <h1 className="font-display text-2xl font-bold text-foreground mb-2">
-              {t('orders.empty')}
+              {error ? 'Nao foi possivel carregar seus pedidos' : t('orders.empty')}
             </h1>
             <p className="text-muted-foreground mb-8">
-              {t('orders.emptySubtitle')}
+              {error || t('orders.emptySubtitle')}
             </p>
             <Link to="/products">
               <Button variant="yellow" size="lg">

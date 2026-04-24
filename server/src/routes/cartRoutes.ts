@@ -1,6 +1,7 @@
 import express, { Response } from 'express';
 import { z } from 'zod';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
+import { asyncHandler } from '../middleware/asyncHandler.js';
 import { prisma } from '../prisma.js';
 
 const router = express.Router();
@@ -19,6 +20,13 @@ const checkoutSchema = z.object({
   paymentMethod: z.string().min(1),
   shippingAddress: z.string().min(3),
 });
+
+class CheckoutError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'CheckoutError';
+  }
+}
 
 async function getOrCreateCart(userId: number) {
   return prisma.cart.upsert({
@@ -62,7 +70,7 @@ async function getCartPayload(userId: number) {
   };
 }
 
-router.get('/', authMiddleware, async (req: AuthRequest, res: Response) => {
+router.get('/', authMiddleware, asyncHandler<AuthRequest>(async (req, res: Response) => {
   if (!req.userId) {
     res.status(401).json({ error: 'Usuario nao identificado' });
     return;
@@ -70,9 +78,9 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response) => {
 
   const payload = await getCartPayload(req.userId);
   res.json(payload);
-});
+}));
 
-router.post('/items', authMiddleware, async (req: AuthRequest, res: Response) => {
+router.post('/items', authMiddleware, asyncHandler<AuthRequest>(async (req, res: Response) => {
   if (!req.userId) {
     res.status(401).json({ error: 'Usuario nao identificado' });
     return;
@@ -126,9 +134,9 @@ router.post('/items', authMiddleware, async (req: AuthRequest, res: Response) =>
   });
 
   res.json(await getCartPayload(req.userId));
-});
+}));
 
-router.patch('/items/:productId', authMiddleware, async (req: AuthRequest, res: Response) => {
+router.patch('/items/:productId', authMiddleware, asyncHandler<AuthRequest>(async (req, res: Response) => {
   if (!req.userId) {
     res.status(401).json({ error: 'Usuario nao identificado' });
     return;
@@ -164,9 +172,9 @@ router.patch('/items/:productId', authMiddleware, async (req: AuthRequest, res: 
   }
 
   res.json(await getCartPayload(req.userId));
-});
+}));
 
-router.delete('/items/:productId', authMiddleware, async (req: AuthRequest, res: Response) => {
+router.delete('/items/:productId', authMiddleware, asyncHandler<AuthRequest>(async (req, res: Response) => {
   if (!req.userId) {
     res.status(401).json({ error: 'Usuario nao identificado' });
     return;
@@ -181,9 +189,9 @@ router.delete('/items/:productId', authMiddleware, async (req: AuthRequest, res:
   });
 
   res.json(await getCartPayload(req.userId));
-});
+}));
 
-router.delete('/items', authMiddleware, async (req: AuthRequest, res: Response) => {
+router.delete('/items', authMiddleware, asyncHandler<AuthRequest>(async (req, res: Response) => {
   if (!req.userId) {
     res.status(401).json({ error: 'Usuario nao identificado' });
     return;
@@ -192,91 +200,119 @@ router.delete('/items', authMiddleware, async (req: AuthRequest, res: Response) 
   const cart = await getOrCreateCart(req.userId);
   await prisma.cartItem.deleteMany({ where: { cartId: cart.id } });
   res.json({ ok: true });
-});
+}));
 
-router.post('/checkout', authMiddleware, async (req: AuthRequest, res: Response) => {
+router.post('/checkout', authMiddleware, asyncHandler<AuthRequest>(async (req, res: Response) => {
   if (!req.userId) {
     res.status(401).json({ error: 'Usuario nao identificado' });
     return;
   }
 
   const input = checkoutSchema.parse(req.body);
-  const cart = await getOrCreateCart(req.userId);
-  const items = await prisma.cartItem.findMany({
-    where: { cartId: cart.id },
-    include: {
-      product: {
-        include: {
-          images: { orderBy: { sortOrder: 'asc' } },
-          inventory: true,
+  const userId = req.userId;
+
+  const orderResult = await prisma.$transaction(async (tx) => {
+    const cart = await tx.cart.upsert({
+      where: { userId },
+      update: {},
+      create: { userId },
+    });
+
+    const items = await tx.cartItem.findMany({
+      where: { cartId: cart.id },
+      include: {
+        product: {
+          include: {
+            images: { orderBy: { sortOrder: 'asc' } },
+            inventory: true,
+          },
         },
-      },
-    },
-  });
-
-  if (items.length === 0) {
-    res.status(400).json({ error: 'Carrinho vazio' });
-    return;
-  }
-
-  const subtotal = items.reduce<number>(
-    (sum: number, item: (typeof items)[number]) => sum + item.unitPriceSnapshot * item.quantity,
-    0
-  );
-  const shippingCost = subtotal > 100 ? 0 : 9.99;
-  const tax = subtotal * 0.23;
-  const total = subtotal + shippingCost + tax;
-
-  const order = await prisma.order.create({
-    data: {
-      orderNumber: `VT-${Date.now()}`,
-      userId: req.userId,
-      subtotal,
-      shippingCost,
-      tax,
-      total,
-      paymentMethod: input.paymentMethod,
-      shippingAddressSnapshot: input.shippingAddress,
-      statusHistory: {
-        create: {
-          status: 'pending',
-          note: 'Pedido criado',
-        },
-      },
-      items: {
-        create: items.map((item: (typeof items)[number]) => ({
-          productId: item.productId,
-          productName: item.product.name,
-          productImage: item.product.images[0]?.url,
-          quantity: item.quantity,
-          unitPrice: item.unitPriceSnapshot,
-          totalPrice: item.unitPriceSnapshot * item.quantity,
-        })),
-      },
-      payments: {
-        create: {
-          method: input.paymentMethod,
-          amount: total,
-          status: 'pending',
-        },
-      },
-    },
-  });
-
-  for (const item of items) {
-    await prisma.inventory.updateMany({
-      where: {
-        productId: item.productId,
-      },
-      data: {
-        stock: { decrement: item.quantity },
       },
     });
-  }
 
-  await prisma.cartItem.deleteMany({ where: { cartId: cart.id } });
+    if (items.length === 0) {
+      throw new CheckoutError('Carrinho vazio');
+    }
 
-  res.status(201).json({ id: order.id, orderNumber: order.orderNumber, total: order.total });
-});
+    for (const item of items) {
+      if (!item.product.isActive) {
+        throw new CheckoutError(`Produto indisponivel: ${item.product.name}`);
+      }
+
+      const availableStock = item.product.inventory?.stock || 0;
+      if (availableStock < item.quantity) {
+        throw new CheckoutError(
+          `Estoque insuficiente para ${item.product.name}. Disponivel: ${availableStock}`
+        );
+      }
+    }
+
+    const subtotal = items.reduce<number>(
+      (sum: number, item: (typeof items)[number]) => sum + item.unitPriceSnapshot * item.quantity,
+      0
+    );
+    const shippingCost = subtotal > 100 ? 0 : 9.99;
+    const tax = subtotal * 0.23;
+    const total = subtotal + shippingCost + tax;
+
+    const order = await tx.order.create({
+      data: {
+        orderNumber: `VT-${Date.now()}-${userId}`,
+        userId,
+        subtotal,
+        shippingCost,
+        tax,
+        total,
+        paymentMethod: input.paymentMethod,
+        shippingAddressSnapshot: input.shippingAddress,
+        statusHistory: {
+          create: {
+            status: 'pending',
+            note: 'Pedido criado',
+          },
+        },
+        items: {
+          create: items.map((item: (typeof items)[number]) => ({
+            productId: item.productId,
+            productName: item.product.name,
+            productImage: item.product.images[0]?.url,
+            quantity: item.quantity,
+            unitPrice: item.unitPriceSnapshot,
+            totalPrice: item.unitPriceSnapshot * item.quantity,
+          })),
+        },
+        payments: {
+          create: {
+            method: input.paymentMethod,
+            amount: total,
+            status: 'pending',
+          },
+        },
+      },
+    });
+
+    for (const item of items) {
+      const updatedInventory = await tx.inventory.updateMany({
+        where: {
+          productId: item.productId,
+          stock: { gte: item.quantity },
+        },
+        data: {
+          stock: { decrement: item.quantity },
+        },
+      });
+
+      if (updatedInventory.count !== 1) {
+        throw new CheckoutError(`Estoque insuficiente para ${item.product.name}`);
+      }
+    }
+
+    await tx.cartItem.deleteMany({ where: { cartId: cart.id } });
+
+    return { id: order.id, orderNumber: order.orderNumber, total: order.total };
+  });
+
+  res.status(201).json(orderResult);
+}));
 
 export default router;

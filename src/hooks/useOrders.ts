@@ -28,30 +28,13 @@ export function useOrders() {
   const { user, isAuthenticated } = useAuthContext();
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const apiUrl = getApiUrl();
 
-  const getStorageKey = useCallback(() => {
-    if (!user) {
-      return null;
-    }
-
-    return `velotech:orders:${user.id}`;
-  }, [user]);
-
-  const getLocalOrders = useCallback((): Order[] => {
-    const storageKey = getStorageKey();
-
-    if (!storageKey) {
-      return [];
-    }
-
-    const raw = localStorage.getItem(storageKey);
-    return raw ? (JSON.parse(raw) as Order[]) : [];
-  }, [getStorageKey]);
-
   const loadOrders = useCallback(async () => {
     setIsLoading(true);
+    setError(null);
 
     if (!isAuthenticated || !user) {
       setOrders([]);
@@ -71,20 +54,23 @@ export function useOrders() {
 
         if (response.ok) {
           const data = (await response.json()) as Order[];
-          const localOrders = getLocalOrders();
-          setOrders(data.length > 0 ? data : localOrders);
+          setOrders(data);
           return;
         }
+
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(payload?.error || 'Erro ao carregar pedidos');
       }
 
-      setOrders(getLocalOrders());
+      throw new Error('Usuario nao autenticado');
     } catch (error) {
       console.error('Erro ao carregar pedidos:', error);
-      setOrders(getLocalOrders());
+      setOrders([]);
+      setError(error instanceof Error ? error.message : 'Erro ao carregar pedidos');
     } finally {
       setIsLoading(false);
     }
-  }, [apiUrl, getLocalOrders, isAuthenticated, user]);
+  }, [apiUrl, isAuthenticated, user]);
 
   useEffect(() => {
     loadOrders();
@@ -93,6 +79,7 @@ export function useOrders() {
   return {
     orders,
     isLoading,
+    error,
     reload: loadOrders,
   };
 }
