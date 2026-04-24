@@ -4,10 +4,11 @@ import { ArrowRight, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/LanguageContext";
 import { products } from "@/data/products";
-import heroImage from "@/assets/hero-cycling.jpg";
 
 const EXPLANATION_VIDEO_URL =
   "https://youtu.be/Nb8dH9x5hN4";
+const HERO_BACKGROUND_VIDEO =
+  "/video_hero/20260424_1953_New%20Video_simple_compose_01kq0v5mx7ewtbbtr67bbgfbvp.mp4";
 
 const HeroSection: React.FC = () => {
   const { t } = useLanguage();
@@ -21,15 +22,28 @@ const HeroSection: React.FC = () => {
   };
 
   return (
-    <section className="relative min-h-[90vh] flex items-center overflow-hidden">
-      {/* Background Image */}
+    <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-black">
+      {/* Background Video */}
       <div className="absolute inset-0">
-        <img
-          src={heroImage}
-          alt="Cyclist riding on mountain road"
+        <video
           className="w-full h-full object-cover"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          aria-hidden="true"
+        >
+          <source src={HERO_BACKGROUND_VIDEO} type="video/mp4" />
+        </video>
+        <div
+          className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/70 to-black/20"
+          aria-hidden="true"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/70 to-transparent" />
+        <div
+          className="absolute inset-0 bg-black/20"
+          aria-hidden="true"
+        />
       </div>
 
       {/* Content */}
