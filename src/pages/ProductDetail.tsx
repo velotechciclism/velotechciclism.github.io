@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
   ChevronLeft,
@@ -23,6 +23,7 @@ import { useCart } from "@/context/CartContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { toast } from "sonner";
 import { MAX_UNITS_PER_PRODUCT } from "@/lib/cartRules";
+import { isInWishlist, toggleWishlist } from "@/lib/wishlist";
 
 const ProductDetail: React.FC = () => {
   const { t } = useLanguage();
@@ -30,9 +31,15 @@ const ProductDetail: React.FC = () => {
   const { addItem } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
-  const [liked, setLiked] = useState(false);
+  const [liked, setLiked] = useState(() => (id ? isInWishlist(id) : false));
 
   const product = products.find((p) => p.id === id);
+
+  useEffect(() => {
+    if (id) {
+      setLiked(isInWishlist(id));
+    }
+  }, [id]);
 
   if (!product) {
     return (
@@ -71,7 +78,7 @@ const ProductDetail: React.FC = () => {
   };
 
   const handleLike = () => {
-    const nextValue = !liked;
+    const nextValue = toggleWishlist(product.id);
     setLiked(nextValue);
     toast.success(nextValue ? "Item adicionado aos favoritos" : "Item removido dos favoritos");
   };
@@ -260,7 +267,7 @@ const ProductDetail: React.FC = () => {
                   {t("products.addToCart")}
                 </Button>
                 <Button variant="outline" size="lg" onClick={handleLike}>
-                  <Heart className="w-5 h-5" />
+                  <Heart className={`w-5 h-5 ${liked ? "fill-destructive text-destructive" : ""}`} />
                 </Button>
                 <Button variant="outline" size="lg" onClick={handleShare}>
                   <Share2 className="w-5 h-5" />
@@ -324,10 +331,8 @@ const ProductDetail: React.FC = () => {
               <div className="max-w-2xl mx-auto prose prose-gray">
                 <p>{product.description}</p>
                 <p>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed
-                  do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                  Ut enim ad minim veniam, quis nostrud exercitation ullamco
-                  laboris.
+                  Produto selecionado pela VeloTech para ciclistas que procuram
+                  confianca, bom acabamento e suporte na escolha do equipamento.
                 </p>
               </div>
             </TabsContent>
@@ -336,9 +341,11 @@ const ProductDetail: React.FC = () => {
                 <p className="text-muted-foreground">
                   {t("products.noReviewsYet")}
                 </p>
-                <Button variant="outline" className="mt-4">
-                  {t("products.writeReview")}
-                </Button>
+                <Link to={`/products/${product.id}/reviews`}>
+                  <Button variant="outline" className="mt-4">
+                    {t("products.writeReview")}
+                  </Button>
+                </Link>
               </div>
             </TabsContent>
           </Tabs>

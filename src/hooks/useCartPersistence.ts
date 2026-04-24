@@ -187,14 +187,14 @@ export function useCartPersistence() {
     persistCart([]);
   }, [isAuthenticated, persistCart, user]);
 
-  const checkout = useCallback(async (paymentMethod: string, shippingAddress: string) => {
+  const checkout = useCallback(async (paymentMethod: string, shippingAddress: string, promoCode?: string) => {
     if (!isAuthenticated || !user || items.length === 0) {
       throw new Error('Usuário não autenticado ou carrinho vazio');
     }
 
     const order = await fetchAuthJson<{ id: string }>('/cart/checkout', {
       method: 'POST',
-      body: JSON.stringify({ paymentMethod, shippingAddress }),
+      body: JSON.stringify({ paymentMethod, shippingAddress, promoCode }),
     });
     setItems([]);
     persistCart([]);

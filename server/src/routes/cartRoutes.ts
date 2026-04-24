@@ -19,6 +19,7 @@ const updateItemSchema = z.object({
 const checkoutSchema = z.object({
   paymentMethod: z.string().min(1),
   shippingAddress: z.string().min(3),
+  promoCode: z.string().trim().max(30).optional(),
 });
 
 class CheckoutError extends Error {
@@ -68,6 +69,20 @@ async function getCartPayload(userId: number) {
       quantity: item.quantity,
     })),
   };
+}
+
+function getPromoDiscountRate(promoCode: string | undefined, subtotal: number): number {
+  const normalizedCode = promoCode?.trim().toUpperCase();
+
+  if (normalizedCode === 'VELO10') {
+    return 0.1;
+  }
+
+  if (normalizedCode === 'BIKE15' && subtotal >= 100) {
+    return 0.15;
+  }
+
+  return 0;
 }
 
 router.get('/', authMiddleware, asyncHandler<AuthRequest>(async (req, res: Response) => {
@@ -253,7 +268,8 @@ router.post('/checkout', authMiddleware, asyncHandler<AuthRequest>(async (req, r
     );
     const shippingCost = subtotal > 100 ? 0 : 9.99;
     const tax = subtotal * 0.23;
-    const total = subtotal + shippingCost + tax;
+    const discount = Number((subtotal * getPromoDiscountRate(input.promoCode, subtotal)).toFixed(2));
+    const total = subtotal + shippingCost + tax - discount;
 
     const order = await tx.order.create({
       data: {
@@ -262,6 +278,7 @@ router.post('/checkout', authMiddleware, asyncHandler<AuthRequest>(async (req, r
         subtotal,
         shippingCost,
         tax,
+        discount,
         total,
         paymentMethod: input.paymentMethod,
         shippingAddressSnapshot: input.shippingAddress,

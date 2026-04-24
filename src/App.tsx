@@ -15,12 +15,20 @@ import Cart from "./pages/Cart";
 import Auth from "./pages/Auth";
 import Brands from "./pages/Brands";
 import Blog from "./pages/Blog";
+import BlogArticle from "./pages/BlogArticle";
 import Contact from "./pages/Contact";
 import Help from "./pages/Help";
 import OrderHistory from "./pages/OrderHistory";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Cookies from "./pages/Cookies";
+import Search from "./pages/Search";
+import Wishlist from "./pages/Wishlist";
+import ProductReviews from "./pages/ProductReviews";
+import Offers from "./pages/Offers";
+import About from "./pages/About";
+import Careers from "./pages/Careers";
+import Press from "./pages/Press";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -39,13 +47,21 @@ const App = () => (
                   <Route path="/" element={<Index />} />
                   <Route path="/products" element={<Products />} />
                   <Route path="/products/:id" element={<ProductDetail />} />
+                  <Route path="/products/:id/reviews" element={<ProductReviews />} />
                   <Route path="/cart" element={<Cart />} />
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/brands" element={<Brands />} />
                   <Route path="/blog" element={<Blog />} />
+                  <Route path="/blog/:postId" element={<BlogArticle />} />
                   <Route path="/contact" element={<Contact />} />
                   <Route path="/help" element={<Help />} />
                   <Route path="/orders" element={<OrderHistory />} />
+                  <Route path="/search" element={<Search />} />
+                  <Route path="/wishlist" element={<Wishlist />} />
+                  <Route path="/offers" element={<Offers />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/careers" element={<Careers />} />
+                  <Route path="/press" element={<Press />} />
                   <Route path="/privacy" element={<Privacy />} />
                   <Route path="/terms" element={<Terms />} />
                   <Route path="/cookies" element={<Cookies />} />

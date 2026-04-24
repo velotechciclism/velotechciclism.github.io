@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Trash2, Plus, Minus, ShoppingBag, ArrowRight } from "lucide-react";
 import Header from "@/components/layout/Header";
@@ -14,10 +14,21 @@ const Cart: React.FC = () => {
   const { t } = useLanguage();
   const { items, removeItem, updateQuantity, totalPrice, clearCart, checkout } = useCart();
   const { isAuthenticated } = useAuthContext();
+  const [promoCode, setPromoCode] = useState("");
+  const [appliedPromoCode, setAppliedPromoCode] = useState<string | null>(null);
 
   const shipping = totalPrice > 100 ? 0 : 9.99;
   const tax = totalPrice * 0.23;
-  const finalTotal = totalPrice + shipping + tax;
+  const promoDiscountRate =
+    appliedPromoCode === "VELO10" ? 0.1 : appliedPromoCode === "BIKE15" && totalPrice >= 100 ? 0.15 : 0;
+  const promoDiscount = totalPrice * promoDiscountRate;
+  const finalTotal = totalPrice + shipping + tax - promoDiscount;
+
+  useEffect(() => {
+    if (appliedPromoCode === "BIKE15" && totalPrice < 100) {
+      setAppliedPromoCode(null);
+    }
+  }, [appliedPromoCode, totalPrice]);
 
   const showCartError = (error: unknown) => {
     const message = error instanceof Error ? error.message : t("notifications.checkoutError");
@@ -48,6 +59,30 @@ const Cart: React.FC = () => {
     }
   };
 
+  const handleApplyPromoCode = () => {
+    const normalizedCode = promoCode.trim().toUpperCase();
+
+    if (normalizedCode === "VELO10") {
+      setAppliedPromoCode(normalizedCode);
+      toast.success("Cupom VELO10 aplicado.");
+      return;
+    }
+
+    if (normalizedCode === "BIKE15") {
+      if (totalPrice < 100) {
+        toast.error("BIKE15 requer subtotal minimo de EUR 100.");
+        return;
+      }
+
+      setAppliedPromoCode(normalizedCode);
+      toast.success("Cupom BIKE15 aplicado.");
+      return;
+    }
+
+    setAppliedPromoCode(null);
+    toast.error("Cupom invalido. Tente VELO10 ou BIKE15.");
+  };
+
   const handleCheckout = async () => {
     if (!isAuthenticated) {
       toast.error("Faça login para finalizar a compra");
@@ -55,7 +90,7 @@ const Cart: React.FC = () => {
     }
 
     try {
-      await checkout("cartao", "Endereco nao informado");
+      await checkout("cartao", "Endereco nao informado", appliedPromoCode || undefined);
       toast.success(t("notifications.checkoutSuccess"));
     } catch (error) {
       const message = error instanceof Error ? error.message : t("notifications.checkoutError");
@@ -221,6 +256,16 @@ const Cart: React.FC = () => {
                     <span className="text-muted-foreground">{t("cart.taxVat")}</span>
                     <span className="font-medium">€{tax.toFixed(2)}</span>
                   </div>
+                  {promoDiscount > 0 && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-primary">
+                        {t("cart.promoCode")} {appliedPromoCode}
+                      </span>
+                      <span className="font-medium text-primary">
+                        -€{promoDiscount.toFixed(2)}
+                      </span>
+                    </div>
+                  )}
                   <div className="border-t border-border pt-4">
                     <div className="flex justify-between">
                       <span className="font-display font-bold text-lg">{t("cart.total")}</span>
@@ -233,8 +278,20 @@ const Cart: React.FC = () => {
 
                 {/* Promo Code */}
                 <div className="flex gap-2 mb-6">
-                  <Input placeholder={t("cart.promoCode")} className="flex-1" />
-                  <Button variant="outline">{t("common.apply")}</Button>
+                  <Input
+                    placeholder={t("cart.promoCode")}
+                    value={promoCode}
+                    onChange={(event) => setPromoCode(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        handleApplyPromoCode();
+                      }
+                    }}
+                    className="flex-1"
+                  />
+                  <Button variant="outline" onClick={handleApplyPromoCode}>
+                    {t("common.apply")}
+                  </Button>
                 </div>
 
                 {/* Checkout Button */}

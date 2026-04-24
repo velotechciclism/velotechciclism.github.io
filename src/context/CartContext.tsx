@@ -8,7 +8,7 @@ interface CartContextType {
   removeItem: (productId: string) => Promise<void>;
   updateQuantity: (productId: string, quantity: number) => Promise<void>;
   clearCart: () => Promise<void>;
-  checkout: (paymentMethod: string, shippingAddress: string) => Promise<{ id: string }>;
+  checkout: (paymentMethod: string, shippingAddress: string, promoCode?: string) => Promise<{ id: string }>;
   totalItems: number;
   totalPrice: number;
   isLoading: boolean;

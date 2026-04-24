@@ -10,6 +10,7 @@ import {
   Globe,
   LogOut,
   Package,
+  Heart,
 } from "lucide-react";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { Button } from "@/components/ui/button";
@@ -71,9 +72,22 @@ const Header: React.FC = () => {
           {/* Right Actions */}
           <div className="flex items-center gap-2 lg:gap-4">
             {/* Search */}
-              <Button variant="ghost" size="icon" className="hidden sm:flex hover:bg-white/10">
-              <Search className="w-5 h-5" />
-            </Button>
+            <Link to="/search" className="hidden sm:block">
+              <Button variant="ghost" size="icon" className="hover:bg-white/10" aria-label={t("common.search")}>
+                <Search className="w-5 h-5" />
+              </Button>
+            </Link>
+
+            <Link to="/wishlist" className="hidden sm:block">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="hover:bg-white/10"
+                aria-label={language === "pt-br" ? "Favoritos" : "Wishlist"}
+              >
+                <Heart className="w-5 h-5" />
+              </Button>
+            </Link>
 
             {/* Theme Switcher */}
             <ThemeSwitcher />
@@ -120,6 +134,12 @@ const Header: React.FC = () => {
                     <Link to="/orders" className="cursor-pointer">
                       <Package className="w-4 h-4 mr-2" />
                       {t("orders.title")}
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/wishlist" className="cursor-pointer">
+                      <Heart className="w-4 h-4 mr-2" />
+                      {language === "pt-br" ? "Favoritos" : "Wishlist"}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -183,6 +203,20 @@ const Header: React.FC = () => {
                   {link.name}
                 </Link>
               ))}
+              <Link
+                to="/search"
+                className="px-4 py-3 text-sm font-medium text-foreground hover:bg-muted rounded-lg transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {t("common.search")}
+              </Link>
+              <Link
+                to="/wishlist"
+                className="px-4 py-3 text-sm font-medium text-foreground hover:bg-muted rounded-lg transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {language === "pt-br" ? "Favoritos" : "Wishlist"}
+              </Link>
               <div className="pt-4 border-t border-border mt-2">
                 {isAuthenticated ? (
                   <div className="px-4 space-y-2">
@@ -196,6 +230,14 @@ const Header: React.FC = () => {
                     >
                       <Package className="w-4 h-4 inline mr-2" />
                       {t("orders.title")}
+                    </Link>
+                    <Link
+                      to="/wishlist"
+                      className="block text-sm text-primary mb-2"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <Heart className="w-4 h-4 inline mr-2" />
+                      {language === "pt-br" ? "Favoritos" : "Wishlist"}
                     </Link>
                     <Button 
                       variant="outline" 

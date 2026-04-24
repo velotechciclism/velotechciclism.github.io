@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/accordion";
 import { Search, MessageCircle, HelpCircle } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 interface FAQItem {
   id: string;
@@ -20,9 +20,17 @@ interface FAQItem {
 }
 
 const Help: React.FC = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
+  const topic = searchParams.get("topic");
+
+  useEffect(() => {
+    if (topic === "returns") {
+      setSearchQuery(language === "pt-br" ? "Devoluções" : "Returns");
+    }
+  }, [language, topic]);
 
   const handleOpenChat = () => {
     window.dispatchEvent(new Event("velotech:open-chatbot"));

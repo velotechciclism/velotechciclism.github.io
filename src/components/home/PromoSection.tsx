@@ -42,7 +42,7 @@ const PromoSection: React.FC = () => {
             <p className="text-secondary-foreground/70 mb-8 max-w-lg">
               {t("home.promo.summerDescription")}
             </p>
-            <Link to="/products">
+            <Link to="/offers">
               <Button variant="hero" size="lg">
                 {t("home.promo.shopTheSale")}
                 <ArrowRight className="w-5 h-5" />

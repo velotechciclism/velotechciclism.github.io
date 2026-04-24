@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Product } from "@/types/product";
 import { useCart } from "@/context/CartContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { isInWishlist, toggleWishlist } from "@/lib/wishlist";
 import { toast } from "sonner";
 
 interface ProductCardProps {
@@ -14,6 +15,7 @@ interface ProductCardProps {
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { addItem } = useCart();
   const { t } = useLanguage();
+  const [isFavorite, setIsFavorite] = React.useState(() => isInWishlist(product.id));
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -25,6 +27,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       const message = error instanceof Error ? error.message : "Nao foi possivel adicionar ao carrinho";
       toast.error(message);
     }
+  };
+
+  const handleWishlist = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const nextValue = toggleWishlist(product.id);
+    setIsFavorite(nextValue);
+    toast.success(nextValue ? "Produto salvo nos favoritos" : "Produto removido dos favoritos");
   };
 
   const discount = product.originalPrice
@@ -60,8 +70,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
           {/* Quick Actions */}
           <div className="absolute top-4 right-4 flex flex-col gap-2 opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
-            <button className="w-10 h-10 rounded-full bg-background/90 backdrop-blur-sm flex items-center justify-center hover:bg-destructive hover:text-destructive-foreground transition-colors">
-              <Heart className="w-5 h-5" />
+            <button
+              type="button"
+              aria-label="Salvar favorito"
+              onClick={handleWishlist}
+              className="w-10 h-10 rounded-full bg-background/90 backdrop-blur-sm flex items-center justify-center hover:bg-destructive hover:text-destructive-foreground transition-colors"
+            >
+              <Heart className={`w-5 h-5 ${isFavorite ? "fill-destructive text-destructive" : ""}`} />
             </button>
           </div>
 

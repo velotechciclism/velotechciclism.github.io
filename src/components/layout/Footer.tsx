@@ -24,15 +24,15 @@ const Footer: React.FC = () => {
     ],
     support: [
       { name: t("common.help"), href: "/help" },
-      { name: t("footer.support"), href: "/help?topic=support" },
+      { name: t("footer.support"), href: "/contact" },
       { name: t("footer.returns"), href: "/help?topic=returns" },
       { name: t("common.contact"), href: "/contact" },
     ],
     company: [
-      { name: t("footer.about"), href: "/blog" },
+      { name: t("footer.about"), href: "/about" },
       { name: t("common.blog"), href: "/blog" },
-      { name: t("footer.careers"), href: "/blog" },
-      { name: t("footer.press"), href: "/blog" },
+      { name: t("footer.careers"), href: "/careers" },
+      { name: t("footer.press"), href: "/press" },
     ],
     legal: [
       { name: t("footer.privacy"), href: "/privacy" },
