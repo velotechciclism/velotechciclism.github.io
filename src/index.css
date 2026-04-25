@@ -251,9 +251,6 @@
     animation: scaleIn 0.3s ease-out forwards;
   }
 
-  .footer-bike-ride {
-    animation: footerBikeRide 9s linear infinite;
-  }
 }
 
 @keyframes float {
@@ -296,19 +293,26 @@
   }
 }
 
+.footer-bike-ride {
+  left: 0;
+  pointer-events: none;
+  transform: translateX(-4rem) translateY(-50%);
+  animation: footerBikeRide 7s linear infinite;
+  will-change: transform;
+}
+
 @keyframes footerBikeRide {
   from {
-    transform: translate3d(-4rem, -50%, 0);
+    transform: translateX(-4rem) translateY(-50%);
   }
   to {
-    transform: translate3d(calc(100vw + 4rem), -50%, 0);
+    transform: translateX(calc(100vw + 4rem)) translateY(-50%);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .footer-bike-ride {
-    animation: none;
-    transform: translate3d(0, -50%, 0);
+    animation-duration: 14s;
   }
 }
 
