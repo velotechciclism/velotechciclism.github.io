@@ -8,6 +8,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import ChatbotWidget from "@/components/chatbot/ChatbotWidget";
+import PwaInstallPrompt from "@/components/pwa/PwaInstallPrompt";
 import Index from "./pages/Index";
 import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
@@ -69,6 +70,7 @@ const App = () => (
                   <Route path="*" element={<NotFound />} />
                 </Routes>
                 <ChatbotWidget />
+                <PwaInstallPrompt />
               </HashRouter>
           </TooltipProvider>
         </CartProvider>
