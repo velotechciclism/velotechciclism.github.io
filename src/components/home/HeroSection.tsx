@@ -8,7 +8,7 @@ import { products } from "@/data/products";
 const EXPLANATION_VIDEO_URL =
   "https://youtu.be/Nb8dH9x5hN4";
 const HERO_BACKGROUND_VIDEO =
-  "/video_hero/20260424_1953_New%20Video_simple_compose_01kq0v5mx7ewtbbtr67bbgfbvp.mp4";
+  "/video_hero/20260425_0612_New%20Video_simple_compose_01kq1yjej1egevg9vahsm7nd26.mp4";
 
 const HeroSection: React.FC = () => {
   const { t } = useLanguage();
