@@ -164,7 +164,7 @@ const Help: React.FC = () => {
               <h3 className="font-display font-bold text-foreground mb-2">
                 {t("help.emailSupport")}
               </h3>
-              <p className="text-sm text-muted-foreground mb-4">
+              <p className="text-sm text-muted-foreground mb-4 break-words [overflow-wrap:anywhere]">
                 {contactInfo.email.address}
               </p>
               <Button

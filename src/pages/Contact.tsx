@@ -106,7 +106,7 @@ const Contact: React.FC = () => {
   ];
 
   const cardClassName =
-    "rounded-2xl bg-muted p-6 hover:shadow-lg hover:bg-muted/80 transition-all duration-300 animate-fade-in";
+    "min-w-0 rounded-2xl bg-muted p-6 hover:shadow-lg hover:bg-muted/80 transition-all duration-300 animate-fade-in";
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -143,7 +143,7 @@ const Contact: React.FC = () => {
                   <h3 className="font-display font-bold text-foreground mb-2">
                     {method.title}
                   </h3>
-                  <p className="font-semibold text-foreground mb-1">
+                  <p className="font-semibold text-foreground mb-1 break-words [overflow-wrap:anywhere]">
                     {method.details}
                   </p>
                   <p className="text-sm text-muted-foreground">{method.description}</p>
@@ -160,7 +160,7 @@ const Contact: React.FC = () => {
                   <h3 className="font-display font-bold text-foreground mb-2">
                     {method.title}
                   </h3>
-                  <p className="font-semibold text-foreground mb-1">
+                  <p className="font-semibold text-foreground mb-1 break-words [overflow-wrap:anywhere]">
                     {method.details}
                   </p>
                   <p className="text-sm text-muted-foreground">{method.description}</p>
