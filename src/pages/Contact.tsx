@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Mail, Phone, MapPin, Send, MessageCircle } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { getApiUrl } from "@/lib/api";
+import { contactInfo } from "@/config/contact";
 
 const Contact: React.FC = () => {
   const { t } = useLanguage();
@@ -40,10 +41,10 @@ const Contact: React.FC = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          subject: formData.subject,
-          message: formData.message,
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          subject: formData.subject.trim(),
+          message: formData.message.trim(),
         }),
       });
 
@@ -63,10 +64,10 @@ const Contact: React.FC = () => {
         setSubmitted(false);
       }, 3000);
     } catch {
-      const mailToUrl = `mailto:c.eduardoteixeiraguinsber@gmail.com?subject=${encodeURIComponent(
-        formData.subject
+      const mailToUrl = `${contactInfo.email.link}?subject=${encodeURIComponent(
+        formData.subject.trim()
       )}&body=${encodeURIComponent(
-        `Nome: ${formData.name}\nEmail: ${formData.email}\n\nMensagem:\n${formData.message}`
+        `Nome: ${formData.name.trim()}\nEmail: ${formData.email.trim()}\n\nMensagem:\n${formData.message.trim()}`
       )}`;
       window.location.href = mailToUrl;
     } finally {
@@ -78,27 +79,28 @@ const Contact: React.FC = () => {
     {
       icon: Phone,
       title: t("contact.phone"),
-      details: t("contact.phoneDetails"),
+      details: contactInfo.phone.number,
       description: t("contact.phoneHours"),
+      link: contactInfo.phone.link,
     },
     {
       icon: Mail,
       title: t("contact.email"),
-      details: t("contact.emailDetails"),
+      details: contactInfo.email.address,
       description: t("contact.emailHours"),
-      link: "mailto:c.eduardoteixeiraguinsber@gmail.com",
+      link: contactInfo.email.link,
     },
     {
       icon: MessageCircle,
       title: t("contact.whatsapp"),
-      details: t("contact.whatsappDetails"),
+      details: contactInfo.whatsapp.display,
       description: t("contact.whatsappHours"),
-      link: "https://wa.me/351966601839",
+      link: contactInfo.whatsapp.link,
     },
     {
       icon: MapPin,
       title: t("contact.address"),
-      details: t("contact.addressDetails"),
+      details: contactInfo.address.display,
       description: t("contact.addressType"),
     },
   ];
@@ -124,18 +126,12 @@ const Contact: React.FC = () => {
 
         {/* Contact Methods */}
         <div className="container mx-auto px-4 py-12">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
             {contactMethods.map((method, index) => (
               method.link ? (
                 <a
                   key={method.title}
                   href={method.link}
-                  onClick={(event) => {
-                    if (method.link?.startsWith("mailto:")) {
-                      event.preventDefault();
-                      window.location.href = method.link;
-                    }
-                  }}
                   target={method.link.startsWith("http") ? "_blank" : undefined}
                   rel={method.link.startsWith("http") ? "noopener noreferrer" : undefined}
                   className={`${cardClassName} cursor-pointer`}

@@ -11,5 +11,8 @@ export const contactInfo = {
   phone: {
     number: "+351 210 123 456",
     link: "tel:+351210123456"
+  },
+  address: {
+    display: "Lisboa, Portugal"
   }
 };

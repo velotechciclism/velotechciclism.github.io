@@ -11,6 +11,7 @@ import {
 import { Search, MessageCircle, HelpCircle } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { contactInfo } from "@/config/contact";
 
 interface FAQItem {
   id: string;
@@ -164,13 +165,13 @@ const Help: React.FC = () => {
                 {t("help.emailSupport")}
               </h3>
               <p className="text-sm text-muted-foreground mb-4">
-                support@velotech.com
+                {contactInfo.email.address}
               </p>
               <Button
                 variant="outline"
                 className="w-full"
                 onClick={() => {
-                  window.location.href = "mailto:support@velotech.com";
+                  window.location.href = contactInfo.email.link;
                 }}
               >
                 {t("help.sendEmail")}

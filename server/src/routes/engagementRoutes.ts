@@ -7,10 +7,10 @@ import { prisma } from '../prisma.js';
 const router = express.Router();
 
 const contactSchema = z.object({
-  name: z.string().min(2),
-  email: z.string().email(),
-  subject: z.string().max(200).optional(),
-  message: z.string().min(5).max(5000),
+  name: z.string().trim().min(2).max(120),
+  email: z.string().trim().email().toLowerCase(),
+  subject: z.string().trim().max(200).optional(),
+  message: z.string().trim().min(5).max(5000),
 });
 
 const newsletterSchema = z.object({
