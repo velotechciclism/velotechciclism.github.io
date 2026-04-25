@@ -1,0 +1,27 @@
+{
+  "name": "VeloTech - Loja de Equipamentos de Ciclismo",
+  "short_name": "VeloTech",
+  "description": "Loja de equipamentos de ciclismo com bicicletas, acessórios, roupas e suporte ao ciclista.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0d0d0d",
+  "theme_color": "#facc15",
+  "categories": ["shopping", "sports", "lifestyle"],
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "/pwa/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/pwa/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
