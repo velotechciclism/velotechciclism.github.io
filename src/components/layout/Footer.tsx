@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Mail, MessageCircle } from "lucide-react";
+import { Bike, Mail, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/context/LanguageContext";
@@ -180,6 +180,18 @@ const Footer: React.FC = () => {
                 </li>
               ))}
             </ul>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer Ride */}
+      <div className="border-t border-white/10" aria-hidden="true">
+        <div className="container mx-auto px-4">
+          <div className="relative h-16 overflow-hidden">
+            <div className="absolute left-0 right-0 top-1/2 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+            <div className="footer-bike-ride absolute top-1/2 text-primary drop-shadow-[0_0_12px_hsl(var(--primary)/0.45)]">
+              <Bike className="h-8 w-8 sm:h-10 sm:w-10" />
+            </div>
           </div>
         </div>
       </div>
