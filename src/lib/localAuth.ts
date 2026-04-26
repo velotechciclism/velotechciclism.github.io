@@ -129,7 +129,7 @@ export async function registerLocalUser(
   const users = readLocalUsers();
 
   if (users.some((user) => normalizeEmail(user.email) === normalizedEmail)) {
-    throw new Error('Email ja cadastrado');
+    throw new Error('E-mail ja cadastrado');
   }
 
   const user: User = {
@@ -161,7 +161,7 @@ export async function loginLocalUser(email: string, password: string): Promise<A
   const attemptedHash = await hashPassword(normalizedEmail, password);
 
   if (!record || record.passwordHash !== attemptedHash) {
-    throw new Error('Email ou senha invalidos');
+    throw new Error('E-mail ou senha invalidos');
   }
 
   const user = stripPassword(record);

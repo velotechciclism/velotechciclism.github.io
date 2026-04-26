@@ -22,10 +22,10 @@ const checkoutSchema = z.object({
   promoCode: z.string().trim().max(30).optional(),
 });
 
-class CheckoutError extends Error {
+class FinalizacaoCompraError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'CheckoutError';
+    this.name = 'FinalizacaoCompraError';
   }
 }
 
@@ -246,17 +246,17 @@ router.post('/checkout', authMiddleware, asyncHandler<AuthRequest>(async (req, r
     });
 
     if (items.length === 0) {
-      throw new CheckoutError('Carrinho vazio');
+      throw new FinalizacaoCompraError('Carrinho vazio');
     }
 
     for (const item of items) {
       if (!item.product.isActive) {
-        throw new CheckoutError(`Produto indisponivel: ${item.product.name}`);
+        throw new FinalizacaoCompraError(`Produto indisponivel: ${item.product.name}`);
       }
 
       const availableStock = item.product.inventory?.stock || 0;
       if (availableStock < item.quantity) {
-        throw new CheckoutError(
+        throw new FinalizacaoCompraError(
           `Estoque insuficiente para ${item.product.name}. Disponivel: ${availableStock}`
         );
       }
@@ -320,7 +320,7 @@ router.post('/checkout', authMiddleware, asyncHandler<AuthRequest>(async (req, r
       });
 
       if (updatedInventory.count !== 1) {
-        throw new CheckoutError(`Estoque insuficiente para ${item.product.name}`);
+        throw new FinalizacaoCompraError(`Estoque insuficiente para ${item.product.name}`);
       }
     }
 

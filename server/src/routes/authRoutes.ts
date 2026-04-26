@@ -30,7 +30,7 @@ router.post('/login', asyncHandler(async (req: Request, res: Response) => {
     if (error instanceof Error) {
       res.status(401).json({ error: error.message });
     } else {
-      res.status(401).json({ error: 'Erro ao fazer login' });
+      res.status(401).json({ error: 'Erro ao acessar conta' });
     }
   }
 }));

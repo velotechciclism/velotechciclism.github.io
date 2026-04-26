@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { products } from "@/data/products";
-import { useLanguage } from "@/context/LanguageContext";
 import { toast } from "sonner";
 
 type StoredReview = {
@@ -36,7 +35,6 @@ function writeReviews(reviews: StoredReview[]) {
 
 const ProductReviews: React.FC = () => {
   const { id } = useParams();
-  const { language } = useLanguage();
   const product = products.find((item) => item.id === id);
   const [reviews, setReviews] = useState<StoredReview[]>(() => readReviews());
   const [formData, setFormData] = useState({ name: "", rating: 5, comment: "" });
@@ -50,7 +48,7 @@ const ProductReviews: React.FC = () => {
     event.preventDefault();
 
     if (!product || !formData.name.trim() || !formData.comment.trim()) {
-      toast.error(language === "pt-br" ? "Preencha todos os campos." : "Please fill all fields.");
+      toast.error("Preencha todos os campos.");
       return;
     }
 
@@ -67,7 +65,7 @@ const ProductReviews: React.FC = () => {
     writeReviews(nextReviews);
     setReviews(nextReviews);
     setFormData({ name: "", rating: 5, comment: "" });
-    toast.success(language === "pt-br" ? "Avaliacao publicada." : "Review published.");
+    toast.success("Avaliação publicada.");
   };
 
   if (!product) {
@@ -77,11 +75,11 @@ const ProductReviews: React.FC = () => {
         <main className="flex-1 bg-black flex items-center justify-center px-4">
           <div className="rounded-2xl border border-white/10 bg-muted p-8 text-center">
             <h1 className="font-display text-2xl font-bold text-foreground mb-4">
-              {language === "pt-br" ? "Produto nao encontrado" : "Product not found"}
+              Produto não encontrado
             </h1>
             <Link to="/products">
               <Button variant="yellow">
-                {language === "pt-br" ? "Voltar aos produtos" : "Back to products"}
+                Voltar aos produtos
               </Button>
             </Link>
           </div>
@@ -99,10 +97,10 @@ const ProductReviews: React.FC = () => {
           <div className="container mx-auto px-4">
             <Link to={`/products/${product.id}`} className="mb-6 inline-flex items-center gap-2 text-sm text-primary hover:text-accent">
               <ArrowLeft className="h-4 w-4" />
-              {language === "pt-br" ? "Voltar ao produto" : "Back to product"}
+              Voltar ao produto
             </Link>
             <h1 className="font-display text-3xl sm:text-4xl font-bold text-secondary-foreground">
-              {language === "pt-br" ? "Avaliar produto" : "Review product"}
+              Avaliar produto
             </h1>
             <p className="mt-2 text-secondary-foreground/70">{product.name}</p>
           </div>
@@ -111,17 +109,17 @@ const ProductReviews: React.FC = () => {
         <section className="container mx-auto grid gap-8 px-4 py-12 lg:grid-cols-[420px_1fr]">
           <form onSubmit={handleSubmit} className="rounded-2xl border border-white/10 bg-muted p-6">
             <h2 className="font-display text-xl font-bold text-foreground mb-5">
-              {language === "pt-br" ? "Sua avaliacao" : "Your review"}
+              Sua avaliação
             </h2>
             <div className="space-y-4">
               <Input
                 value={formData.name}
                 onChange={(event) => setFormData((prev) => ({ ...prev, name: event.target.value }))}
-                placeholder={language === "pt-br" ? "Seu nome" : "Your name"}
+                placeholder="Seu nome"
               />
               <div>
                 <label htmlFor="rating" className="mb-2 block text-sm font-medium text-foreground">
-                  {language === "pt-br" ? "Nota" : "Rating"}
+                  Nota
                 </label>
                 <select
                   id="rating"
@@ -139,18 +137,18 @@ const ProductReviews: React.FC = () => {
               <Textarea
                 value={formData.comment}
                 onChange={(event) => setFormData((prev) => ({ ...prev, comment: event.target.value }))}
-                placeholder={language === "pt-br" ? "Conte como foi sua experiencia" : "Tell us about your experience"}
+                placeholder="Conte como foi sua experiência"
                 rows={6}
               />
               <Button type="submit" variant="yellow" className="w-full">
-                {language === "pt-br" ? "Publicar avaliacao" : "Publish review"}
+                Publicar avaliação
               </Button>
             </div>
           </form>
 
           <div className="space-y-4">
             <h2 className="font-display text-xl font-bold text-secondary-foreground">
-              {language === "pt-br" ? "Avaliacoes recentes" : "Recent reviews"}
+              Avaliações recentes
             </h2>
             {productReviews.length > 0 ? (
               productReviews.map((review) => (
@@ -167,9 +165,7 @@ const ProductReviews: React.FC = () => {
               ))
             ) : (
               <div className="rounded-2xl border border-white/10 bg-muted p-8 text-center text-muted-foreground">
-                {language === "pt-br"
-                  ? "Ainda nao ha avaliacoes salvas neste navegador."
-                  : "No reviews saved in this browser yet."}
+                Ainda não há avaliações salvas neste navegador.
               </div>
             )}
           </div>

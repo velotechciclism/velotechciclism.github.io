@@ -5,7 +5,7 @@ import { prisma } from '../prisma.js';
 
 // Schemas de validação
 export const registerSchema = z.object({
-  email: z.string().email('Email inválido'),
+  email: z.string().email('E-mail inválido'),
   name: z.string().min(3, 'Nome deve ter pelo menos 3 caracteres'),
   password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
   phone: z.string().optional(),
@@ -13,7 +13,7 @@ export const registerSchema = z.object({
 });
 
 export const loginSchema = z.object({
-  email: z.string().email('Email inválido'),
+  email: z.string().email('E-mail inválido'),
   password: z.string().min(1, 'Senha é obrigatória'),
 });
 
@@ -52,7 +52,7 @@ export async function registerUser(data: RegisterData): Promise<AuthResponse> {
   const existingUser = await prisma.user.findUnique({ where: { email: data.email } });
 
   if (existingUser) {
-    throw new Error('Email ja cadastrado');
+    throw new Error('E-mail ja cadastrado');
   }
 
   const user = await prisma.user.create({
@@ -89,13 +89,13 @@ export async function loginUser(data: LoginData): Promise<AuthResponse> {
   const user = await prisma.user.findUnique({ where: { email: data.email } });
 
   if (!user) {
-    throw new Error('Email ou senha inválidos');
+    throw new Error('E-mail ou senha inválidos');
   }
 
   const isPasswordValid = await bcryptjs.compare(data.password, user.password);
 
   if (!isPasswordValid) {
-    throw new Error('Email ou senha inválidos');
+    throw new Error('E-mail ou senha inválidos');
   }
 
   const tokenExpiresIn = (process.env.JWT_EXPIRES_IN || '7d') as jwt.SignOptions['expiresIn'];

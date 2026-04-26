@@ -5,13 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight, Calendar, User } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
-import { BlogLanguage, blogPosts } from "@/data/blogPosts";
+import { blogPosts } from "@/data/blogPosts";
 
 const Blog: React.FC = () => {
-  const { t, language } = useLanguage();
-  const lang = language as BlogLanguage;
+  const { t } = useLanguage();
   const featuredPost = blogPosts[0];
-  const featuredContent = featuredPost.content[lang];
+  const featuredContent = featuredPost.content["pt-br"];
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -67,7 +66,7 @@ const Blog: React.FC = () => {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {blogPosts.slice(1).map((post, index) => {
-              const content = post.content[lang];
+              const content = post.content["pt-br"];
               return (
                 <article
                   key={post.id}

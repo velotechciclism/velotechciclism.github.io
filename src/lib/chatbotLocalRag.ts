@@ -188,11 +188,11 @@ function buildNaturalAnswer(query: string, productsRanked: RagProduct[]): string
   const wantsHelp = intent === 'help' || hasPhrase(normalizedQuery, ['me ajuda', 'me ajude']);
 
   if (intent === 'support') {
-    return 'Claro. Posso te atender por suporte direto tambem: WhatsApp +351 966 601 839, email c.eduardoteixeiraguinsber@gmail.com e telefone +351 210 123 456. Se preferir, eu continuo por aqui com recomendacoes.';
+    return 'Claro. Posso te atender por suporte direto tambem: WhatsApp +351 966 601 839, e-mail c.eduardoteixeiraguinsber@gmail.com e telefone +351 966 601 839. Se preferir, eu continuo por aqui com recomendacoes.';
   }
 
   if (wantsGreeting && productsRanked.length === 0) {
-    return 'Oi! Estou aqui para ajudar voce a encontrar o produto certo. Posso recomendar por uso (urbano, estrada ou trilha), por faixa de preco e por categoria. Exemplos: "me ajuda a escolher uma bike", "quais itens tem", "capacete ate 120", "itens para trilha".';
+    return 'Oi! Estou aqui para ajudar voce a encontrar o produto certo. Posso recomendar por uso (urbano, estrada ou trilha), por faixa de preco e por categoria. Exemplos: "me ajuda a escolher uma bicicleta", "quais itens tem", "luvas ate 20", "itens para trilha".';
   }
 
   if (wantsCatalog) {
@@ -210,7 +210,7 @@ function buildNaturalAnswer(query: string, productsRanked: RagProduct[]): string
         path: `/products/${product.id}`,
       }));
 
-    return `Temos itens em bicicletas, capacetes, vestuario e acessorios. Aqui vai uma amostra rapida:\n${formatProductList(
+    return `Temos itens em bicicletas, roupas e calcados e acessorios. Aqui vai uma amostra rapida:\n${formatProductList(
       topCatalog
     )}\n\nSe quiser, eu filtro agora por categoria, uso ou faixa de preco.`;
   }
@@ -220,7 +220,7 @@ function buildNaturalAnswer(query: string, productsRanked: RagProduct[]): string
   }
 
   if (intent === 'payment') {
-    return 'Perfeito. Atualmente voce pode concluir com cartao, MB WAY, multibanco e outras opcoes exibidas no checkout. Posso te sugerir itens para seguir para compra.';
+    return 'Perfeito. Atualmente voce pode concluir com cartao, MB WAY, multibanco e outras opcoes exibidas na finalizacao da compra. Posso te sugerir itens para seguir para compra.';
   }
 
   if (wantsHelp && productsRanked.length === 0) {
@@ -241,7 +241,7 @@ function buildNaturalAnswer(query: string, productsRanked: RagProduct[]): string
     return `${opening}\n${formatProductList(productsRanked)}\n\n${closing}`;
   }
 
-  return 'Nao achei um item exato ainda, mas consigo te guiar. Me diga categoria (bicicleta, capacete, roupa, acessorio), faixa de preco e tipo de uso.';
+  return 'Nao achei um item exato ainda, mas consigo te guiar. Me diga categoria (bicicleta, roupa, calcado ou acessorio), faixa de preco e tipo de uso.';
 }
 
 function isGenericFollowUp(normalizedQuery: string): boolean {

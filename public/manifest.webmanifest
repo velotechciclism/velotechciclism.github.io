@@ -8,7 +8,6 @@
   "orientation": "portrait-primary",
   "background_color": "#0d0d0d",
   "theme_color": "#facc15",
-  "categories": ["shopping", "sports", "lifestyle"],
   "lang": "pt-BR",
   "icons": [
     {

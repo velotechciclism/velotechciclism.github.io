@@ -82,7 +82,7 @@ app.use((error: unknown, _req: express.Request, res: express.Response, _next: ex
     return;
   }
 
-  if (error instanceof Error && error.name === 'CheckoutError') {
+  if (error instanceof Error && error.name === 'FinalizacaoCompraError') {
     res.status(400).json({ error: error.message });
     return;
   }

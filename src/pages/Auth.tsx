@@ -109,7 +109,7 @@ export default function Auth() {
     setLocalError(null);
     
     if (!formData.email || !formData.password) {
-      setLocalError(t("auth.passwordMinLength", "Email e senha são obrigatórios"));
+      setLocalError(t("auth.passwordMinLength", "E-mail e senha são obrigatórios"));
       return false;
     }
 
@@ -191,13 +191,13 @@ export default function Auth() {
           <div>
             <img src={logo} alt="VeloTech" className="h-20 w-auto" />
             <p className="mt-10 text-sm font-semibold uppercase tracking-[0.2em] text-orange-100">
-              VeloTech Cycling Platform
+              Plataforma de Ciclismo VeloTech
             </p>
             <h2 className="mt-3 text-4xl font-black leading-tight">
-              Pedale com estilo, controle e performance.
+              Pedale com estilo, controle e desempenho.
             </h2>
             <p className="mt-5 max-w-md text-base leading-relaxed text-orange-50/95">
-              Crie sua conta para acompanhar pedidos, montar seu setup ideal e acessar recomendações personalizadas.
+              Crie sua conta para acompanhar pedidos, montar seu conjunto ideal e acessar recomendações personalizadas.
             </p>
           </div>
 
@@ -295,7 +295,7 @@ export default function Auth() {
                   id="email"
                   type="email"
                   name="email"
-                  placeholder="seu@email.com"
+                  placeholder="seu@exemplo.pt"
                   value={formData.email}
                   onChange={handleChange}
                   required
@@ -366,7 +366,7 @@ export default function Auth() {
                         />
                       </div>
                       <p className="mt-1 text-xs text-slate-300">
-                        O numero sera salvo em formato internacional ({selectedCountry.dialCode}).
+                        O número será salvo em formato internacional ({selectedCountry.dialCode}).
                       </p>
                     </div>
 

@@ -85,7 +85,7 @@ export function useAuth() {
       setProfile(response.user);
       return response;
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Erro ao fazer login';
+      const message = err instanceof Error ? err.message : 'Erro ao acessar conta';
       setError(message);
       throw err;
     } finally {

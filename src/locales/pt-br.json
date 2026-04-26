@@ -11,7 +11,7 @@
     "login": "Entrar",
     "signUp": "Registre-se",
     "signIn": "Entrar",
-    "email": "Email",
+    "email": "E-mail",
     "password": "Senha",
     "name": "Nome",
     "phone": "Telefone",
@@ -55,13 +55,13 @@
     "copyright": "© 2026 VeloTech. Todos os direitos reservados.",
     "language": "Idioma",
     "portuguese": "Português",
-    "english": "English",
+    "english": "Inglês",
     "currency": "Moeda",
     "followUs": "Siga-nos",
     "company": "Empresa",
     "about": "Sobre",
     "careers": "Carreiras",
-    "legal": "Legal",
+    "legal": "Jurídico",
     "terms": "Termos de Serviço",
     "privacy": "Política de Privacidade",
     "support": "Suporte",
@@ -72,8 +72,8 @@
     "community": "Comunidade",
     "newsletterTitle": "Comunidade VeloTech",
     "newsletterSubtitle": "Receba ofertas exclusivas, dicas de ciclismo e novos produtos",
-    "emailPlaceholder": "Digite seu email",
-    "brandDescription": "Equipamentos premium de ciclismo para todo ciclista. De estrada a montanha, temos os melhores equipamentos do mercado."
+    "emailPlaceholder": "Digite seu e-mail",
+    "brandDescription": "Equipamentos de ciclismo selecionados para todo ciclista. De estrada a montanha, temos os melhores equipamentos do mercado."
   },
   "home": {
     "hero": {
@@ -84,7 +84,7 @@
       "shopNow": "Comprar Agora",
       "watchVideo": "Assistir Vídeo",
       "stats": {
-        "products": "Produtos Premium",
+        "products": "Produtos selecionados",
         "cyclists": "Ciclistas Felizes",
         "support": "Suporte Especializado"
       }
@@ -96,7 +96,7 @@
     },
     "categories": {
       "title": "Comprar por Categoria",
-      "subtitle": "Explore nossa seleção de equipamentos premium de ciclismo para todo tipo de ciclista e terreno",
+      "subtitle": "Explore nossa seleção de equipamentos de ciclismo para todo tipo de ciclista e terreno",
       "bikes": "Bicicletas",
       "helmets": "Capacetes",
       "clothing": "Roupas e Calçados",
@@ -128,17 +128,17 @@
       "subtitle": "Junte-se a milhares de ciclistas satisfeitos que confiam na VeloTech",
       "viewMore": "Ver Mais",
       "testimonial1": {
-        "name": "Sarah Johnson",
+        "name": "Sofia Martins",
         "role": "Ciclista Profissional",
-        "content": "A Carbon Apex Road Bike transformou completamente meu treinamento. A dirigibilidade é incrível e a economia de peso é perceptível em cada subida."
+        "content": "A Bicicleta WATSON Volga transformou completamente meu treino. A dirigibilidade é incrível e a economia de peso é perceptível em cada subida."
       },
       "testimonial2": {
-        "name": "Marcus Chen",
+        "name": "Marcos Costa",
         "role": "Guerreiro de Fim de Semana",
         "content": "O melhor equipamento de ciclismo que já comprei. A qualidade é excepcional e a equipe de atendimento foi além para me ajudar a encontrar o ajuste perfeito."
       },
       "testimonial3": {
-        "name": "Emma Williams",
+        "name": "Ema Ferreira",
         "role": "Triatleta",
         "content": "De capacetes a roupas, tudo que comprei da VeloTech superou minhas expectativas. A atenção aos detalhes é o que os diferencia."
       }
@@ -204,8 +204,8 @@
     "taxVat": "Imposto (23% IVA)",
     "shipping": "Frete",
     "total": "Total",
-    "checkout": "Ir para Checkout",
-    "proceedToCheckout": "Prosseguir para Checkout",
+    "payment": "Ir para pagamento",
+    "finalizePurchase": "Finalizar compra",
     "updateCart": "Atualizar Carrinho",
     "remove": "Remover",
     "quantity": "Quantidade",
@@ -224,7 +224,7 @@
     "createAccount": "Criar Conta",
     "signInToAccount": "Entrar na Sua Conta",
     "signUpNewAccount": "Criar Nova Conta",
-    "email": "Email",
+    "email": "E-mail",
     "password": "Senha",
     "confirmPassword": "Confirmar Senha",
     "name": "Nome Completo",
@@ -239,9 +239,9 @@
     "dontHaveAccount": "Não tem conta?",
     "forgotPassword": "Esqueceu sua senha?",
     "resetPassword": "Redefinir Senha",
-    "loginSuccess": "Login realizado com sucesso!",
+    "loginSuccess": "Acesso realizado com sucesso!",
     "signupSuccess": "Conta criada com sucesso! Você já está logado.",
-    "loginError": "Email ou senha inválidos",
+    "loginError": "E-mail ou senha inválidos",
     "signupError": "Erro ao criar conta",
     "backToStore": "← Voltar para a loja",
     "rememberMe": "Lembrar de mim",
@@ -251,11 +251,11 @@
     "title": "Contato",
     "subtitle": "Tem uma dúvida? Adoraríamos ouvir de você. Envie-nos uma mensagem!",
     "phone": "Telefone",
-    "email": "Email",
+    "email": "E-mail",
     "whatsapp": "WhatsApp",
     "address": "Endereço",
     "hours": "Horário",
-    "phoneDetails": "+351 210 123 456",
+    "phoneDetails": "+351 966 601 839",
     "phoneHours": "Seg-Sex, 9h-18h",
     "whatsappDetails": "+351 966 601 839",
     "whatsappHours": "Disponível 24/7",
@@ -264,7 +264,7 @@
     "addressDetails": "Lisboa, Portugal",
     "addressType": "Sede",
     "hoursDetails": "Suporte 24/7",
-    "hoursDescription": "Suporte por chat disponível a qualquer hora",
+    "hoursDescription": "Suporte por conversa disponível a qualquer hora",
     "sendMessage": "Envie-nos uma Mensagem",
     "name": "Nome",
     "subject": "Assunto",
@@ -291,11 +291,11 @@
     "noResults": "Nenhuma pergunta encontrada",
     "noResultsFor": "Nenhum resultado encontrado para",
     "faq": "Perguntas Frequentes",
-    "liveChat": "Chat ao Vivo",
+    "liveChat": "Atendimento ao vivo",
     "liveChatDesc": "Converse com nossa equipe 24/7",
-    "startChat": "Iniciar Chat",
-    "emailSupport": "Suporte por Email",
-    "sendEmail": "Enviar Email",
+    "startChat": "Iniciar conversa",
+    "emailSupport": "Suporte por e-mail",
+    "sendEmail": "Enviar e-mail",
     "guides": "Guias",
     "guidesDesc": "Artigos e tutoriais úteis",
     "browseGuides": "Ver Guias",
@@ -306,11 +306,11 @@
     "faqItems": {
       "trackOrder": {
         "question": "Como rastrear meu pedido?",
-        "answer": "Assim que seu pedido for enviado, você receberá um número de rastreamento por email. Você pode usar este número para rastrear seu pacote em tempo real em nosso site ou diretamente com a transportadora."
+        "answer": "Assim que seu pedido for enviado, você receberá um número de rastreamento por e-mail. Você pode usar este número para rastrear seu pacote em tempo real em nosso site ou diretamente com a transportadora."
       },
       "internationalShipping": {
         "question": "Vocês fazem entregas internacionais?",
-        "answer": "Sim! Enviamos para a maioria dos países do mundo. Custos e prazos de entrega variam por localização. Você pode ver as opções de envio durante o checkout."
+        "answer": "Sim! Enviamos para a maioria dos países do mundo. Custos e prazos de entrega variam por localização. Você pode ver as opções de envio durante a finalização da compra."
       },
       "returnPolicy": {
         "question": "Qual é a política de devolução?",
@@ -326,7 +326,7 @@
       },
       "paymentSecurity": {
         "question": "Minhas informações de pagamento são seguras?",
-        "answer": "Sim! Usamos criptografia padrão da indústria e gateways de pagamento seguros. Suas informações de pagamento nunca são armazenadas em nossos servidores."
+        "answer": "Sim! Usamos criptografia padrão do setor e sistemas de pagamento seguros. Suas informações de pagamento nunca são armazenadas em nossos servidores."
       },
       "bikeSize": {
         "question": "Como encontrar o tamanho certo de bicicleta?",
@@ -342,7 +342,7 @@
       },
       "createAccount": {
         "question": "Como criar uma conta?",
-        "answer": "Clique em 'Registre-se' no cabeçalho, insira seu email e crie uma senha. Você também pode se cadastrar usando suas redes sociais."
+        "answer": "Clique em 'Registre-se' no cabeçalho, insira seu e-mail e crie uma senha. Você também pode se cadastrar usando suas redes sociais."
       }
     }
   },
@@ -370,7 +370,7 @@
     "author": "Autor",
     "date": "Data",
     "category": "Categoria",
-    "tags": "Tags",
+    "tags": "Etiquetas",
     "relatedArticles": "Artigos Relacionados",
     "shareArticle": "Compartilhar Artigo",
     "comments": "Comentários",
@@ -378,8 +378,8 @@
     "featured": "Em Destaque",
     "latestArticles": "Últimos Artigos",
     "subscribeTitle": "Assine Nosso Blog",
-    "subscribeSubtitle": "Receba as últimas dicas de ciclismo, análises de produtos e histórias direto no seu email",
-    "enterEmail": "Digite seu email"
+    "subscribeSubtitle": "Receba as últimas dicas de ciclismo, análises de produtos e histórias direto no seu e-mail",
+    "enterEmail": "Digite seu e-mail"
   },
   "errors": {
     "pageNotFound": "Página não encontrada",
@@ -406,8 +406,8 @@
     "title": "Histórico de Pedidos",
     "empty": "Nenhum pedido encontrado",
     "emptySubtitle": "Você ainda não realizou nenhuma compra.",
-    "loginRequired": "Login Necessário",
-    "loginRequiredSubtitle": "Faça login para ver seu histórico de pedidos.",
+    "loginRequired": "Acesso necessário",
+    "loginRequiredSubtitle": "Entre na sua conta para ver seu histórico de pedidos.",
     "orderId": "Pedido",
     "quantity": "Qtd",
     "totalItems": "Total de itens",

@@ -87,7 +87,7 @@ const ChatbotWidget: React.FC = () => {
 
 📞 **Contato Direto:**
 • WhatsApp: ${contactInfo.whatsapp.display}
-• Email: ${contactInfo.email.address}
+• E-mail: ${contactInfo.email.address}
 • Telefone: ${contactInfo.phone.number}`,
           timestamp: new Date(),
         },
@@ -154,7 +154,7 @@ const ChatbotWidget: React.FC = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Backend indisponivel para chatbot");
+        throw new Error("Backend indisponivel para o assistente virtual");
       }
 
       const data = (await response.json()) as {
@@ -234,7 +234,7 @@ const ChatbotWidget: React.FC = () => {
           "fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center group",
           isOpen && "scale-0 opacity-0"
         )}
-        aria-label="Abrir chat"
+        aria-label="Abrir conversa"
       >
         <MessageCircle className="w-6 h-6 group-hover:scale-110 transition-transform" />
         <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse" />

@@ -24,7 +24,7 @@ const Cookies: React.FC = () => {
               Utilizamos cookies para manter sessao ativa, lembrar preferencias e melhorar navegacao.
             </p>
             <p className="text-muted-foreground">
-              Alguns cookies sao essenciais para funcionamento de login, carrinho e historico de pedidos.
+              Alguns cookies sao essenciais para funcionamento de acesso, carrinho e historico de pedidos.
             </p>
             <p className="text-muted-foreground">
               Voce pode desativar cookies no navegador, mas algumas funcionalidades podem ficar limitadas.

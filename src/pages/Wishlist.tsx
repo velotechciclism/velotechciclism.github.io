@@ -7,10 +7,8 @@ import ProductCard from "@/components/product/ProductCard";
 import { Button } from "@/components/ui/button";
 import { products } from "@/data/products";
 import { readWishlistIds, removeFromWishlist } from "@/lib/wishlist";
-import { useLanguage } from "@/context/LanguageContext";
 
 const Wishlist: React.FC = () => {
-  const { language } = useLanguage();
   const [wishlistIds, setWishlistIds] = useState<string[]>(() => readWishlistIds());
 
   const wishlistProducts = useMemo(
@@ -33,12 +31,10 @@ const Wishlist: React.FC = () => {
               <Heart className="h-8 w-8 text-primary" />
               <div>
                 <h1 className="font-display text-3xl sm:text-4xl font-bold text-secondary-foreground">
-                  {language === "pt-br" ? "Favoritos" : "Wishlist"}
+                  Favoritos
                 </h1>
                 <p className="mt-2 text-secondary-foreground/70">
-                  {language === "pt-br"
-                    ? "Produtos salvos para comparar ou comprar depois."
-                    : "Saved products to compare or buy later."}
+                  Produtos salvos para comparar ou comprar depois.
                 </p>
               </div>
             </div>
@@ -58,7 +54,7 @@ const Wishlist: React.FC = () => {
                       onClick={() => handleRemove(product.id)}
                     >
                       <Trash2 className="mr-2 h-4 w-4" />
-                      {language === "pt-br" ? "Remover dos favoritos" : "Remove from wishlist"}
+                      Remover dos favoritos
                     </Button>
                   </div>
                 ))}
@@ -70,16 +66,14 @@ const Wishlist: React.FC = () => {
                 <ShoppingBag className="h-8 w-8 text-primary" />
               </div>
               <h2 className="font-display text-2xl font-bold text-foreground mb-3">
-                {language === "pt-br" ? "Nada salvo ainda" : "Nothing saved yet"}
+                Nada salvo ainda
               </h2>
               <p className="text-muted-foreground mb-6">
-                {language === "pt-br"
-                  ? "Use o coracao nos produtos para montar sua lista de favoritos."
-                  : "Use the heart button on products to build your wishlist."}
+                Use o coração nos produtos para montar sua lista de favoritos.
               </p>
               <Link to="/products">
                 <Button variant="yellow">
-                  {language === "pt-br" ? "Ver produtos" : "View products"}
+                  Ver produtos
                 </Button>
               </Link>
             </div>

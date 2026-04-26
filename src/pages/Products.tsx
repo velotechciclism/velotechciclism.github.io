@@ -27,10 +27,14 @@ import { useLanguage } from "@/context/LanguageContext";
 
 const categorySlugMap: Record<string, string> = {
   bicycles: "bicycles",
-  helmets: "helmets",
+  bicicletas: "bicycles",
   apparel: "apparel",
+  "roupas e calçados": "apparel",
+  "roupas e calcados": "apparel",
+  roupas: "apparel",
   accessories: "accessories",
-  parts: "parts",
+  acessórios: "accessories",
+  acessorios: "accessories",
 };
 
 function normalizeCategoryToSlug(category: string): string {
@@ -41,14 +45,10 @@ function getCategoryLabel(categoryId: string, t: (key: string) => string): strin
   switch (categoryId) {
     case "bicycles":
       return t("home.categories.bikes");
-    case "helmets":
-      return t("home.categories.helmets");
     case "apparel":
       return t("home.categories.clothing");
     case "accessories":
       return t("home.categories.accessories");
-    case "parts":
-      return t("home.categories.parts") || "Peças";
     default:
       return categoryId;
   }

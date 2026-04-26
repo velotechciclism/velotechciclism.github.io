@@ -67,7 +67,7 @@ const Contact: React.FC = () => {
       const mailToUrl = `${contactInfo.email.link}?subject=${encodeURIComponent(
         formData.subject.trim()
       )}&body=${encodeURIComponent(
-        `Nome: ${formData.name.trim()}\nEmail: ${formData.email.trim()}\n\nMensagem:\n${formData.message.trim()}`
+        `Nome: ${formData.name.trim()}\nE-mail: ${formData.email.trim()}\n\nMensagem:\n${formData.message.trim()}`
       )}`;
       window.location.href = mailToUrl;
     } finally {
@@ -209,7 +209,7 @@ const Contact: React.FC = () => {
                       onChange={handleChange}
                       required
                       className="w-full px-4 py-2 rounded-lg bg-background border border-border focus:outline-none focus:ring-2 focus:ring-primary"
-                      placeholder="seu@email.com"
+                      placeholder="seu@exemplo.pt"
                     />
                   </div>
                 </div>

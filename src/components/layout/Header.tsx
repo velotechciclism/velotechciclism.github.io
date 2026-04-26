@@ -7,7 +7,6 @@ import {
   Menu,
   X,
   ChevronDown,
-  Globe,
   LogOut,
   Package,
   Heart,
@@ -27,7 +26,7 @@ import {
 const Header: React.FC = () => {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { language, setLanguage, t } = useLanguage();
+  const { t } = useLanguage();
   const { totalItems } = useCart();
   const { isAuthenticated, profile, logout, isLoading } = useAuthContext();
 
@@ -82,32 +81,11 @@ const Header: React.FC = () => {
                 variant="ghost"
                 size="icon"
                 className="hover:bg-white/10"
-                aria-label={language === "pt-br" ? "Favoritos" : "Wishlist"}
+                aria-label="Favoritos"
               >
                 <Heart className="w-5 h-5" />
               </Button>
             </Link>
-
-            {/* Language Switcher */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="hidden sm:flex gap-1 hover:bg-white/10">
-                  <Globe className="w-4 h-4" />
-                  <span className="text-xs font-medium">
-                    {language === "en" ? "EN" : "PT"}
-                  </span>
-                  <ChevronDown className="w-3 h-3" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-popover">
-                <DropdownMenuItem onClick={() => setLanguage("en")}>
-                  🇺🇸 English
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setLanguage("pt-br")}>
-                  🇧🇷 Português
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
 
             {/* User */}
             {isAuthenticated ? (
@@ -135,7 +113,7 @@ const Header: React.FC = () => {
                   <DropdownMenuItem asChild>
                     <Link to="/wishlist" className="cursor-pointer">
                       <Heart className="w-4 h-4 mr-2" />
-                      {language === "pt-br" ? "Favoritos" : "Wishlist"}
+                      Favoritos
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -211,7 +189,7 @@ const Header: React.FC = () => {
                 className="px-4 py-3 text-sm font-medium text-foreground hover:bg-muted rounded-lg transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
-                {language === "pt-br" ? "Favoritos" : "Wishlist"}
+                Favoritos
               </Link>
               <div className="pt-4 border-t border-border mt-2">
                 {isAuthenticated ? (
@@ -233,7 +211,7 @@ const Header: React.FC = () => {
                       onClick={() => setIsMenuOpen(false)}
                     >
                       <Heart className="w-4 h-4 inline mr-2" />
-                      {language === "pt-br" ? "Favoritos" : "Wishlist"}
+                      Favoritos
                     </Link>
                     <Button 
                       variant="outline" 

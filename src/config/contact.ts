@@ -9,8 +9,8 @@ export const contactInfo = {
     link: "mailto:c.eduardoteixeiraguinsber@gmail.com"
   },
   phone: {
-    number: "+351 210 123 456",
-    link: "tel:+351210123456"
+    number: "+351 966 601 839",
+    link: "tel:+351966601839"
   },
   address: {
     display: "Lisboa, Portugal"

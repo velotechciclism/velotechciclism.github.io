@@ -21,7 +21,7 @@ interface FAQItem {
 }
 
 const Help: React.FC = () => {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
@@ -29,9 +29,9 @@ const Help: React.FC = () => {
 
   useEffect(() => {
     if (topic === "returns") {
-      setSearchQuery(language === "pt-br" ? "Devoluções" : "Returns");
+      setSearchQuery("Devoluções");
     }
-  }, [language, topic]);
+  }, [topic]);
 
   const handleOpenChat = () => {
     window.dispatchEvent(new Event("velotech:open-chatbot"));

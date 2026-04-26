@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import logo from "@/assets/logo.png";
 
 const Footer: React.FC = () => {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const API_URL = getApiUrl();
 
@@ -55,7 +55,7 @@ const Footer: React.FC = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Falha ao inscrever email");
+        throw new Error("Falha ao inscrever e-mail");
       }
 
       toast.success("Inscricao realizada com sucesso.");
@@ -204,7 +204,7 @@ const Footer: React.FC = () => {
               <p>{t("footer.developedBy")} Carlos Santos | Escola Secundária Henriques Nogueira</p>
             </div>
             <div className="flex gap-4">
-              <span>{language === "pt-br" ? "🇧🇷" : "🇺🇸"} {language === "pt-br" ? t("footer.portuguese") : t("footer.english")}</span>
+              <span>{t("footer.portuguese")}</span>
               <span>€ EUR</span>
             </div>
           </div>

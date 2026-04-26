@@ -5,12 +5,11 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/LanguageContext";
-import { BlogLanguage, blogPosts, getBlogPost } from "@/data/blogPosts";
+import { blogPosts, getBlogPost } from "@/data/blogPosts";
 
 const BlogArticle: React.FC = () => {
   const { postId } = useParams();
-  const { t, language } = useLanguage();
-  const lang = language as BlogLanguage;
+  const { t } = useLanguage();
   const post = getBlogPost(postId);
 
   if (!post) {
@@ -20,17 +19,15 @@ const BlogArticle: React.FC = () => {
         <main className="flex-1 bg-black flex items-center justify-center px-4">
           <div className="max-w-xl text-center rounded-2xl border border-white/10 bg-muted p-8">
             <h1 className="font-display text-2xl font-bold text-foreground mb-3">
-              {language === "pt-br" ? "Artigo nao encontrado" : "Article not found"}
+              Artigo não encontrado
             </h1>
             <p className="text-muted-foreground mb-6">
-              {language === "pt-br"
-                ? "O artigo que voce tentou abrir nao existe ou foi movido."
-                : "The article you tried to open does not exist or was moved."}
+              O artigo que você tentou abrir não existe ou foi movido.
             </p>
             <Link to="/blog">
               <Button variant="yellow">
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                {language === "pt-br" ? "Voltar ao blog" : "Back to blog"}
+                Voltar ao blog
               </Button>
             </Link>
           </div>
@@ -40,7 +37,7 @@ const BlogArticle: React.FC = () => {
     );
   }
 
-  const content = post.content[lang];
+  const content = post.content["pt-br"];
   const relatedPosts = blogPosts.filter((item) => item.id !== post.id).slice(0, 3);
 
   return (
@@ -51,7 +48,7 @@ const BlogArticle: React.FC = () => {
           <div className="container mx-auto px-4">
             <Link to="/blog" className="inline-flex items-center gap-2 text-sm text-primary hover:text-accent mb-8">
               <ArrowLeft className="w-4 h-4" />
-              {language === "pt-br" ? "Voltar ao blog" : "Back to blog"}
+              Voltar ao blog
             </Link>
             <div className="max-w-4xl">
               <span className="inline-flex rounded-full bg-primary/15 px-3 py-1 text-sm font-semibold text-primary">
@@ -113,7 +110,7 @@ const BlogArticle: React.FC = () => {
                 {t("blog.relatedArticles")}
               </h2>
               {relatedPosts.map((item) => {
-                const related = item.content[lang];
+                const related = item.content["pt-br"];
                 return (
                   <Link
                     key={item.id}

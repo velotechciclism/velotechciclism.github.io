@@ -4,35 +4,23 @@ import { Bike, ShieldCheck, Wrench } from "lucide-react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
-import { useLanguage } from "@/context/LanguageContext";
 
 const About: React.FC = () => {
-  const { language } = useLanguage();
-
   const values = [
     {
       icon: Bike,
-      title: language === "pt-br" ? "Equipamento para pedalar melhor" : "Gear for better rides",
-      text:
-        language === "pt-br"
-          ? "Selecionamos produtos para deslocamento, treino, trilha e estrada com foco em confianca."
-          : "We select products for commuting, training, trail, and road riding with confidence in mind.",
+      title: "Equipamento para pedalar melhor",
+      text: "Selecionamos produtos para deslocamento, treino, trilha e estrada com foco em confiança.",
     },
     {
       icon: ShieldCheck,
-      title: language === "pt-br" ? "Compra clara e segura" : "Clear and secure shopping",
-      text:
-        language === "pt-br"
-          ? "Precos, politicas e suporte pensados para o ciclista decidir sem pressa."
-          : "Prices, policies, and support designed to help riders decide without pressure.",
+      title: "Compra clara e segura",
+      text: "Preços, políticas e suporte pensados para o ciclista decidir sem pressa.",
     },
     {
       icon: Wrench,
-      title: language === "pt-br" ? "Cultura de manutencao" : "Maintenance culture",
-      text:
-        language === "pt-br"
-          ? "Guias e atendimento ajudam cada cliente a cuidar melhor do proprio setup."
-          : "Guides and support help every customer take better care of their setup.",
+      title: "Cultura de manutenção",
+      text: "Guias e atendimento ajudam cada cliente a cuidar melhor do próprio conjunto.",
     },
   ];
 
@@ -43,12 +31,10 @@ const About: React.FC = () => {
         <section className="bg-secondary py-14">
           <div className="container mx-auto px-4">
             <h1 className="font-display text-4xl font-black text-secondary-foreground">
-              {language === "pt-br" ? "Sobre a VeloTech" : "About VeloTech"}
+              Sobre a VeloTech
             </h1>
             <p className="mt-4 max-w-3xl text-lg text-secondary-foreground/70">
-              {language === "pt-br"
-                ? "A VeloTech nasceu para aproximar ciclistas de equipamentos confiaveis, informacao simples e uma experiencia de compra direta."
-                : "VeloTech was created to connect riders with reliable gear, simple information, and a direct shopping experience."}
+              A VeloTech nasceu para aproximar ciclistas de equipamentos confiáveis, informação simples e uma experiência de compra direta.
             </p>
           </div>
         </section>
@@ -66,19 +52,17 @@ const About: React.FC = () => {
 
           <div className="mt-10 rounded-2xl border border-primary/25 bg-gradient-to-r from-primary/10 to-accent/10 p-8">
             <h2 className="font-display text-2xl font-bold text-foreground">
-              {language === "pt-br" ? "Pronto para montar seu setup?" : "Ready to build your setup?"}
+              Pronto para montar seu conjunto?
             </h2>
             <p className="mt-3 max-w-2xl text-muted-foreground">
-              {language === "pt-br"
-                ? "Explore o catalogo ou fale com a equipe para encontrar o equipamento ideal."
-                : "Explore the catalog or contact the team to find the right equipment."}
+              Explore o catálogo ou fale com a equipe para encontrar o equipamento ideal.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link to="/products">
-                <Button variant="yellow">{language === "pt-br" ? "Ver produtos" : "View products"}</Button>
+                <Button variant="yellow">Ver produtos</Button>
               </Link>
               <Link to="/contact">
-                <Button variant="outline">{language === "pt-br" ? "Falar conosco" : "Contact us"}</Button>
+                <Button variant="outline">Falar conosco</Button>
               </Link>
             </div>
           </div>

@@ -8,7 +8,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useLanguage } from "@/context/LanguageContext";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -33,34 +32,23 @@ function isIosDevice(): boolean {
 }
 
 const PwaInstallPrompt = () => {
-  const { language } = useLanguage();
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isStandalone, setIsStandalone] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [showIosDialog, setShowIosDialog] = useState(false);
   const [dismissed, setDismissed] = useState(false);
 
-  const copy = useMemo(() => {
-    if (language === "pt-br") {
-      return {
-        button: "Instalar app",
-        title: "Instalar VeloTech",
-        description: "No iPhone, use o menu de compartilhamento do Safari e toque em Adicionar a Tela de Inicio.",
-        stepOne: "Toque no icone de compartilhar.",
-        stepTwo: "Escolha Adicionar a Tela de Inicio.",
-        close: "Entendi",
-      };
-    }
-
-    return {
-      button: "Install app",
-      title: "Install VeloTech",
-      description: "On iPhone, use Safari's share menu and tap Add to Home Screen.",
-      stepOne: "Tap the share icon.",
-      stepTwo: "Choose Add to Home Screen.",
-      close: "Got it",
-    };
-  }, [language]);
+  const copy = useMemo(
+    () => ({
+      button: "Instalar aplicativo",
+      title: "Instalar VeloTech",
+      description: "No iPhone, use o menu de compartilhamento do Safari e toque em Adicionar à Tela de Início.",
+      stepOne: "Toque no ícone de compartilhar.",
+      stepTwo: "Escolha Adicionar à Tela de Início.",
+      close: "Entendi",
+    }),
+    []
+  );
 
   useEffect(() => {
     setIsStandalone(isStandaloneDisplay());

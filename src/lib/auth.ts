@@ -129,10 +129,10 @@ export async function loginUser(email: string, password: string): Promise<AuthRe
     });
 
     if (!response.ok) {
-      throw new Error(await readErrorMessage(response, 'Erro ao fazer login'));
+      throw new Error(await readErrorMessage(response, 'Erro ao acessar conta'));
     }
 
-    return readJsonOrThrow<AuthResponse>(response, 'Erro ao fazer login');
+    return readJsonOrThrow<AuthResponse>(response, 'Erro ao acessar conta');
   } catch (error) {
     if (isBackendUnavailableError(error) && canUseLocalAuthFallback()) {
       return loginLocalUser(email, password);

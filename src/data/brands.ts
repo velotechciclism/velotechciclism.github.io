@@ -48,7 +48,7 @@ export const brandsData: Brand[] = [
     name: "Castelli",
     logo: "/logos/castelli.jpeg",
     url: "https://www.castelli-cycling.com",
-    description: "Vestuário de ciclismo de performance",
+    description: "Vestuário de ciclismo de alto desempenho",
   },
   {
     id: "giro",

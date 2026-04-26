@@ -1,8 +1,7 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useEffect } from 'react';
 import ptBrTranslations from '@/locales/pt-br.json';
-import enTranslations from '@/locales/en.json';
 
-type Language = 'pt-br' | 'en';
+type Language = 'pt-br';
 
 interface LanguageContextType {
   language: Language;
@@ -18,46 +17,22 @@ interface TranslationTree {
   [key: string]: TranslationValue;
 }
 
+const language: Language = 'pt-br';
 const translations: Record<Language, TranslationTree> = {
   'pt-br': ptBrTranslations || {},
-  'en': enTranslations || {},
 };
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [language, setLanguageState] = useState<Language>('en');
-  const [isInitialized, setIsInitialized] = useState(false);
-
   useEffect(() => {
     try {
-      const saved = localStorage.getItem('language');
-      if (saved === 'pt-br' || saved === 'en') {
-        setLanguageState(saved);
-      } else {
-        const browserLang = navigator.language;
-        if (browserLang.startsWith('pt')) {
-          setLanguageState('pt-br');
-        }
-      }
+      localStorage.setItem('language', language);
+      document.documentElement.lang = 'pt-BR';
     } catch {
-      // Fallback para ambientes sem localStorage
+      // Fallback para ambientes sem localStorage.
     }
-    setIsInitialized(true);
   }, []);
 
-  useEffect(() => {
-    if (isInitialized) {
-      try {
-        localStorage.setItem('language', language);
-        document.documentElement.lang = language;
-      } catch {
-        // Ignore localStorage errors
-      }
-    }
-  }, [language, isInitialized]);
-
-  const setLanguage = (lang: Language) => {
-    setLanguageState(lang);
-  };
+  const setLanguage = () => undefined;
 
   const t = (key: string, defaultValue?: string): string => {
     const keys = key.split('.');
@@ -84,7 +59,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 export const useLanguage = () => {
   const context = useContext(LanguageContext);
   if (context === undefined) {
-    throw new Error('useLanguage must be used within a LanguageProvider');
+    throw new Error('useLanguage deve ser usado dentro de LanguageProvider');
   }
   return context;
 };

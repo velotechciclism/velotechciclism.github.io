@@ -83,9 +83,9 @@ const Cart: React.FC = () => {
     toast.error("Cupom invalido. Tente VELO10 ou BIKE15.");
   };
 
-  const handleCheckout = async () => {
+  const handleFinalizarCompra = async () => {
     if (!isAuthenticated) {
-      toast.error("Faça login para finalizar a compra");
+      toast.error("Entre na sua conta para finalizar a compra");
       return;
     }
 
@@ -294,9 +294,9 @@ const Cart: React.FC = () => {
                   </Button>
                 </div>
 
-                {/* Checkout Button */}
-                <Button variant="yellow" size="lg" className="w-full" onClick={handleCheckout}>
-                  {t("cart.proceedToCheckout")}
+                {/* Botão de finalização */}
+                <Button variant="yellow" size="lg" className="w-full" onClick={handleFinalizarCompra}>
+                  {t("cart.finalizePurchase")}
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
 

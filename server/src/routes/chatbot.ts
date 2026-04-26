@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { prisma } from '../prisma.js';
+import { seedCategories, seedProducts } from '../data/catalogSeed.js';
 
 const chatbotRequestSchema = z.object({
   message: z.string().min(1, 'Mensagem obrigatoria').max(1200, 'Mensagem muito longa'),
@@ -7,13 +8,19 @@ const chatbotRequestSchema = z.object({
   sessionId: z.string().min(3, 'Sessao invalida').max(128, 'Sessao invalida'),
 });
 
-const catalog = [
-  { id: '1', name: 'AeroSpeed Pro Helmet', category: 'Helmets', price: 74.99, tags: ['capacete', 'helmet', 'seguranca', 'mips'] },
-  { id: '2', name: 'ProRace Elite Jersey', category: 'Apparel', price: 49.99, tags: ['camisa', 'jersey', 'roupa', 'vestuario'] },
-  { id: '3', name: 'Carbon Apex Road Bike', category: 'Bicycles', price: 1599.99, tags: ['bicicleta', 'bike', 'speed', 'estrada'] },
-  { id: '4', name: 'GripMax Pro Gloves', category: 'Accessories', price: 19.99, tags: ['luva', 'gloves', 'acessorio'] },
-  { id: '7', name: 'MTB Trail Blazer', category: 'Bicycles', price: 1349.99, tags: ['mtb', 'trilha', 'mountain bike'] },
-];
+const categoryNameBySlug = new Map(seedCategories.map((category) => [category.slug, category.name]));
+
+const catalog = seedProducts.map((product) => ({
+  id: product.id,
+  name: product.name,
+  category: categoryNameBySlug.get(product.categorySlug) || product.categorySlug,
+  price: product.price,
+  tags: [
+    product.brandName,
+    product.description,
+    ...Object.values(product.specs || {}),
+  ],
+}));
 
 function findProducts(query: string) {
   const tokens = query
@@ -93,7 +100,7 @@ function buildContextualMessage(message: string, recentUserMessages: string[]): 
 function generateAssistantReply(message: string, products: ReturnType<typeof findProducts>) {
   const normalized = normalizeText(message);
 
-  const isGreeting = hasAny(normalized, ['oi', 'ola', 'hello', 'bom dia', 'boa tarde', 'boa noite']);
+  const isGreeting = hasAny(normalized, ['oi', 'ola', 'bom dia', 'boa tarde', 'boa noite']);
   const asksHelp = hasAny(normalized, ['me ajuda', 'me ajude', 'ajuda', 'suporte']);
   const asksCatalog = hasAny(normalized, [
     'quais itens tem',
@@ -106,11 +113,11 @@ function generateAssistantReply(message: string, products: ReturnType<typeof fin
   const asksSupportContact = hasAny(normalized, ['contato', 'atendente', 'humano', 'whatsapp', 'email', 'telefone']);
 
   if (asksSupportContact) {
-    return 'Posso te dar suporte por aqui e tambem pelos canais diretos: WhatsApp +351 966 601 839, email c.eduardoteixeiraguinsber@gmail.com e telefone +351 210 123 456.';
+    return 'Posso te dar suporte por aqui e tambem pelos canais diretos: WhatsApp +351 966 601 839, e-mail c.eduardoteixeiraguinsber@gmail.com e telefone +351 966 601 839.';
   }
 
   if ((isGreeting || asksHelp) && products.length === 0) {
-    return 'Oi! Posso te ajudar a escolher por tipo de uso (urbano, estrada, trilha), categoria e faixa de preco. Exemplos: "quais itens tem", "bike ate 900", "capacete para estrada".';
+    return 'Oi! Posso te ajudar a escolher por tipo de uso (urbano, estrada, trilha), categoria e faixa de preco. Exemplos: "quais itens tem", "bicicleta ate 300", "luvas para ciclismo".';
   }
 
   if (asksCatalog) {
@@ -119,7 +126,7 @@ function generateAssistantReply(message: string, products: ReturnType<typeof fin
       .map((p) => `- ${p.name} (${p.category}) por EUR ${p.price.toFixed(2)}`)
       .join('\n');
 
-    return `Temos bicicletas, capacetes, vestuario e acessorios. Aqui vai uma amostra:\n${sample}\n\nSe quiser, eu filtro agora por categoria ou faixa de preco.`;
+    return `Temos bicicletas, roupas e calcados e acessorios. Aqui vai uma amostra:\n${sample}\n\nSe quiser, eu filtro agora por categoria ou faixa de preco.`;
   }
 
   if (products.length > 0) {
@@ -130,7 +137,7 @@ function generateAssistantReply(message: string, products: ReturnType<typeof fin
     return `Encontrei algumas opcoes que combinam com o que voce pediu:\n${productLines}\n\nSe quiser, eu te ajudo a comparar por categoria, faixa de preco e uso (urbano, estrada ou trilha).`;
   }
 
-  if (hasAny(normalized, ['frete', 'envio', 'entrega', 'shipping'])) {
+  if (hasAny(normalized, ['frete', 'envio', 'entrega'])) {
     return 'O frete e calculado no carrinho com base no total e no endereco. Posso te ajudar a simular uma compra para ver o valor final.';
   }
 
@@ -138,7 +145,7 @@ function generateAssistantReply(message: string, products: ReturnType<typeof fin
     return 'Aceitamos cartao, MB WAY, multibanco e transferencia. Se quiser, eu te sugiro os produtos e voce finaliza no carrinho.';
   }
 
-  return 'Posso te ajudar a escolher produtos de ciclismo por objetivo, nivel e faixa de preco. Me diga se voce procura bicicleta, capacete, roupas ou acessorios.';
+  return 'Posso te ajudar a escolher produtos de ciclismo por objetivo, nivel e faixa de preco. Me diga se voce procura bicicleta, roupas, calcados ou acessorios.';
 }
 
 export async function handleChatbotMessage(input: unknown) {
