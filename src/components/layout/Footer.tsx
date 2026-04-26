@@ -17,10 +17,8 @@ const Footer: React.FC = () => {
   const footerLinks = {
     shop: [
       { name: t("home.categories.bikes"), href: "/products?category=bicycles" },
-      { name: t("home.categories.helmets"), href: "/products?category=helmets" },
       { name: t("home.categories.clothing"), href: "/products?category=apparel" },
       { name: t("home.categories.accessories"), href: "/products?category=accessories" },
-      { name: t("home.categories.parts"), href: "/products?category=parts" },
     ],
     support: [
       { name: t("common.help"), href: "/help" },

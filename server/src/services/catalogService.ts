@@ -13,17 +13,40 @@ function slugify(value: string): string {
 }
 
 export async function ensureCatalogSeeded(): Promise<void> {
+  const seedCategorySlugs = seedCategories.map((category) => category.slug);
+  const seedProductIds = seedProducts.map((product) => product.id);
+
+  await prisma.category.updateMany({
+    where: {
+      slug: { notIn: seedCategorySlugs },
+    },
+    data: {
+      isActive: false,
+    },
+  });
+
+  await prisma.product.updateMany({
+    where: {
+      id: { notIn: seedProductIds },
+    },
+    data: {
+      isActive: false,
+    },
+  });
+
   for (const category of seedCategories) {
     await prisma.category.upsert({
       where: { slug: category.slug },
       update: {
         name: category.name,
         imageUrl: category.imageUrl,
+        isActive: true,
       },
       create: {
         slug: category.slug,
         name: category.name,
         imageUrl: category.imageUrl,
+        isActive: true,
       },
     });
   }
@@ -64,6 +87,7 @@ export async function ensureCatalogSeeded(): Promise<void> {
         reviewCount: item.reviewCount,
         isNew: Boolean(item.isNew),
         isFeatured: Boolean(item.isFeatured),
+        isActive: true,
       },
       create: {
         id: item.id,
@@ -79,6 +103,7 @@ export async function ensureCatalogSeeded(): Promise<void> {
         reviewCount: item.reviewCount,
         isNew: Boolean(item.isNew),
         isFeatured: Boolean(item.isFeatured),
+        isActive: true,
       },
     });
 

@@ -7,7 +7,16 @@ const router = express.Router();
 router.get('/meta', asyncHandler(async (_req: Request, res: Response) => {
   const [categories, brands] = await Promise.all([
     prisma.category.findMany({ where: { isActive: true }, orderBy: { name: 'asc' } }),
-    prisma.brand.findMany({ orderBy: { name: 'asc' } }),
+    prisma.brand.findMany({
+      where: {
+        products: {
+          some: {
+            isActive: true,
+          },
+        },
+      },
+      orderBy: { name: 'asc' },
+    }),
   ]);
 
   res.json({
