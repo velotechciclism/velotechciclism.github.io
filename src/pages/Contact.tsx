@@ -111,7 +111,7 @@ const Contact: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-1 bg-green-950/90">
+      <main className="flex-1 bg-black">
         {/* Page Header */}
         <div className="bg-secondary py-12">
           <div className="container mx-auto px-4">

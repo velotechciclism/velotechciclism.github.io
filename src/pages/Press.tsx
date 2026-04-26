@@ -12,7 +12,7 @@ const Press: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-1 bg-green-950/95">
+      <main className="flex-1 bg-black">
         <section className="bg-secondary py-14">
           <div className="container mx-auto px-4">
             <h1 className="font-display text-4xl font-black text-secondary-foreground">

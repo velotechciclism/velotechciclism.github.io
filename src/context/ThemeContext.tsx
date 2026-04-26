@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect } from "react";
 
-export type Theme = "light" | "green" | "dark";
+export type Theme = "dark";
 
 interface ThemeContextType {
   theme: Theme;
@@ -9,38 +9,21 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  const [theme, setThemeState] = useState<Theme>(() => {
-    // Recuperar tema salvo do localStorage ou usar "light" como padrão
-    if (typeof window !== "undefined") {
-      const savedTheme = localStorage.getItem("theme") as Theme | null;
-      return savedTheme || "light";
-    }
-    return "light";
-  });
-
+export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   useEffect(() => {
-    // Aplicar tema ao documento
     const root = document.documentElement;
-    
-    // Remover todas as classes de tema
-    root.classList.remove("light", "green", "dark");
-    
-    // Adicionar a classe do tema atual
-    root.classList.add(theme);
-    
-    // Salvar no localStorage
-    localStorage.setItem("theme", theme);
-  }, [theme]);
 
-  const setTheme = (newTheme: Theme) => {
-    setThemeState(newTheme);
+    root.classList.remove("light", "green", "dark");
+    root.classList.add("dark");
+    localStorage.setItem("theme", "dark");
+  }, []);
+
+  const setTheme = () => {
+    localStorage.setItem("theme", "dark");
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
+    <ThemeContext.Provider value={{ theme: "dark", setTheme }}>
       {children}
     </ThemeContext.Provider>
   );

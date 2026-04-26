@@ -12,7 +12,6 @@ import {
   Package,
   Heart,
 } from "lucide-react";
-import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
 import { useAuthContext } from "@/context/AuthContext";
@@ -88,9 +87,6 @@ const Header: React.FC = () => {
                 <Heart className="w-5 h-5" />
               </Button>
             </Link>
-
-            {/* Theme Switcher */}
-            <ThemeSwitcher />
 
             {/* Language Switcher */}
             <DropdownMenu>

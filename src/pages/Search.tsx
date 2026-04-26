@@ -36,7 +36,7 @@ const Search: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-1 bg-green-950/95">
+      <main className="flex-1 bg-black">
         <section className="bg-secondary py-12">
           <div className="container mx-auto px-4">
             <h1 className="font-display text-3xl sm:text-4xl font-bold text-secondary-foreground mb-2">

@@ -17,7 +17,7 @@ const BlogArticle: React.FC = () => {
     return (
       <div className="min-h-screen flex flex-col">
         <Header />
-        <main className="flex-1 bg-green-950/95 flex items-center justify-center px-4">
+        <main className="flex-1 bg-black flex items-center justify-center px-4">
           <div className="max-w-xl text-center rounded-2xl border border-white/10 bg-muted p-8">
             <h1 className="font-display text-2xl font-bold text-foreground mb-3">
               {language === "pt-br" ? "Artigo nao encontrado" : "Article not found"}
@@ -46,7 +46,7 @@ const BlogArticle: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-1 bg-green-950/95">
+      <main className="flex-1 bg-black">
         <section className="bg-secondary py-10">
           <div className="container mx-auto px-4">
             <Link to="/blog" className="inline-flex items-center gap-2 text-sm text-primary hover:text-accent mb-8">
