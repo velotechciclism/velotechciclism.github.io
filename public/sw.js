@@ -1,4 +1,4 @@
-const CACHE_NAME = "velotech-pwa-v1";
+const CACHE_NAME = "velotech-pwa-v2";
 const APP_SHELL = [
   "/",
   "/index.html",

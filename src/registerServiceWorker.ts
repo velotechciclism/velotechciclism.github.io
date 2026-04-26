@@ -6,8 +6,11 @@ export function registerServiceWorker() {
   window.addEventListener("load", () => {
     const swUrl = `${import.meta.env.BASE_URL}sw.js`;
 
-    navigator.serviceWorker.register(swUrl).catch((error) => {
-      console.warn("Nao foi possivel registrar o service worker:", error);
-    });
+    navigator.serviceWorker
+      .register(swUrl)
+      .then((registration) => registration.update())
+      .catch((error) => {
+        console.warn("Nao foi possivel registrar o service worker:", error);
+      });
   });
 }

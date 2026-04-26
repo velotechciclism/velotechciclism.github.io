@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,7 +7,8 @@
     <meta name="description" content="VeloTech - loja de equipamentos de ciclismo, bicicletas, roupas e acessórios.">
     <meta name="author" content="VeloTech" />
     <meta name="application-name" content="VeloTech" />
-    <meta name="theme-color" content="#facc15" />
+    <meta name="theme-color" content="#030303" />
+    <meta name="color-scheme" content="dark" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="VeloTech" />
@@ -27,6 +28,13 @@
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="/pwa/icon-192.png" />
   <link rel="manifest" href="/manifest.webmanifest" />
+  <script>
+    document.documentElement.classList.remove("light", "green");
+    document.documentElement.classList.add("dark");
+    try {
+      localStorage.setItem("theme", "dark");
+    } catch (_) {}
+  </script>
 </head>
 
   <body>
