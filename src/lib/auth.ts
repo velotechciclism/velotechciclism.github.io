@@ -1,6 +1,33 @@
-import { getApiUrl, getBackendUnavailableMessage } from './api';
+import { getApiUrl, getBackendUnavailableMessage, isLocalhost } from './api';
+import {
+  getLocalProfile,
+  isLocalAuthToken,
+  loginLocalUser,
+  registerLocalUser,
+} from './localAuth';
 
 const API_URL = getApiUrl();
+const INVALID_API_RESPONSE_MESSAGE =
+  'Resposta invalida da API. Verifique se VITE_API_URL aponta para o backend correto.';
+
+class BackendUnavailableError extends Error {
+  constructor(message = INVALID_API_RESPONSE_MESSAGE) {
+    super(message);
+    this.name = 'BackendUnavailableError';
+  }
+}
+
+function isBackendUnavailableError(error: unknown): boolean {
+  return error instanceof BackendUnavailableError || error instanceof TypeError;
+}
+
+function canUseLocalAuthFallback(): boolean {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  return !isLocalhost(window.location.hostname);
+}
 
 async function readErrorMessage(response: Response, fallbackMessage: string): Promise<string> {
   const contentType = response.headers.get('content-type') || '';
@@ -18,20 +45,32 @@ async function readErrorMessage(response: Response, fallbackMessage: string): Pr
     const text = await response.text();
 
     if (text.trim().startsWith('<')) {
-      return 'Resposta invalida da API. Verifique se VITE_API_URL aponta para o backend correto.';
+      throw new BackendUnavailableError();
     }
 
     return text || fallbackMessage;
-  } catch {
+  } catch (error) {
+    if (error instanceof BackendUnavailableError) {
+      throw error;
+    }
+
     return fallbackMessage;
   }
 }
 
 async function readJsonOrThrow<T>(response: Response, fallbackMessage: string): Promise<T> {
+  const contentType = response.headers.get('content-type') || '';
+
+  if (!contentType.includes('application/json')) {
+    throw new BackendUnavailableError();
+  }
+
   try {
     return (await response.json()) as T;
   } catch {
-    throw new Error('Resposta invalida da API. Verifique se o backend esta ativo e respondendo JSON.');
+    throw new BackendUnavailableError(
+      fallbackMessage || 'Resposta invalida da API. Verifique se o backend esta ativo e respondendo JSON.'
+    );
   }
 }
 
@@ -69,9 +108,14 @@ export async function registerUser(
 
     return readJsonOrThrow<AuthResponse>(response, 'Erro ao registrar');
   } catch (error) {
-    if (error instanceof TypeError && error.message === 'Failed to fetch') {
+    if (isBackendUnavailableError(error) && canUseLocalAuthFallback()) {
+      return registerLocalUser(email, name, password, phone, address);
+    }
+
+    if (error instanceof TypeError) {
       throw new Error(getBackendUnavailableMessage());
     }
+
     throw error;
   }
 }
@@ -90,14 +134,29 @@ export async function loginUser(email: string, password: string): Promise<AuthRe
 
     return readJsonOrThrow<AuthResponse>(response, 'Erro ao fazer login');
   } catch (error) {
-    if (error instanceof TypeError && error.message === 'Failed to fetch') {
+    if (isBackendUnavailableError(error) && canUseLocalAuthFallback()) {
+      return loginLocalUser(email, password);
+    }
+
+    if (error instanceof TypeError) {
       throw new Error(getBackendUnavailableMessage());
     }
+
     throw error;
   }
 }
 
 export async function getProfile(token: string): Promise<User> {
+  if (isLocalAuthToken(token)) {
+    const localUser = getLocalProfile(token);
+
+    if (!localUser) {
+      throw new Error('Sessao local expirada');
+    }
+
+    return localUser;
+  }
+
   try {
     const response = await fetch(`${API_URL}/auth/me`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -109,9 +168,10 @@ export async function getProfile(token: string): Promise<User> {
 
     return readJsonOrThrow<User>(response, 'Erro ao buscar perfil');
   } catch (error) {
-    if (error instanceof TypeError && error.message === 'Failed to fetch') {
+    if (error instanceof TypeError) {
       throw new Error(getBackendUnavailableMessage());
     }
+
     throw error;
   }
 }
@@ -127,3 +187,5 @@ export function getAuthToken(): string | null {
 export function clearAuthToken() {
   localStorage.removeItem('authToken');
 }
+
+export { isLocalAuthToken };

@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuthContext } from '@/context/AuthContext';
 import { getApiUrl } from '@/lib/api';
-import { getAuthToken } from '@/lib/auth';
+import { getAuthToken, isLocalAuthToken } from '@/lib/auth';
+import { getLocalOrders } from '@/lib/localOrders';
 
 interface OrderItem {
   id: string;
@@ -46,6 +47,11 @@ export function useOrders() {
       const token = getAuthToken();
 
       if (token) {
+        if (isLocalAuthToken(token)) {
+          setOrders(getLocalOrders(user.id));
+          return;
+        }
+
         const response = await fetch(`${apiUrl}/orders/me`, {
           headers: {
             Authorization: `Bearer ${token}`,
