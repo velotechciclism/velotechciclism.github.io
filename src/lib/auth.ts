@@ -59,7 +59,7 @@ async function readErrorMessage(response: Response, fallbackMessage: string): Pr
   try {
     const text = await response.text();
 
-    if (text.trim().startsWith('<')) {
+    if (!text.trim() || text.trim().startsWith('<')) {
       throw new BackendUnavailableError();
     }
 
