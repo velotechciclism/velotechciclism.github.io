@@ -1,15 +1,18 @@
 <!doctype html>
-<html lang="en">
+<html lang="pt-BR" class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- TODO: Set the document title to the name of your application -->
     <title>VeloTech</title>
-    <meta name="description" content="Lovable Generated Project">
-    <meta name="author" content="Lovable" />
-
-    <!-- TODO: Update og:title to match your application name -->
-    
+    <meta name="description" content="VeloTech - loja de equipamentos de ciclismo, bicicletas, roupas e acessórios.">
+    <meta name="author" content="VeloTech" />
+    <meta name="application-name" content="VeloTech" />
+    <meta name="theme-color" content="#030303" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="VeloTech" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     
     <meta property="og:type" content="website" />
     <meta property="og:image" content="https://storage.googleapis.com/gpt-engineer-file-uploads/JyeNnCCXsDgAX9Zuo3qhdUZfzIy2/social-images/social-1768259984180-Captura de tela 2026-01-12 201927.png">
@@ -23,8 +26,17 @@
   <meta name="twitter:description" content="VeloTech - Equipamentos de Ciclismo">
   
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-  <script type="module" crossorigin src="/assets/index-CkFO1Mhp.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-Dy_PtBfd.css">
+  <link rel="apple-touch-icon" href="/pwa/icon-192.png" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <script>
+    document.documentElement.classList.remove("light", "green");
+    document.documentElement.classList.add("dark");
+    try {
+      localStorage.setItem("theme", "dark");
+    } catch (_) {}
+  </script>
+  <script type="module" crossorigin src="/assets/index-DUtUiycB.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-BcGLO0vu.css">
 </head>
 
   <body>
