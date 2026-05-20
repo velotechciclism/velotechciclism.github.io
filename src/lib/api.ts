@@ -31,5 +31,5 @@ export function getBackendUnavailableMessage(): string {
     return `Servidor nao esta disponivel. Verifique se o backend esta rodando em ${apiUrl}`;
   }
 
-  return 'Servidor indisponivel. Verifique a configuracao de VITE_API_URL no deploy.';
+  return 'Servidor indisponivel no momento. Tente novamente em alguns instantes.';
 }
