@@ -3,6 +3,8 @@ import type { AuthResponse, User } from './auth';
 const AUTH_TOKEN_KEY = 'authToken';
 const LOCAL_USERS_KEY = 'velotech:local-auth-users';
 const LOCAL_TOKEN_PREFIX = 'local-auth:';
+const PBKDF2_PREFIX = 'pbkdf2-sha256';
+const PBKDF2_ITERATIONS = 310000;
 
 interface LocalUserRecord extends User {
   passwordHash: string;
@@ -55,6 +57,53 @@ function toHex(buffer: ArrayBuffer): string {
     .join('');
 }
 
+function toBase64(buffer: ArrayBuffer): string {
+  return btoa(String.fromCharCode(...new Uint8Array(buffer)));
+}
+
+function fromBase64(value: string): Uint8Array {
+  return Uint8Array.from(atob(value), (char) => char.charCodeAt(0));
+}
+
+function createSalt(): string {
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    const salt = new Uint8Array(16);
+    crypto.getRandomValues(salt);
+    return toBase64(salt.buffer);
+  }
+
+  return Math.random().toString(36).slice(2, 18);
+}
+
+async function hashLegacyPassword(email: string, password: string): Promise<string> {
+  const value = `${normalizeEmail(email)}:${password}`;
+
+  if (typeof crypto !== 'undefined' && crypto.subtle) {
+    const bytes = new TextEncoder().encode(value);
+    return `sha256:${toHex(await crypto.subtle.digest('SHA-256', bytes))}`;
+  }
+
+  return fallbackHash(value);
+}
+
+async function derivePasswordHash(value: string, salt: string): Promise<string> {
+  const passwordBytes = new TextEncoder().encode(value);
+  const saltBytes = fromBase64(salt);
+  const key = await crypto.subtle.importKey('raw', passwordBytes, 'PBKDF2', false, ['deriveBits']);
+  const derivedBits = await crypto.subtle.deriveBits(
+    {
+      name: 'PBKDF2',
+      hash: 'SHA-256',
+      salt: saltBytes,
+      iterations: PBKDF2_ITERATIONS,
+    },
+    key,
+    256
+  );
+
+  return toBase64(derivedBits);
+}
+
 function fallbackHash(value: string): string {
   let hash = 2166136261;
 
@@ -70,11 +119,39 @@ async function hashPassword(email: string, password: string): Promise<string> {
   const value = `${normalizeEmail(email)}:${password}`;
 
   if (typeof crypto !== 'undefined' && crypto.subtle) {
-    const bytes = new TextEncoder().encode(value);
-    return `sha256:${toHex(await crypto.subtle.digest('SHA-256', bytes))}`;
+    const salt = createSalt();
+    const hash = await derivePasswordHash(value, salt);
+    return `${PBKDF2_PREFIX}:${PBKDF2_ITERATIONS}:${salt}:${hash}`;
   }
 
   return fallbackHash(value);
+}
+
+async function verifyPassword(
+  email: string,
+  password: string,
+  storedHash: string
+): Promise<{ matches: boolean; needsUpgrade: boolean }> {
+  if (
+    storedHash.startsWith(`${PBKDF2_PREFIX}:`) &&
+    typeof crypto !== 'undefined' &&
+    crypto.subtle
+  ) {
+    const [, iterations, salt, expectedHash] = storedHash.split(':');
+
+    if (!iterations || !salt || !expectedHash || Number(iterations) !== PBKDF2_ITERATIONS) {
+      return { matches: false, needsUpgrade: false };
+    }
+
+    const computedHash = await derivePasswordHash(`${normalizeEmail(email)}:${password}`, salt);
+    return { matches: computedHash === expectedHash, needsUpgrade: false };
+  }
+
+  const legacyHash = await hashLegacyPassword(email, password);
+  return {
+    matches: legacyHash === storedHash,
+    needsUpgrade: legacyHash === storedHash,
+  };
 }
 
 function createLocalToken(userId: number): string {
@@ -157,11 +234,23 @@ export async function registerLocalUser(
 export async function loginLocalUser(email: string, password: string): Promise<AuthResponse> {
   const normalizedEmail = normalizeEmail(email);
   const users = readLocalUsers();
-  const record = users.find((user) => normalizeEmail(user.email) === normalizedEmail);
-  const attemptedHash = await hashPassword(normalizedEmail, password);
+  const recordIndex = users.findIndex((user) => normalizeEmail(user.email) === normalizedEmail);
+  const record = recordIndex >= 0 ? users[recordIndex] : undefined;
+  const { matches, needsUpgrade } = record
+    ? await verifyPassword(normalizedEmail, password, record.passwordHash)
+    : { matches: false, needsUpgrade: false };
 
-  if (!record || record.passwordHash !== attemptedHash) {
+  if (!record || !matches) {
     throw new Error('E-mail ou senha invalidos');
+  }
+
+  if (needsUpgrade) {
+    const upgradedUsers = [...users];
+    upgradedUsers[recordIndex] = {
+      ...record,
+      passwordHash: await hashPassword(normalizedEmail, password),
+    };
+    writeLocalUsers(upgradedUsers);
   }
 
   const user = stripPassword(record);

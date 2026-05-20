@@ -231,7 +231,7 @@
     "phone": "Telefone",
     "address": "Endereço",
     "passwordsDoNotMatch": "As senhas não correspondem",
-    "passwordMinLength": "Senha deve ter pelo menos 6 caracteres",
+    "passwordMinLength": "Senha deve ter pelo menos 8 caracteres",
     "nameMinLength": "Nome deve ter pelo menos 3 caracteres",
     "signIn": "Entrar",
     "signUp": "Registre-se",

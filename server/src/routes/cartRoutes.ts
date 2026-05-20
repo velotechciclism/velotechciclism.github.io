@@ -17,8 +17,8 @@ const updateItemSchema = z.object({
 });
 
 const checkoutSchema = z.object({
-  paymentMethod: z.string().min(1),
-  shippingAddress: z.string().min(3),
+  paymentMethod: z.string().trim().min(1).max(40),
+  shippingAddress: z.string().trim().min(3).max(300),
   promoCode: z.string().trim().max(30).optional(),
 });
 

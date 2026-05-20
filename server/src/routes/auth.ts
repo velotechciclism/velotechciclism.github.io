@@ -7,7 +7,7 @@ import { prisma } from '../prisma.js';
 export const registerSchema = z.object({
   email: z.string().email('E-mail inválido'),
   name: z.string().min(3, 'Nome deve ter pelo menos 3 caracteres'),
-  password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
+  password: z.string().min(8, 'Senha deve ter pelo menos 8 caracteres'),
   phone: z.string().optional(),
   address: z.string().optional(),
 });

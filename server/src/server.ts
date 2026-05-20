@@ -23,13 +23,35 @@ const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:5173')
   .map((origin) => origin.trim())
   .filter(Boolean);
 
-function isLoopbackOrigin(origin: string): boolean {
+function parseOrigin(origin: string): URL | null {
   try {
-    const { hostname } = new URL(origin);
-    return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]';
+    return new URL(origin);
   } catch {
+    return null;
+  }
+}
+
+function isLoopbackHost(hostname: string): boolean {
+  return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' || hostname === '[::1]';
+}
+
+function isLoopbackOrigin(origin: string): boolean {
+  const candidate = parseOrigin(origin);
+
+  if (!candidate || !isLoopbackHost(candidate.hostname)) {
     return false;
   }
+
+  return allowedOrigins.some((allowedOrigin) => {
+    const allowed = parseOrigin(allowedOrigin);
+
+    return Boolean(
+      allowed &&
+        isLoopbackHost(allowed.hostname) &&
+        allowed.protocol === candidate.protocol &&
+        allowed.port === candidate.port
+    );
+  });
 }
 
 const apiLimiter = rateLimit({

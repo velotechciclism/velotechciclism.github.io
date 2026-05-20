@@ -26,7 +26,15 @@ function canUseLocalAuthFallback(): boolean {
     return false;
   }
 
-  return !isLocalhost(window.location.hostname);
+  const envFlag = String(import.meta.env.VITE_ENABLE_LOCAL_AUTH_FALLBACK || '')
+    .trim()
+    .toLowerCase();
+
+  if (envFlag === 'true') {
+    return true;
+  }
+
+  return isLocalhost(window.location.hostname);
 }
 
 async function readErrorMessage(response: Response, fallbackMessage: string): Promise<string> {

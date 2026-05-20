@@ -118,7 +118,7 @@ export default function Auth() {
         setLocalError(t("auth.nameMinLength"));
         return false;
       }
-      if (formData.password.length < 6) {
+      if (formData.password.length < 8) {
         setLocalError(t("auth.passwordMinLength"));
         return false;
       }
