@@ -7,11 +7,9 @@ import {
 } from './localAuth';
 
 const API_URL = getApiUrl();
-const INVALID_API_RESPONSE_MESSAGE =
-  'Resposta invalida da API. Verifique se VITE_API_URL aponta para o backend correto.';
 
 class BackendUnavailableError extends Error {
-  constructor(message = INVALID_API_RESPONSE_MESSAGE) {
+  constructor(message = getBackendUnavailableMessage()) {
     super(message);
     this.name = 'BackendUnavailableError';
   }
@@ -77,7 +75,7 @@ async function readJsonOrThrow<T>(response: Response, fallbackMessage: string): 
     return (await response.json()) as T;
   } catch {
     throw new BackendUnavailableError(
-      fallbackMessage || 'Resposta invalida da API. Verifique se o backend esta ativo e respondendo JSON.'
+      fallbackMessage || getBackendUnavailableMessage()
     );
   }
 }
