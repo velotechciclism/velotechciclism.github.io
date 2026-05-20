@@ -27,8 +27,17 @@ function canUseLocalAuthFallback(): boolean {
   const envFlag = String(import.meta.env.VITE_ENABLE_LOCAL_AUTH_FALLBACK || '')
     .trim()
     .toLowerCase();
+  const envApiUrl = String(import.meta.env.VITE_API_URL || '').trim();
 
   if (envFlag === 'true') {
+    return true;
+  }
+
+  if (envFlag === 'false') {
+    return false;
+  }
+
+  if (!isLocalhost(window.location.hostname) && !envApiUrl) {
     return true;
   }
 
