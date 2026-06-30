@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { products } from "@/data/products";
 import { toast } from "sonner";
+import { persistBrowserDatabase, queryRows, runStatement } from "@/lib/browserDatabase";
 
 type StoredReview = {
   id: string;
@@ -18,19 +19,22 @@ type StoredReview = {
   createdAt: string;
 };
 
-const REVIEWS_KEY = "velotech:reviews";
-
 function readReviews(): StoredReview[] {
-  try {
-    const raw = localStorage.getItem(REVIEWS_KEY);
-    return raw ? (JSON.parse(raw) as StoredReview[]) : [];
-  } catch {
-    return [];
-  }
-}
-
-function writeReviews(reviews: StoredReview[]) {
-  localStorage.setItem(REVIEWS_KEY, JSON.stringify(reviews));
+  return queryRows<{
+    id: string;
+    product_id: string;
+    name: string;
+    rating: number;
+    comment: string;
+    created_at: string;
+  }>('SELECT * FROM product_reviews ORDER BY created_at DESC').map((row) => ({
+    id: row.id,
+    productId: row.product_id,
+    name: row.name,
+    rating: row.rating,
+    comment: row.comment,
+    createdAt: row.created_at,
+  }));
 }
 
 const ProductReviews: React.FC = () => {
@@ -44,7 +48,7 @@ const ProductReviews: React.FC = () => {
     [id, reviews]
   );
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
     if (!product || !formData.name.trim() || !formData.comment.trim()) {
@@ -61,8 +65,13 @@ const ProductReviews: React.FC = () => {
       createdAt: new Date().toISOString(),
     };
 
+    runStatement(
+      `INSERT INTO product_reviews(id, product_id, name, rating, comment, created_at)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [review.id, review.productId, review.name, review.rating, review.comment, review.createdAt]
+    );
+    await persistBrowserDatabase();
     const nextReviews = [review, ...reviews];
-    writeReviews(nextReviews);
     setReviews(nextReviews);
     setFormData({ name: "", rating: 5, comment: "" });
     toast.success("Avaliação publicada.");

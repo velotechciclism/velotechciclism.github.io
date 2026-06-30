@@ -1,186 +1,71 @@
-# 🚀 Guia Rápido - Iniciar o VeloTech Completo
+# Executar o VeloTech
 
-## ⚠️ IMPORTANTE: O Backend Precisa Estar Rodando!
+## Modo estático, igual ao GitHub Pages
 
-Se você está recebendo o erro **"Failed to fetch"**, é porque o backend não está rodando.
-
----
-
-## 🗄️ Passo 1: Configurar PostgreSQL
-
-### Opção 1: Usando Docker (Recomendado)
+Este modo não requer backend. Login de demonstração, carrinho, pedidos, favoritos, avaliações e chatbot são persistidos em SQLite WebAssembly dentro do navegador.
 
 ```bash
-# Criar container PostgreSQL
-docker run --name velotech-db \
-  -e POSTGRES_DB=velotech \
-  -e POSTGRES_USER=postgres \
-  -e POSTGRES_PASSWORD=password \
-  -p 5432:5432 \
-  -d postgres:16
-```
-
-### Opção 2: PostgreSQL Local
-
-```bash
-# Criar banco de dados
-createdb velotech
-
-# Ou via psql
-psql -U postgres -c "CREATE DATABASE velotech;"
-```
-
----
-
-## 🔧 Passo 2: Iniciar o Backend
-
-### Terminal 1: Backend
-
-```bash
-cd server
-npm install
-npm run db:migrate
+npm ci
 npm run dev
 ```
 
-Deve aparecer:
-```
-🚀 Servidor rodando em http://localhost:3000
-```
-
----
-
-## 🎨 Passo 3: Iniciar o Frontend
-
-### Terminal 2: Frontend
+Acesse `http://localhost:3000`. Para validar exatamente o build publicado:
 
 ```bash
-npm install
-npm run dev
+npm run build:gh
+npm run preview
 ```
 
-Deve aparecer:
-```
-➜  Local:   http://localhost:5173
-```
+Os dados locais ficam somente no perfil do navegador e não sincronizam entre aparelhos.
 
----
+## Modo com backend
 
-## ✅ Checklist de Funcionamento
+O backend é opcional e usa Express, Prisma e SQLite.
 
-- [ ] Backend rodando em `http://localhost:3000` ✓
-- [ ] Frontend rodando em `http://localhost:5173` ✓
-- [ ] Clique no ícone de usuário → página de cadastro abre
-- [ ] Tente se registrar com um email e senha
-- [ ] Tente fazer login
-
----
-
-## 🐛 Troubleshooting
-
-### Erro: "Failed to fetch"
-**Causa:** Backend não está rodando
 ```bash
-# Solução:
-cd server
-npm run dev
+npm --prefix server ci
+npm --prefix server run prisma:generate
+npm --prefix server run db:push
+npm --prefix server run dev
 ```
 
-### Erro: "database does not exist"
-**Causa:** PostgreSQL não iniciado ou banco não criado
+Em outro terminal:
+
 ```bash
-# Solução:
-docker start velotech-db  # Se usar Docker
-# Ou
-createdb velotech
+VITE_API_URL=http://localhost:3001/api npm run dev
 ```
 
-### Erro: "Connection refused on port 5432"
-**Causa:** PostgreSQL não está rodando
-```bash
-# Solução (Docker):
-docker start velotech-db
+Variáveis do backend em `server/.env`:
 
-# Solução (Local):
-sudo systemctl start postgresql  # Linux
-brew services start postgresql  # macOS
-```
-
-### Erro: "EADDRINUSE: address already in use :::3000"
-**Causa:** Porta 3000 já está em uso
-```bash
-# Solução:
-# Mude a porta em server/.env
+```env
+DATABASE_URL=file:./dev.db
 PORT=3001
-
-# Ou encontre e mate o processo
-lsof -ti:3000 | xargs kill -9
+NODE_ENV=development
+JWT_SECRET=troque-por-um-segredo-longo-e-aleatorio
+JWT_EXPIRES_IN=7d
+CLIENT_URL=http://localhost:3000,http://localhost:4173
 ```
 
----
+Use um caminho absoluto ASCII para `DATABASE_URL` se o motor do Prisma tiver dificuldade com caracteres especiais no caminho do projeto.
 
-## 📱 Testar a Autenticação
+## Verificações
 
-### 1. Registrar novo usuário
-```
-Email: teste@example.com
-Nome: João Silva
-Senha: senha123
-```
+```bash
+npm run typecheck
+npm run lint
+npm audit --omit=dev
+npm run build:gh
 
-### 2. Após registrar, você receberá um token
-- Token é armazenado no `localStorage`
-- Você será redirecionado automaticamente
-
-### 3. Login
-```
-Email: teste@example.com
-Senha: senha123
+npm --prefix server run prisma:generate
+npm --prefix server run typecheck
+npm --prefix server run build
+npm --prefix server audit --omit=dev
 ```
 
----
+## GitHub Pages
 
-## 🔒 Variáveis de Ambiente
+O workflow `.github/workflows/deploy-pages.yml` publica somente `dist/`. GitHub Pages não executa o diretório `server/`.
 
-### Frontend (`.env.local`)
-```env
-VITE_API_URL=http://localhost:3000/api
-```
+Sem `VITE_API_URL`, o site usa automaticamente SQLite no navegador. Para recursos compartilhados, publique o backend separadamente e configure a variável de repositório `VITE_API_URL` com a URL HTTPS terminada em `/api`.
 
-### Backend (`server/.env`)
-```env
-DATABASE_URL=postgresql://postgres:password@localhost:5432/velotech
-PORT=3000
-JWT_SECRET=seu_secret_seguro_aqui
-```
-
----
-
-## 📊 Estrutura de Pastas
-
-```
-velotechbikeyourself/
-├── src/                    # Frontend (React + TypeScript)
-│   ├── pages/Auth.tsx      # Página de autenticação
-│   ├── context/            # Context da autenticação
-│   ├── hooks/              # Hooks customizados
-│   └── lib/auth.ts         # Funções da API
-│
-└── server/                 # Backend (Node.js + Express)
-    ├── src/
-    │   ├── db/             # Conexão e migrations
-    │   ├── routes/         # Rotas de autenticação
-    │   └── server.ts       # Servidor Express
-    └── .env                # Variáveis de ambiente
-```
-
----
-
-## 🎉 Pronto!
-
-Agora seu VeloTech está completo com:
-- ✅ Frontend em React
-- ✅ Backend em Node.js/Express
-- ✅ Banco de dados PostgreSQL
-- ✅ Autenticação com JWT
-- ✅ Sistema de cadastro e login
+Consulte `docs/auditoria-completa-2026-06-30.md` para limites de segurança, resultados dos testes e recomendações de produção.

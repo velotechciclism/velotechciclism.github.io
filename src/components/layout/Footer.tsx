@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/context/LanguageContext";
 import { contactInfo } from "@/config/contact";
-import { getApiUrl } from "@/lib/api";
+import { getApiUrl, shouldUseRemoteApi } from "@/lib/api";
+import { saveLocalNewsletter } from "@/lib/localEngagement";
 import { toast } from "sonner";
 import logo from "@/assets/logo.png";
 
@@ -46,6 +47,12 @@ const Footer: React.FC = () => {
     }
 
     try {
+      if (!shouldUseRemoteApi()) {
+        await saveLocalNewsletter(newsletterEmail);
+        toast.success("E-mail salvo neste navegador.");
+        return;
+      }
+
       const response = await fetch(`${API_URL}/newsletter/subscribe`, {
         method: "POST",
         headers: {
@@ -60,7 +67,12 @@ const Footer: React.FC = () => {
 
       toast.success("Inscricao realizada com sucesso.");
     } catch {
-      toast.error("Nao foi possivel concluir a inscricao agora.");
+      try {
+        await saveLocalNewsletter(newsletterEmail);
+        toast.info("Servidor indisponivel; e-mail salvo somente neste navegador.");
+      } catch {
+        toast.error("Nao foi possivel concluir a inscricao agora.");
+      }
     } finally {
       setNewsletterEmail("");
     }

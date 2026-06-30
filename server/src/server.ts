@@ -61,9 +61,25 @@ const apiLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Muitas tentativas. Aguarde alguns minutos.' },
+});
+
+const chatbotLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Limite temporario de mensagens atingido.' },
+});
+
 // Middlewares
 app.use(helmet());
-app.use(express.json());
+app.use(express.json({ limit: '32kb' }));
 app.use(apiLimiter);
 app.use(
   cors({
@@ -80,8 +96,8 @@ app.use(
 );
 
 // Rotas
-app.use('/api/auth', authRoutes);
-app.use('/api/chatbot', chatbotRoutes);
+app.use('/api/auth', authLimiter, authRoutes);
+app.use('/api/chatbot', chatbotLimiter, chatbotRoutes);
 app.use('/api/products', productsRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/orders', ordersRoutes);
@@ -93,6 +109,11 @@ app.get('/api/health', (_req, res) => {
 });
 
 app.use((error: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  if (error instanceof Error && error.message === 'Origem nao permitida pelo CORS') {
+    res.status(403).json({ error: error.message });
+    return;
+  }
+
   if (error instanceof ZodError) {
     res.status(400).json({
       error: 'Dados invalidos',

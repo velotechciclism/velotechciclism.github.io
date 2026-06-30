@@ -35,6 +35,10 @@ const synonymMap: Record<string, string[]> = {
   caro: ['premium', 'alto desempenho', 'topo de linha'],
   frete: ['envio', 'entrega', 'shipping'],
   pagamento: ['cartao', 'mb way', 'multibanco', 'paypal', 'pix'],
+  trilha: ['mtb', 'montanha', 'offroad', 'suspensao'],
+  estrada: ['speed', 'road', 'asfalto', 'aero'],
+  tamanho: ['medida', 'quadro', 'aro', 'ajuste', 'fit'],
+  manutencao: ['revisao', 'limpeza', 'lubrificacao', 'corrente', 'freio'],
 };
 
 const intentLexicon = {
@@ -46,6 +50,11 @@ const intentLexicon = {
   payment: ['pagamento', 'cartao', 'mb way', 'multibanco', 'paypal', 'pix'],
   recommendation: ['recomenda', 'sugere', 'ideal', 'indica', 'melhor', 'quero'],
   checkout: ['comprar', 'compra', 'checkout', 'finalizar', 'pedido', 'carrinho'],
+  maintenance: ['manutencao', 'revisao', 'limpar', 'limpeza', 'lubrificar', 'corrente', 'freio'],
+  sizing: ['tamanho', 'medida', 'quadro', 'aro', 'altura', 'fit', 'vestir'],
+  safety: ['seguranca', 'capacete', 'luz', 'refletivo', 'protecao'],
+  returns: ['troca', 'devolucao', 'devolver', 'garantia', 'reembolso'],
+  comparison: ['comparar', 'comparacao', 'versus', 'diferenca', 'melhor'],
 };
 
 const typoMap: Record<string, string> = {
@@ -92,6 +101,11 @@ function expandTokens(tokens: string[]): string[] {
 }
 
 function detectBudget(query: string): number | null {
+  const normalized = normalize(query);
+  if (!/(€|eur|euro|preco|orcamento|ate|menos de|maximo|gastar|custa)/i.test(query) &&
+      !hasPhrase(normalized, ['por menos', 'mais barato'])) {
+    return null;
+  }
   const matches = query.match(/(\d+[.,]?\d*)/g);
   if (!matches || matches.length === 0) {
     return null;
@@ -221,6 +235,29 @@ function buildNaturalAnswer(query: string, productsRanked: RagProduct[]): string
 
   if (intent === 'payment') {
     return 'Perfeito. Atualmente voce pode concluir com cartao, MB WAY, multibanco e outras opcoes exibidas na finalizacao da compra. Posso te sugerir itens para seguir para compra.';
+  }
+
+  if (intent === 'maintenance') {
+    return 'Para manter a bicicleta confiavel: confira pressao e freios antes de cada saida; limpe e lubrifique a corrente quando estiver seca ou ruidosa; verifique desgaste de pneus e pastilhas mensalmente; e faca revisao de apertos e transmissao a cada 3 a 6 meses, conforme uso. Nao aplique oleo nos discos de freio. Diga o componente ou sintoma e eu detalho o procedimento.';
+  }
+
+  if (intent === 'sizing') {
+    return 'O tamanho correto depende da sua altura, medida do cavalo e geometria do fabricante — aro 29 nao significa tamanho do quadro. Para bicicleta, envie altura e cavalo em centimetros e o tipo de uso. Para roupa, informe peito, cintura e quadril; compare sempre com a tabela da marca e prefira o tamanho maior se ficar entre dois.';
+  }
+
+  if (intent === 'safety') {
+    return 'Priorize capacete bem ajustado e certificado, luz branca dianteira e vermelha traseira, itens refletivos e pneus/freios em bom estado. Para pedalar a noite ou no transito, visibilidade vem antes de desempenho. Posso montar um kit por orcamento e tipo de percurso.';
+  }
+
+  if (intent === 'returns') {
+    return 'Para troca, devolucao ou garantia, conserve embalagem, comprovante e fotos do estado do produto. As condicoes e prazos aplicaveis devem ser confirmados na pagina de termos ou com o atendimento antes do envio; eu nao vou inventar um prazo que nao esteja publicado.';
+  }
+
+  if (intent === 'comparison' && productsRanked.length > 1) {
+    const [first, second] = productsRanked;
+    const priceDifference = Math.abs(first.price - second.price);
+    const cheaper = first.price <= second.price ? first : second;
+    return `Comparacao rapida:\n- [${first.name}](${first.path}): ${first.category}, EUR ${first.price.toFixed(2)}.\n- [${second.name}](${second.path}): ${second.category}, EUR ${second.price.toFixed(2)}.\n\n${cheaper.name} custa EUR ${priceDifference.toFixed(2)} menos. Para dizer qual e melhor para voce, preciso do tipo de uso, nivel e prioridade (preco, conforto ou desempenho).`;
   }
 
   if (wantsHelp && productsRanked.length === 0) {

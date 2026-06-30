@@ -5,23 +5,10 @@ import { getApiUrl, getBackendUnavailableMessage } from '@/lib/api';
 import { getAuthToken, isLocalAuthToken } from '@/lib/auth';
 import { MAX_UNITS_PER_PRODUCT } from '@/lib/cartRules';
 import { createLocalOrder } from '@/lib/localOrders';
+import { readLocalCart, writeLocalCart } from '@/lib/localCart';
 
 function getCartKey(userId: number | undefined) {
   return userId ? `velotech:cart:${userId}` : 'velotech:cart:guest';
-}
-
-function readJson<T>(key: string, fallback: T): T {
-  try {
-    const raw = localStorage.getItem(key);
-
-    if (!raw) {
-      return fallback;
-    }
-
-    return JSON.parse(raw) as T;
-  } catch {
-    return fallback;
-  }
 }
 
 const API_URL = getApiUrl();
@@ -73,9 +60,7 @@ export function useCartPersistence() {
   );
 
   const persistCart = useCallback(
-    (nextItems: CartItem[]) => {
-      localStorage.setItem(getCartKey(user?.id), JSON.stringify(nextItems));
-    },
+    (nextItems: CartItem[]) => writeLocalCart(getCartKey(user?.id), nextItems),
     [user?.id]
   );
 
@@ -87,7 +72,15 @@ export function useCartPersistence() {
         const data = await fetchAuthJson<{ items: CartItem[] }>('/cart');
         setItems(data.items || []);
       } else {
-        const storedItems = readJson<CartItem[]>(getCartKey(user?.id), []);
+        let storedItems = readLocalCart(getCartKey(user?.id));
+        if (user && storedItems.length === 0) {
+          const guestItems = readLocalCart(getCartKey(undefined));
+          if (guestItems.length > 0) {
+            storedItems = guestItems;
+            await writeLocalCart(getCartKey(user.id), guestItems);
+            await writeLocalCart(getCartKey(undefined), []);
+          }
+        }
         setItems(storedItems);
       }
     } catch (error) {
@@ -95,7 +88,7 @@ export function useCartPersistence() {
         setItems([]);
         console.error('Erro ao carregar carrinho autenticado:', error);
       } else {
-        const storedItems = readJson<CartItem[]>(getCartKey(user?.id), []);
+        const storedItems = readLocalCart(getCartKey(user?.id));
         setItems(storedItems);
       }
     } finally {
@@ -122,20 +115,11 @@ export function useCartPersistence() {
       throw new Error(`Limite maximo de ${MAX_UNITS_PER_PRODUCT} unidades por produto.`);
     }
 
-    setItems((prev) => {
-      const matchedItem = prev.find((item) => item.id === product.id);
-
-      const nextItems = matchedItem
-        ? prev.map((item) =>
-            item.id === product.id
-              ? { ...item, quantity: item.quantity + quantity }
-              : item
-          )
-        : [...prev, { ...product, quantity }];
-
-      persistCart(nextItems);
-      return nextItems;
-    });
+    const nextItems = existingItem
+      ? items.map((item) => item.id === product.id ? { ...item, quantity: item.quantity + quantity } : item)
+      : [...items, { ...product, quantity }];
+    await persistCart(nextItems);
+    setItems(nextItems);
   }, [items, persistCart, shouldUseRemotePersistence]);
 
   const removeItem = useCallback(async (productId: string) => {
@@ -147,12 +131,10 @@ export function useCartPersistence() {
       return;
     }
 
-    setItems((prev) => {
-      const nextItems = prev.filter((item) => item.id !== productId);
-      persistCart(nextItems);
-      return nextItems;
-    });
-  }, [persistCart, shouldUseRemotePersistence]);
+    const nextItems = items.filter((item) => item.id !== productId);
+    await persistCart(nextItems);
+    setItems(nextItems);
+  }, [items, persistCart, shouldUseRemotePersistence]);
 
   const updateQuantity = useCallback(async (productId: string, quantity: number) => {
     if (quantity > MAX_UNITS_PER_PRODUCT) {
@@ -173,14 +155,12 @@ export function useCartPersistence() {
       return;
     }
 
-    setItems((prev) => {
-      const nextItems = prev.map((item) =>
-        item.id === productId ? { ...item, quantity } : item
-      );
-      persistCart(nextItems);
-      return nextItems;
-    });
-  }, [persistCart, removeItem, shouldUseRemotePersistence]);
+    const nextItems = items.map((item) =>
+      item.id === productId ? { ...item, quantity } : item
+    );
+    await persistCart(nextItems);
+    setItems(nextItems);
+  }, [items, persistCart, removeItem, shouldUseRemotePersistence]);
 
   const clearCart = useCallback(async () => {
     if (shouldUseRemotePersistence) {
@@ -188,7 +168,7 @@ export function useCartPersistence() {
     }
 
     setItems([]);
-    persistCart([]);
+    await persistCart([]);
   }, [persistCart, shouldUseRemotePersistence]);
 
   const checkout = useCallback(async (paymentMethod: string, shippingAddress: string, promoCode?: string) => {
@@ -201,10 +181,10 @@ export function useCartPersistence() {
           method: 'POST',
           body: JSON.stringify({ paymentMethod, shippingAddress, promoCode }),
         })
-      : createLocalOrder(user.id, items, paymentMethod, shippingAddress, promoCode);
+      : await createLocalOrder(user.id, items, paymentMethod, shippingAddress, promoCode);
 
     setItems([]);
-    persistCart([]);
+    await persistCart([]);
     return order;
   }, [isAuthenticated, user, items, persistCart, shouldUseRemotePersistence]);
 

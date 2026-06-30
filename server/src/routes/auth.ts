@@ -5,16 +5,16 @@ import { prisma } from '../prisma.js';
 
 // Schemas de validação
 export const registerSchema = z.object({
-  email: z.string().email('E-mail inválido'),
-  name: z.string().min(3, 'Nome deve ter pelo menos 3 caracteres'),
-  password: z.string().min(8, 'Senha deve ter pelo menos 8 caracteres'),
-  phone: z.string().optional(),
-  address: z.string().optional(),
+  email: z.string().trim().email('E-mail inválido').max(254).transform((value) => value.toLowerCase()),
+  name: z.string().trim().min(3, 'Nome deve ter pelo menos 3 caracteres').max(100),
+  password: z.string().min(8, 'Senha deve ter pelo menos 8 caracteres').max(128),
+  phone: z.string().trim().regex(/^\+[1-9]\d{7,14}$/, 'Telefone invalido').optional().or(z.literal('')),
+  address: z.string().trim().max(300).optional(),
 });
 
 export const loginSchema = z.object({
-  email: z.string().email('E-mail inválido'),
-  password: z.string().min(1, 'Senha é obrigatória'),
+  email: z.string().trim().email('E-mail inválido').max(254).transform((value) => value.toLowerCase()),
+  password: z.string().min(1, 'Senha é obrigatória').max(128),
 });
 
 // Types
@@ -97,6 +97,11 @@ export async function loginUser(data: LoginData): Promise<AuthResponse> {
   if (!isPasswordValid) {
     throw new Error('E-mail ou senha inválidos');
   }
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { lastLoginAt: new Date() },
+  });
 
   const tokenExpiresIn = (process.env.JWT_EXPIRES_IN || '7d') as jwt.SignOptions['expiresIn'];
   const token = jwt.sign(

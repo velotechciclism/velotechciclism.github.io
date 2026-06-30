@@ -24,6 +24,12 @@ export function getApiUrl(): string {
   return 'http://localhost:3001/api';
 }
 
+export function shouldUseRemoteApi(): boolean {
+  const envUrl = String(import.meta.env.VITE_API_URL || '').trim();
+  if (envUrl) return true;
+  return typeof window !== 'undefined' && isLocalhost(window.location.hostname);
+}
+
 export function getBackendUnavailableMessage(): string {
   const apiUrl = getApiUrl();
 

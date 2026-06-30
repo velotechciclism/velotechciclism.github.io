@@ -1,4 +1,4 @@
-import { getApiUrl, getBackendUnavailableMessage, isLocalhost } from './api';
+import { getApiUrl, getBackendUnavailableMessage, isLocalhost, shouldUseRemoteApi } from './api';
 import {
   getLocalProfile,
   isLocalAuthToken,
@@ -110,6 +110,10 @@ export async function registerUser(
   phone?: string,
   address?: string
 ): Promise<AuthResponse> {
+  if (!shouldUseRemoteApi()) {
+    return registerLocalUser(email, name, password, phone, address);
+  }
+
   try {
     const response = await fetch(`${API_URL}/auth/register`, {
       method: 'POST',
@@ -136,6 +140,10 @@ export async function registerUser(
 }
 
 export async function loginUser(email: string, password: string): Promise<AuthResponse> {
+  if (!shouldUseRemoteApi()) {
+    return loginLocalUser(email, password);
+  }
+
   try {
     const response = await fetch(`${API_URL}/auth/login`, {
       method: 'POST',

@@ -1,6 +1,8 @@
 # Auditoria de Persistencia SQLite (VeloTech)
 
-Data: 2026-04-05
+Data original: 2026-04-05
+
+> Documento histórico. A implementação foi atualizada em 30/06/2026. Consulte `docs/auditoria-completa-2026-06-30.md` para o estado validado atual, incluindo SQLite WebAssembly no GitHub Pages e o backend opcional.
 
 ## 1. Estado atual (evidencias)
 

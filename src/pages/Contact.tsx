@@ -4,8 +4,9 @@ import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Mail, Phone, MapPin, Send, MessageCircle } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
-import { getApiUrl } from "@/lib/api";
+import { getApiUrl, shouldUseRemoteApi } from "@/lib/api";
 import { contactInfo } from "@/config/contact";
+import { saveLocalContact } from "@/lib/localEngagement";
 
 const Contact: React.FC = () => {
   const { t } = useLanguage();
@@ -18,6 +19,7 @@ const Contact: React.FC = () => {
   });
 
   const [submitted, setSubmitted] = useState(false);
+  const [savedLocally, setSavedLocally] = useState(false);
   const [isSending, setIsSending] = useState(false);
 
   const handleChange = (
@@ -34,18 +36,29 @@ const Contact: React.FC = () => {
     e.preventDefault();
     setIsSending(true);
 
+    const payload = {
+      name: formData.name.trim(),
+      email: formData.email.trim(),
+      subject: formData.subject.trim(),
+      message: formData.message.trim(),
+    };
+
     try {
+      if (!shouldUseRemoteApi()) {
+        await saveLocalContact(payload);
+        setSavedLocally(true);
+        setSubmitted(true);
+        setFormData({ name: "", email: "", subject: "", message: "" });
+        setTimeout(() => setSubmitted(false), 3000);
+        return;
+      }
+
       const response = await fetch(`${API_URL}/contact/messages`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          name: formData.name.trim(),
-          email: formData.email.trim(),
-          subject: formData.subject.trim(),
-          message: formData.message.trim(),
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -53,6 +66,7 @@ const Contact: React.FC = () => {
       }
 
       setSubmitted(true);
+      setSavedLocally(false);
       setFormData({
         name: "",
         email: "",
@@ -64,6 +78,11 @@ const Contact: React.FC = () => {
         setSubmitted(false);
       }, 3000);
     } catch {
+      try {
+        await saveLocalContact(payload);
+      } catch {
+        // O mailto abaixo ainda permite que a pessoa envie a mensagem.
+      }
       const mailToUrl = `${contactInfo.email.link}?subject=${encodeURIComponent(
         formData.subject.trim()
       )}&body=${encodeURIComponent(
@@ -178,7 +197,9 @@ const Contact: React.FC = () => {
             {submitted ? (
               <div className="rounded-lg bg-green-50 dark:bg-green-950 p-6 border border-green-200 dark:border-green-800">
                 <p className="text-green-800 dark:text-green-200 font-semibold">
-                  {t("contact.thankYou")}
+                  {savedLocally
+                    ? "Mensagem salva neste navegador. Para falar com a equipe, use e-mail ou WhatsApp."
+                    : t("contact.thankYou")}
                 </p>
               </div>
             ) : (

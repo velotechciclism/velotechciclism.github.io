@@ -5,8 +5,9 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { contactInfo } from "@/config/contact";
-import { getApiUrl } from "@/lib/api";
+import { getApiUrl, shouldUseRemoteApi } from "@/lib/api";
 import { askLocalRag } from "@/lib/chatbotLocalRag";
+import { createConversationId, readLocalConversation, saveLocalChatMessage } from "@/lib/localChat";
 import { Link } from "react-router-dom";
 
 interface Message {
@@ -31,12 +32,17 @@ const ChatbotWidget: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [localConversationId] = useState<string>(() => createConversationId());
+  const [remoteConversationId, setRemoteConversationId] = useState<string | null>(null);
   const [sessionId] = useState(() => crypto.randomUUID());
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [suggestionsByMessage, setSuggestionsByMessage] = useState<Record<string, ProductSuggestion[]>>({});
+
+  useEffect(() => {
+    setMessages(readLocalConversation(localConversationId));
+  }, [localConversationId]);
 
   const formatMarkdownLinks = (text: string) => {
     const pattern = /\[([^\]]+)\]\(([^)]+)\)/g;
@@ -137,10 +143,14 @@ const ChatbotWidget: React.FC = () => {
     ].slice(-5);
 
     setMessages((prev) => [...prev, userMessage]);
+    await saveLocalChatMessage(localConversationId, userMessage);
     setInputValue("");
     setIsLoading(true);
 
     try {
+      if (!shouldUseRemoteApi()) {
+        throw new Error("modo-local");
+      }
       const response = await fetch(`${API_URL}/chatbot`, {
         method: "POST",
         headers: {
@@ -148,7 +158,7 @@ const ChatbotWidget: React.FC = () => {
         },
         body: JSON.stringify({
           message: userMessage.content,
-          conversationId,
+          conversationId: remoteConversationId,
           sessionId,
         }),
       });
@@ -163,8 +173,8 @@ const ChatbotWidget: React.FC = () => {
         products: ProductSuggestion[];
       };
 
-      if (data.conversationId && !conversationId) {
-        setConversationId(data.conversationId);
+      if (data.conversationId && data.conversationId !== remoteConversationId) {
+        setRemoteConversationId(data.conversationId);
       }
 
       const assistantMessage: Message = {
@@ -187,6 +197,7 @@ const ChatbotWidget: React.FC = () => {
       }
 
       setMessages((prev) => [...prev, assistantMessage]);
+      await saveLocalChatMessage(localConversationId, assistantMessage);
     } catch {
       const localRag = askLocalRag(userMessage.content, {
         recentUserMessages,
@@ -213,6 +224,7 @@ const ChatbotWidget: React.FC = () => {
       }
 
       setMessages((prev) => [...prev, assistantMessage]);
+      await saveLocalChatMessage(localConversationId, assistantMessage);
     } finally {
       setIsLoading(false);
     }

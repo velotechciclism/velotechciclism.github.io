@@ -7,30 +7,32 @@ import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { ThemeProvider } from "@/context/ThemeContext";
-import ChatbotWidget from "@/components/chatbot/ChatbotWidget";
 import PwaInstallPrompt from "@/components/pwa/PwaInstallPrompt";
-import Index from "./pages/Index";
-import Products from "./pages/Products";
-import ProductDetail from "./pages/ProductDetail";
-import Cart from "./pages/Cart";
-import Auth from "./pages/Auth";
-import Brands from "./pages/Brands";
-import Blog from "./pages/Blog";
-import BlogArticle from "./pages/BlogArticle";
-import Contact from "./pages/Contact";
-import Help from "./pages/Help";
-import OrderHistory from "./pages/OrderHistory";
-import Privacy from "./pages/Privacy";
-import Terms from "./pages/Terms";
-import Cookies from "./pages/Cookies";
-import Search from "./pages/Search";
-import Wishlist from "./pages/Wishlist";
-import ProductReviews from "./pages/ProductReviews";
-import Offers from "./pages/Offers";
-import About from "./pages/About";
-import Careers from "./pages/Careers";
-import Press from "./pages/Press";
-import NotFound from "./pages/NotFound";
+import { lazy, Suspense } from "react";
+
+const Index = lazy(() => import("./pages/Index"));
+const Products = lazy(() => import("./pages/Products"));
+const ProductDetail = lazy(() => import("./pages/ProductDetail"));
+const Cart = lazy(() => import("./pages/Cart"));
+const Auth = lazy(() => import("./pages/Auth"));
+const Brands = lazy(() => import("./pages/Brands"));
+const Blog = lazy(() => import("./pages/Blog"));
+const BlogArticle = lazy(() => import("./pages/BlogArticle"));
+const Contact = lazy(() => import("./pages/Contact"));
+const Help = lazy(() => import("./pages/Help"));
+const OrderHistory = lazy(() => import("./pages/OrderHistory"));
+const Privacy = lazy(() => import("./pages/Privacy"));
+const Terms = lazy(() => import("./pages/Terms"));
+const Cookies = lazy(() => import("./pages/Cookies"));
+const Search = lazy(() => import("./pages/Search"));
+const Wishlist = lazy(() => import("./pages/Wishlist"));
+const ProductReviews = lazy(() => import("./pages/ProductReviews"));
+const Offers = lazy(() => import("./pages/Offers"));
+const About = lazy(() => import("./pages/About"));
+const Careers = lazy(() => import("./pages/Careers"));
+const Press = lazy(() => import("./pages/Press"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const ChatbotWidget = lazy(() => import("@/components/chatbot/ChatbotWidget"));
 
 const queryClient = new QueryClient();
 
@@ -44,7 +46,8 @@ const App = () => (
               <Toaster />
               <Sonner />
               <HashRouter>
-                <Routes>
+                <Suspense fallback={<div className="min-h-screen bg-background" aria-label="Carregando pagina" />}>
+                  <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/products" element={<Products />} />
                   <Route path="/products/:id" element={<ProductDetail />} />
@@ -68,8 +71,9 @@ const App = () => (
                   <Route path="/cookies" element={<Cookies />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
-                </Routes>
-                <ChatbotWidget />
+                  </Routes>
+                </Suspense>
+                <Suspense fallback={null}><ChatbotWidget /></Suspense>
                 <PwaInstallPrompt />
               </HashRouter>
           </TooltipProvider>

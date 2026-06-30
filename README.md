@@ -164,6 +164,12 @@ npm run dev
 
 O servidor estará disponível
 
+### Persistência e GitHub Pages
+
+No GitHub Pages, a aplicação usa SQLite WebAssembly persistido no IndexedDB do navegador. Isso permite login demonstrativo, carrinho, favoritos, pedidos, avaliações e histórico do chatbot sem API, mas os dados ficam somente naquele navegador.
+
+O backend em `server/` é opcional e precisa ser publicado em um host Node separado para oferecer dados compartilhados. GitHub Pages não executa Node nem SQLite de servidor. Veja [SETUP.md](SETUP.md) e [a auditoria completa](docs/auditoria-completa-2026-06-30.md).
+
 ---
 
 ## 📄 Relatório sobre o Site

@@ -1,7 +1,7 @@
 import type { AuthResponse, User } from './auth';
+import { persistBrowserDatabase, queryOne, runStatement } from './browserDatabase';
 
 const AUTH_TOKEN_KEY = 'authToken';
-const LOCAL_USERS_KEY = 'velotech:local-auth-users';
 const LOCAL_TOKEN_PREFIX = 'local-auth:';
 const PBKDF2_PREFIX = 'pbkdf2-sha256';
 const PBKDF2_ITERATIONS = 310000;
@@ -26,29 +26,26 @@ function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
 }
 
-function readLocalUsers(): LocalUserRecord[] {
-  const storage = getStorage();
+type LocalUserRow = {
+  id: number;
+  email: string;
+  name: string;
+  phone: string | null;
+  address: string | null;
+  password_hash: string;
+  created_at: string;
+};
 
-  if (!storage) {
-    return [];
-  }
-
-  try {
-    const rawUsers = storage.getItem(LOCAL_USERS_KEY);
-    return rawUsers ? (JSON.parse(rawUsers) as LocalUserRecord[]) : [];
-  } catch {
-    return [];
-  }
-}
-
-function writeLocalUsers(users: LocalUserRecord[]) {
-  const storage = getStorage();
-
-  if (!storage) {
-    throw new Error('Armazenamento local indisponivel neste navegador.');
-  }
-
-  storage.setItem(LOCAL_USERS_KEY, JSON.stringify(users));
+function rowToUser(row: LocalUserRow): LocalUserRecord {
+  return {
+    id: row.id,
+    email: row.email,
+    name: row.name,
+    phone: row.phone || undefined,
+    address: row.address || undefined,
+    passwordHash: row.password_hash,
+    created_at: row.created_at,
+  };
 }
 
 function toHex(buffer: ArrayBuffer): string {
@@ -168,10 +165,6 @@ function stripPassword(record: LocalUserRecord): User {
   return user;
 }
 
-function getNextUserId(users: LocalUserRecord[]): number {
-  return users.reduce((nextId, user) => Math.max(nextId, user.id + 1), 1);
-}
-
 export function isLocalAuthToken(token?: string | null): boolean {
   return Boolean(token?.startsWith(LOCAL_TOKEN_PREFIX));
 }
@@ -191,7 +184,8 @@ export function getLocalProfile(token: string): User | null {
     return null;
   }
 
-  const record = readLocalUsers().find((user) => user.id === userId);
+  const row = queryOne<LocalUserRow>('SELECT * FROM local_users WHERE id = ?', [userId]);
+  const record = row ? rowToUser(row) : null;
   return record ? stripPassword(record) : null;
 }
 
@@ -203,27 +197,29 @@ export async function registerLocalUser(
   address?: string
 ): Promise<AuthResponse> {
   const normalizedEmail = normalizeEmail(email);
-  const users = readLocalUsers();
-
-  if (users.some((user) => normalizeEmail(user.email) === normalizedEmail)) {
+  if (queryOne('SELECT id FROM local_users WHERE email = ? COLLATE NOCASE', [normalizedEmail])) {
     throw new Error('E-mail ja cadastrado');
   }
 
+  const createdAt = new Date().toISOString();
+  const passwordHash = await hashPassword(normalizedEmail, password);
+  runStatement(
+    `INSERT INTO local_users(email, name, phone, address, password_hash, created_at)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+    [normalizedEmail, name.trim(), phone || null, address || null, passwordHash, createdAt]
+  );
+  const inserted = queryOne<LocalUserRow>('SELECT * FROM local_users WHERE email = ?', [normalizedEmail]);
+  if (!inserted) throw new Error('Nao foi possivel criar a conta local.');
+  await persistBrowserDatabase();
+
   const user: User = {
-    id: getNextUserId(users),
+    id: inserted.id,
     email: normalizedEmail,
     name: name.trim(),
     phone,
     address,
-    created_at: new Date().toISOString(),
+    created_at: createdAt,
   };
-
-  const record: LocalUserRecord = {
-    ...user,
-    passwordHash: await hashPassword(normalizedEmail, password),
-  };
-
-  writeLocalUsers([...users, record]);
 
   return {
     user,
@@ -233,9 +229,8 @@ export async function registerLocalUser(
 
 export async function loginLocalUser(email: string, password: string): Promise<AuthResponse> {
   const normalizedEmail = normalizeEmail(email);
-  const users = readLocalUsers();
-  const recordIndex = users.findIndex((user) => normalizeEmail(user.email) === normalizedEmail);
-  const record = recordIndex >= 0 ? users[recordIndex] : undefined;
+  const row = queryOne<LocalUserRow>('SELECT * FROM local_users WHERE email = ? COLLATE NOCASE', [normalizedEmail]);
+  const record = row ? rowToUser(row) : undefined;
   const { matches, needsUpgrade } = record
     ? await verifyPassword(normalizedEmail, password, record.passwordHash)
     : { matches: false, needsUpgrade: false };
@@ -245,12 +240,11 @@ export async function loginLocalUser(email: string, password: string): Promise<A
   }
 
   if (needsUpgrade) {
-    const upgradedUsers = [...users];
-    upgradedUsers[recordIndex] = {
-      ...record,
-      passwordHash: await hashPassword(normalizedEmail, password),
-    };
-    writeLocalUsers(upgradedUsers);
+    runStatement('UPDATE local_users SET password_hash = ? WHERE id = ?', [
+      await hashPassword(normalizedEmail, password),
+      record.id,
+    ]);
+    await persistBrowserDatabase();
   }
 
   const user = stripPassword(record);

@@ -7,8 +7,8 @@ const router = express.Router();
 
 // Registro
 router.post('/register', asyncHandler(async (req: Request, res: Response) => {
+  const data = authService.registerSchema.parse(req.body);
   try {
-    const data = authService.registerSchema.parse(req.body);
     const result = await authService.registerUser(data);
     res.status(201).json(result);
   } catch (error) {
@@ -22,8 +22,8 @@ router.post('/register', asyncHandler(async (req: Request, res: Response) => {
 
 // Login
 router.post('/login', asyncHandler(async (req: Request, res: Response) => {
+  const data = authService.loginSchema.parse(req.body);
   try {
-    const data = authService.loginSchema.parse(req.body);
     const result = await authService.loginUser(data);
     res.json(result);
   } catch (error) {

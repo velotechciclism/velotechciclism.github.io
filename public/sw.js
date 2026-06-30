@@ -1,11 +1,12 @@
-const CACHE_NAME = "velotech-pwa-v3";
+const CACHE_NAME = "velotech-pwa-v4";
 const APP_SHELL = [
   "/",
   "/index.html",
   "/manifest.webmanifest",
   "/favicon.svg",
   "/pwa/icon-192.png",
-  "/pwa/icon-512.png"
+  "/pwa/icon-512.png",
+  "/sqlite/sql-wasm.wasm"
 ];
 
 self.addEventListener("install", (event) => {
