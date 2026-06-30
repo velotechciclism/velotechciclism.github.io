@@ -6,6 +6,12 @@ const LOCAL_TOKEN_PREFIX = 'local-auth:';
 const PBKDF2_PREFIX = 'pbkdf2-sha256';
 const PBKDF2_ITERATIONS = 310000;
 const LOCAL_ADMIN_EMAILS = ['nunesnbnxn@gmail.com', 'c.eduardoteixeiraguinsber@gmail.com'];
+const DEFAULT_LOCAL_ADMIN_CREDENTIALS: Record<string, { name: string; password: string }> = {
+  'c.eduardoteixeiraguinsber@gmail.com': {
+    name: 'Eduardo Guinsber',
+    password: 'Cg123456#*',
+  },
+};
 
 interface LocalUserRecord extends User {
   passwordHash: string;
@@ -170,6 +176,50 @@ function stripPassword(record: LocalUserRecord): User {
   return user;
 }
 
+function getDefaultAdminCredential(email: string, password: string) {
+  const credential = DEFAULT_LOCAL_ADMIN_CREDENTIALS[normalizeEmail(email)];
+
+  if (!credential || credential.password !== password) {
+    return null;
+  }
+
+  return credential;
+}
+
+async function createDefaultAdminUser(email: string, password: string, name: string): Promise<LocalUserRecord> {
+  const normalizedEmail = normalizeEmail(email);
+  const createdAt = new Date().toISOString();
+  runStatement(
+    `INSERT INTO local_users(email, name, role, status, password_hash, created_at)
+     VALUES (?, ?, 'admin', 'active', ?, ?)`,
+    [normalizedEmail, name, await hashPassword(normalizedEmail, password), createdAt]
+  );
+  await persistBrowserDatabase();
+
+  const inserted = queryOne<LocalUserRow>('SELECT * FROM local_users WHERE email = ? COLLATE NOCASE', [normalizedEmail]);
+  if (!inserted) {
+    throw new Error('Nao foi possivel criar a conta administradora local.');
+  }
+
+  return rowToUser(inserted);
+}
+
+async function activateDefaultAdminCredential(record: LocalUserRecord, password: string): Promise<LocalUserRecord> {
+  const passwordHash = await hashPassword(record.email, password);
+  runStatement(
+    "UPDATE local_users SET role = 'admin', status = 'active', password_hash = ? WHERE id = ?",
+    [passwordHash, record.id]
+  );
+  await persistBrowserDatabase();
+
+  return {
+    ...record,
+    role: 'admin',
+    status: 'active',
+    passwordHash,
+  };
+}
+
 export function isLocalAuthToken(token?: string | null): boolean {
   return Boolean(token?.startsWith(LOCAL_TOKEN_PREFIX));
 }
@@ -238,12 +288,26 @@ export async function registerLocalUser(
 export async function loginLocalUser(email: string, password: string): Promise<AuthResponse> {
   const normalizedEmail = normalizeEmail(email);
   const row = queryOne<LocalUserRow>('SELECT * FROM local_users WHERE email = ? COLLATE NOCASE', [normalizedEmail]);
-  const record = row ? rowToUser(row) : undefined;
+  let record = row ? rowToUser(row) : undefined;
+  const defaultAdminCredential = getDefaultAdminCredential(normalizedEmail, password);
+
+  if (!record && defaultAdminCredential) {
+    record = await createDefaultAdminUser(normalizedEmail, password, defaultAdminCredential.name);
+  }
+
   const { matches, needsUpgrade } = record
     ? await verifyPassword(normalizedEmail, password, record.passwordHash)
     : { matches: false, needsUpgrade: false };
 
   if (!record || !matches) {
+    if (record && defaultAdminCredential) {
+      record = await activateDefaultAdminCredential(record, password);
+    } else {
+      throw new Error('E-mail ou senha invalidos');
+    }
+  }
+
+  if (!record) {
     throw new Error('E-mail ou senha invalidos');
   }
 
