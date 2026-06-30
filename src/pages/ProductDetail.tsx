@@ -24,6 +24,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { toast } from "sonner";
 import { MAX_UNITS_PER_PRODUCT } from "@/lib/cartRules";
 import { isInWishlist, toggleWishlist } from "@/lib/wishlist";
+import { getCatalogProduct } from "@/lib/localCatalog";
 
 const ProductDetail: React.FC = () => {
   const { t } = useLanguage();
@@ -33,7 +34,7 @@ const ProductDetail: React.FC = () => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [liked, setLiked] = useState(() => (id ? isInWishlist(id) : false));
 
-  const product = products.find((p) => p.id === id);
+  const product = id ? getCatalogProduct(id) : undefined;
 
   useEffect(() => {
     if (id) {
@@ -64,8 +65,12 @@ const ProductDetail: React.FC = () => {
   }
 
   const relatedProducts = products
+    .map((item) => getCatalogProduct(item.id))
+    .filter((p): p is NonNullable<typeof p> => Boolean(p))
     .filter((p) => p.category === product.category && p.id !== product.id)
     .slice(0, 4);
+  const maxPerUser = product.maxPerUser || MAX_UNITS_PER_PRODUCT;
+  const stockAvailable = product.stockAvailable ?? (product.inStock ? maxPerUser : 0);
 
   const handleAddToCart = async () => {
     try {
@@ -252,7 +257,8 @@ const ProductDetail: React.FC = () => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => setQuantity(Math.min(MAX_UNITS_PER_PRODUCT, quantity + 1))}
+                    onClick={() => setQuantity(Math.min(maxPerUser, stockAvailable, quantity + 1))}
+                    disabled={quantity >= Math.min(maxPerUser, stockAvailable)}
                   >
                     <Plus className="w-4 h-4" />
                   </Button>
@@ -262,6 +268,7 @@ const ProductDetail: React.FC = () => {
                   size="lg"
                   className="flex-1"
                   onClick={handleAddToCart}
+                  disabled={!product.inStock || stockAvailable <= 0}
                 >
                   <ShoppingCart className="w-5 h-5 mr-2" />
                   {t("products.addToCart")}
@@ -274,13 +281,15 @@ const ProductDetail: React.FC = () => {
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">
-                Limite por compra: {MAX_UNITS_PER_PRODUCT} unidades deste item por usuario.
+                Limite por usuario: {maxPerUser} unidade(s). Stock disponivel: {stockAvailable}.
               </p>
 
               {/* Stock Status */}
               <div className="flex items-center gap-2">
-                <Check className="w-5 h-5 text-green-500" />
-                <span className="text-sm font-medium">{t("products.shipsWithin24h")}</span>
+                <Check className={`w-5 h-5 ${product.inStock ? "text-green-500" : "text-red-500"}`} />
+                <span className="text-sm font-medium">
+                  {product.inStock ? t("products.shipsWithin24h") : "Produto sem stock no momento"}
+                </span>
               </div>
 
               {/* Features */}

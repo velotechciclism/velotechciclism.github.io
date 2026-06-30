@@ -10,6 +10,7 @@ import {
   LogOut,
   Package,
   Heart,
+  ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
@@ -116,6 +117,14 @@ const Header: React.FC = () => {
                       Favoritos
                     </Link>
                   </DropdownMenuItem>
+                  {profile?.role === "admin" && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin" className="cursor-pointer">
+                        <ShieldCheck className="w-4 h-4 mr-2" />
+                        Administração
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem 
                     onClick={handleLogout}
@@ -213,6 +222,16 @@ const Header: React.FC = () => {
                       <Heart className="w-4 h-4 inline mr-2" />
                       Favoritos
                     </Link>
+                    {profile?.role === "admin" && (
+                      <Link
+                        to="/admin"
+                        className="block text-sm text-primary mb-2"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        <ShieldCheck className="w-4 h-4 inline mr-2" />
+                        Administração
+                      </Link>
+                    )}
                     <Button 
                       variant="outline" 
                       className="w-full text-red-600 border-red-200 hover:bg-red-50"

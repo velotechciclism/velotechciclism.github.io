@@ -56,6 +56,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
           {/* Badges */}
           <div className="absolute top-4 left-4 flex flex-col gap-2">
+            {!product.inStock && (
+              <span className="px-3 py-1 text-xs font-bold rounded-full bg-zinc-900 text-white">
+                Sem stock
+              </span>
+            )}
             {product.isNew && (
               <span className="px-3 py-1 text-xs font-bold rounded-full bg-primary text-primary-foreground">
                 {t("products.new")}
@@ -86,6 +91,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               variant="yellow"
               className="w-full"
               onClick={handleAddToCart}
+              disabled={!product.inStock}
             >
               <ShoppingCart className="w-4 h-4 mr-2" />
               {t("products.addToCart")}
@@ -125,6 +131,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               </span>
             )}
           </div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Stock: {product.stockAvailable ?? (product.inStock ? "disponivel" : 0)} · Limite: {product.maxPerUser || 5}
+          </p>
         </div>
       </div>
     </Link>

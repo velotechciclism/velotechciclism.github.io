@@ -7,6 +7,8 @@ export interface AuthUser {
   name: string;
   phone?: string;
   address?: string;
+  role?: 'customer' | 'admin';
+  status?: 'active' | 'blocked';
   created_at: string;
 }
 

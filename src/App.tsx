@@ -15,6 +15,7 @@ const Products = lazy(() => import("./pages/Products"));
 const ProductDetail = lazy(() => import("./pages/ProductDetail"));
 const Cart = lazy(() => import("./pages/Cart"));
 const Auth = lazy(() => import("./pages/Auth"));
+const Admin = lazy(() => import("./pages/Admin"));
 const Brands = lazy(() => import("./pages/Brands"));
 const Blog = lazy(() => import("./pages/Blog"));
 const BlogArticle = lazy(() => import("./pages/BlogArticle"));
@@ -54,6 +55,7 @@ const App = () => (
                   <Route path="/products/:id/reviews" element={<ProductReviews />} />
                   <Route path="/cart" element={<Cart />} />
                   <Route path="/auth" element={<Auth />} />
+                  <Route path="/admin" element={<Admin />} />
                   <Route path="/brands" element={<Brands />} />
                   <Route path="/blog" element={<Blog />} />
                   <Route path="/blog/:postId" element={<BlogArticle />} />

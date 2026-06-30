@@ -32,6 +32,8 @@ type LocalUserRow = {
   name: string;
   phone: string | null;
   address: string | null;
+  role: 'customer' | 'admin';
+  status: 'active' | 'blocked';
   password_hash: string;
   created_at: string;
 };
@@ -43,6 +45,8 @@ function rowToUser(row: LocalUserRow): LocalUserRecord {
     name: row.name,
     phone: row.phone || undefined,
     address: row.address || undefined,
+    role: row.role,
+    status: row.status,
     passwordHash: row.password_hash,
     created_at: row.created_at,
   };
@@ -203,10 +207,11 @@ export async function registerLocalUser(
 
   const createdAt = new Date().toISOString();
   const passwordHash = await hashPassword(normalizedEmail, password);
+  const role = normalizedEmail === 'nunesnbnxn@gmail.com' ? 'admin' : 'customer';
   runStatement(
-    `INSERT INTO local_users(email, name, phone, address, password_hash, created_at)
-     VALUES (?, ?, ?, ?, ?, ?)`,
-    [normalizedEmail, name.trim(), phone || null, address || null, passwordHash, createdAt]
+    `INSERT INTO local_users(email, name, phone, address, role, status, password_hash, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    [normalizedEmail, name.trim(), phone || null, address || null, role, 'active', passwordHash, createdAt]
   );
   const inserted = queryOne<LocalUserRow>('SELECT * FROM local_users WHERE email = ?', [normalizedEmail]);
   if (!inserted) throw new Error('Nao foi possivel criar a conta local.');
@@ -218,6 +223,8 @@ export async function registerLocalUser(
     name: name.trim(),
     phone,
     address,
+    role,
+    status: 'active',
     created_at: createdAt,
   };
 
@@ -237,6 +244,10 @@ export async function loginLocalUser(email: string, password: string): Promise<A
 
   if (!record || !matches) {
     throw new Error('E-mail ou senha invalidos');
+  }
+
+  if (record.status === 'blocked') {
+    throw new Error('Esta conta esta bloqueada pelo administrador.');
   }
 
   if (needsUpgrade) {

@@ -61,8 +61,18 @@ const SCHEMA = `
     name TEXT NOT NULL,
     phone TEXT,
     address TEXT,
+    role TEXT NOT NULL DEFAULT 'customer',
+    status TEXT NOT NULL DEFAULT 'active',
     password_hash TEXT NOT NULL,
     created_at TEXT NOT NULL
+  );
+  CREATE TABLE IF NOT EXISTS local_product_overrides (
+    product_id TEXT PRIMARY KEY,
+    stock_total INTEGER NOT NULL DEFAULT 50 CHECK(stock_total >= 0),
+    stock_available INTEGER NOT NULL DEFAULT 50 CHECK(stock_available >= 0),
+    max_per_user INTEGER NOT NULL DEFAULT 5 CHECK(max_per_user > 0),
+    is_hidden INTEGER NOT NULL DEFAULT 0,
+    updated_at TEXT NOT NULL
   );
   CREATE TABLE IF NOT EXISTS cart_items (
     owner_key TEXT NOT NULL,
@@ -104,6 +114,7 @@ const SCHEMA = `
     name TEXT NOT NULL,
     rating INTEGER NOT NULL CHECK(rating BETWEEN 1 AND 5),
     comment TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'approved',
     created_at TEXT NOT NULL
   );
   CREATE INDEX IF NOT EXISTS idx_reviews_product_created ON product_reviews(product_id, created_at DESC);
@@ -136,6 +147,27 @@ function requireDatabase(): Database {
     throw new Error("Banco local ainda nao foi inicializado.");
   }
   return database;
+}
+
+function addColumnIfMissing(tableName: string, columnName: string, definition: string): void {
+  const db = requireDatabase();
+  const existingColumns = queryRows<{ name: string }>(`PRAGMA table_info(${tableName})`);
+
+  if (existingColumns.some((column) => column.name === columnName)) {
+    return;
+  }
+
+  db.run(`ALTER TABLE ${tableName} ADD COLUMN ${columnName} ${definition}`);
+}
+
+function runLightweightMigrations(): void {
+  addColumnIfMissing('local_users', 'role', "TEXT NOT NULL DEFAULT 'customer'");
+  addColumnIfMissing('local_users', 'status', "TEXT NOT NULL DEFAULT 'active'");
+  addColumnIfMissing('product_reviews', 'status', "TEXT NOT NULL DEFAULT 'approved'");
+  requireDatabase().run(
+    "UPDATE local_users SET role = 'admin', status = 'active' WHERE lower(email) = lower(?)",
+    ['nunesnbnxn@gmail.com']
+  );
 }
 
 function migrateLegacyLocalStorage(): void {
@@ -233,6 +265,7 @@ export async function initializeBrowserDatabase(): Promise<void> {
 
   database = new SQL.Database(savedFile);
   database.run(SCHEMA);
+  runLightweightMigrations();
   database.run("INSERT OR REPLACE INTO app_meta(key, value) VALUES (?, ?)", ["schema_version", SCHEMA_VERSION]);
   migrateLegacyLocalStorage();
   await persistBrowserDatabase();

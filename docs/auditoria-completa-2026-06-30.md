@@ -2,6 +2,55 @@
 
 Data: 30/06/2026
 
+## Revalidacao operacional - 30/06/2026 17:14 America/Bahia
+
+Esta revalidacao foi executada no workspace local em `/home/gabriel/Área de trabalho/Velotech/velotechciclism.github.io`.
+
+Resultado atualizado:
+
+- remoto Git `git@github.com:velotechciclism/velotechciclism.github.io.git`: acessivel via SSH;
+- branch atual: `master`;
+- `npm run typecheck`: OK;
+- `npm run lint`: OK, com 12 avisos preexistentes de Fast Refresh e 0 erros;
+- `npm audit --omit=dev`: 0 vulnerabilidades;
+- `npm --prefix server run typecheck`: OK;
+- `npm --prefix server audit --omit=dev`: 0 vulnerabilidades;
+- `DATABASE_URL='file:/tmp/velotech-audit.db' npx prisma validate`: OK;
+- `npm --prefix server run prisma:generate`: OK;
+- `npm --prefix server run build`: OK;
+- `DATABASE_URL='file:/tmp/velotech-audit.db' npx prisma db push`: falhou neste ambiente com `Schema engine error` sem detalhe;
+- `npm run build:gh`: OK;
+- `vite preview` local em `http://127.0.0.1:4173/`: OK;
+- `http://127.0.0.1:4173/sqlite/sql-wasm.wasm`: HTTP 200, `Content-Type: application/wasm`, 659730 bytes;
+- Chrome headless carregando o build local: OK, sem erro de inicializacao da aplicacao;
+- site publicado `https://velotechciclism.github.io/`: HTTP 200;
+- `https://velotechciclism.github.io/sqlite/sql-wasm.wasm`: HTTP 404 no deploy remoto atual;
+- `https://velotechciclism.github.io/api/health`: HTTP 404, esperado para GitHub Pages.
+
+Conclusao da revalidacao: o build local atual esta pronto para GitHub Pages e inclui o SQLite WebAssembly necessario. O deploy remoto publicado em `https://velotechciclism.github.io/` ainda parece ser uma versao antiga, pois nao contem `sqlite/sql-wasm.wasm`. Para garantir o funcionamento real no GitHub Pages, publique o build atual via workflow `Deploy GitHub Pages` ou `npm run deploy:gh`.
+
+Observacao de backend nesta revalidacao: o backend compilou e o schema Prisma validou, mas os endpoints HTTP nao foram reexecutados porque `prisma db push` falhou no engine local antes de criar o banco temporario. Isso nao afeta o modo GitHub Pages, que usa SQLite no navegador via `sql.js`, mas bloqueia a prova local end-to-end do backend Express neste computador.
+
+## Implementacao adicional - 30/06/2026 17:26 America/Bahia
+
+Foram implementadas funcionalidades visiveis no modo GitHub Pages/local-first:
+
+- rota `/admin` com painel administrativo para usuários com `role = admin`;
+- conta `nunesnbnxn@gmail.com` promovida automaticamente a administradora no SQLite local;
+- gestão local de usuários com promoção/remocao de admin e bloqueio/desbloqueio;
+- gestão local de produtos com stock total, stock disponivel, limite `maxPerUser` e ocultacao;
+- cartões e detalhe de produto exibem stock e limite por usuário;
+- carrinho valida produto sem stock, stock disponivel e limite especifico por produto;
+- avaliacoes ganharam campo `status` para moderação administrativa;
+- chatbot local passou a usar o catálogo mesclado com stock/visibilidade definidos pelo admin;
+- prints de validação foram salvos em `screenshots/`.
+
+Arquivos de evidência visual:
+
+- `screenshots/01-produtos-stock-limite.png`;
+- `screenshots/02-painel-admin.png`;
+- `screenshots/03-admin-stock-editado.png`.
+
 ## Resumo executivo
 
 O site publicado em `https://velotechciclism.github.io/` responde normalmente, e o remoto Git está acessível. O endpoint `https://velotechciclism.github.io/api/health` retorna 404 porque GitHub Pages serve somente arquivos estáticos: ele não executa Node, Prisma nem um processo SQLite de servidor.

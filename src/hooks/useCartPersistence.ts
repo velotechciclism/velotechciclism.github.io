@@ -101,6 +101,13 @@ export function useCartPersistence() {
   }, [loadCartItems]);
 
   const addItem = useCallback(async (product: Product, quantity = 1) => {
+    const productLimit = product.maxPerUser || MAX_UNITS_PER_PRODUCT;
+    const availableStock = product.stockAvailable ?? (product.inStock ? productLimit : 0);
+
+    if (!product.inStock || availableStock <= 0) {
+      throw new Error('Produto sem stock disponivel.');
+    }
+
     if (shouldUseRemotePersistence) {
       const data = await fetchAuthJson<{ items: CartItem[] }>('/cart/items', {
         method: 'POST',
@@ -111,8 +118,14 @@ export function useCartPersistence() {
     }
 
     const existingItem = items.find((item) => item.id === product.id);
-    if ((existingItem?.quantity || 0) + quantity > MAX_UNITS_PER_PRODUCT) {
-      throw new Error(`Limite maximo de ${MAX_UNITS_PER_PRODUCT} unidades por produto.`);
+    const nextQuantity = (existingItem?.quantity || 0) + quantity;
+
+    if (nextQuantity > productLimit) {
+      throw new Error(`Limite maximo de ${productLimit} unidades deste produto por usuario.`);
+    }
+
+    if (nextQuantity > availableStock) {
+      throw new Error(`Stock disponivel: ${availableStock} unidade(s).`);
     }
 
     const nextItems = existingItem
@@ -137,8 +150,16 @@ export function useCartPersistence() {
   }, [items, persistCart, shouldUseRemotePersistence]);
 
   const updateQuantity = useCallback(async (productId: string, quantity: number) => {
-    if (quantity > MAX_UNITS_PER_PRODUCT) {
-      throw new Error(`Limite maximo de ${MAX_UNITS_PER_PRODUCT} unidades por produto.`);
+    const currentItem = items.find((item) => item.id === productId);
+    const productLimit = currentItem?.maxPerUser || MAX_UNITS_PER_PRODUCT;
+    const availableStock = currentItem?.stockAvailable ?? productLimit;
+
+    if (quantity > productLimit) {
+      throw new Error(`Limite maximo de ${productLimit} unidades deste produto por usuario.`);
+    }
+
+    if (quantity > availableStock) {
+      throw new Error(`Stock disponivel: ${availableStock} unidade(s).`);
     }
 
     if (shouldUseRemotePersistence) {

@@ -10,6 +10,10 @@ export interface Product {
   rating: number;
   reviewCount: number;
   inStock: boolean;
+  stockTotal?: number;
+  stockAvailable?: number;
+  maxPerUser?: number;
+  isHidden?: boolean;
   isNew?: boolean;
   isFeatured?: boolean;
   specs?: Record<string, string>;

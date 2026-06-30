@@ -22,8 +22,9 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Checkbox } from "@/components/ui/checkbox";
-import { products, categories, brands } from "@/data/products";
+import { categories, brands } from "@/data/products";
 import { useLanguage } from "@/context/LanguageContext";
+import { getCatalogProducts } from "@/lib/localCatalog";
 
 const categorySlugMap: Record<string, string> = {
   bicycles: "bicycles",
@@ -57,9 +58,10 @@ function getCategoryLabel(categoryId: string, t: (key: string) => string): strin
 const Products: React.FC = () => {
   const { t } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [catalogProducts, setCatalogProducts] = useState(() => getCatalogProducts());
   const maxProductPrice = useMemo(
-    () => Math.ceil(Math.max(...products.map((product) => product.price))),
-    []
+    () => Math.ceil(Math.max(...catalogProducts.map((product) => product.price))),
+    [catalogProducts]
   );
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [priceRange, setPriceRange] = useState([0, maxProductPrice]);
@@ -73,6 +75,10 @@ const Products: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
+    setCatalogProducts(getCatalogProducts());
+  }, []);
+
+  useEffect(() => {
     const categoryParam = searchParams.get("category");
     const brandParam = searchParams.get("brand");
 
@@ -81,7 +87,7 @@ const Products: React.FC = () => {
   }, [searchParams]);
 
   const filteredProducts = useMemo(() => {
-    let result = [...products];
+    let result = [...catalogProducts];
 
     // Filter by search
     if (searchQuery) {
@@ -130,7 +136,7 @@ const Products: React.FC = () => {
     }
 
     return result;
-  }, [searchQuery, selectedCategories, selectedBrands, priceRange, sortBy]);
+  }, [catalogProducts, searchQuery, selectedCategories, selectedBrands, priceRange, sortBy]);
 
   const toggleCategory = (category: string) => {
     setSelectedCategories((prev) =>

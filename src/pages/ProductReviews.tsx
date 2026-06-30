@@ -16,6 +16,7 @@ type StoredReview = {
   name: string;
   rating: number;
   comment: string;
+  status: string;
   createdAt: string;
 };
 
@@ -26,13 +27,15 @@ function readReviews(): StoredReview[] {
     name: string;
     rating: number;
     comment: string;
+    status: string;
     created_at: string;
-  }>('SELECT * FROM product_reviews ORDER BY created_at DESC').map((row) => ({
+  }>("SELECT * FROM product_reviews WHERE status != 'rejected' ORDER BY created_at DESC").map((row) => ({
     id: row.id,
     productId: row.product_id,
     name: row.name,
     rating: row.rating,
     comment: row.comment,
+    status: row.status,
     createdAt: row.created_at,
   }));
 }
@@ -62,13 +65,14 @@ const ProductReviews: React.FC = () => {
       name: formData.name.trim(),
       rating: formData.rating,
       comment: formData.comment.trim(),
+      status: 'approved',
       createdAt: new Date().toISOString(),
     };
 
     runStatement(
-      `INSERT INTO product_reviews(id, product_id, name, rating, comment, created_at)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [review.id, review.productId, review.name, review.rating, review.comment, review.createdAt]
+      `INSERT INTO product_reviews(id, product_id, name, rating, comment, status, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [review.id, review.productId, review.name, review.rating, review.comment, review.status, review.createdAt]
     );
     await persistBrowserDatabase();
     const nextReviews = [review, ...reviews];

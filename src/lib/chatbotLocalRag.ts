@@ -1,4 +1,4 @@
-import { products } from '@/data/products';
+import { getCatalogProducts } from './localCatalog';
 
 type RagProduct = {
   id: string;
@@ -137,8 +137,9 @@ function rankProducts(query: string): RagProduct[] {
   const baseTokens = tokenize(query);
   const expandedTokens = expandTokens(baseTokens);
   const budget = detectBudget(query);
+  const catalogProducts = getCatalogProducts();
 
-  const ranked = products
+  const ranked = catalogProducts
     .map((product) => {
       const specsText = product.specs ? Object.values(product.specs).join(' ') : '';
       const doc = normalize(
@@ -152,7 +153,7 @@ function rankProducts(query: string): RagProduct[] {
 
       const categoryBoost = expandedTokens.includes(product.category.toLowerCase()) ? 2 : 0;
       const featuredBoost = product.isFeatured ? 0.5 : 0;
-      const stockBoost = product.inStock ? 0.5 : -1;
+      const stockBoost = product.inStock ? 0.5 : -3;
 
       const budgetPenalty = budget && product.price > budget * 1.15 ? -2 : 0;
 
@@ -210,7 +211,7 @@ function buildNaturalAnswer(query: string, productsRanked: RagProduct[]): string
   }
 
   if (wantsCatalog) {
-    const topCatalog = products
+    const topCatalog = getCatalogProducts()
       .filter((product) => product.inStock)
       .slice(0, 6)
       .map((product) => ({
