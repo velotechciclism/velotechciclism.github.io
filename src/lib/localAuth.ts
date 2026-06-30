@@ -5,6 +5,7 @@ const AUTH_TOKEN_KEY = 'authToken';
 const LOCAL_TOKEN_PREFIX = 'local-auth:';
 const PBKDF2_PREFIX = 'pbkdf2-sha256';
 const PBKDF2_ITERATIONS = 310000;
+const LOCAL_ADMIN_EMAILS = ['nunesnbnxn@gmail.com', 'c.eduardoteixeiraguinsber@gmail.com'];
 
 interface LocalUserRecord extends User {
   passwordHash: string;
@@ -207,7 +208,7 @@ export async function registerLocalUser(
 
   const createdAt = new Date().toISOString();
   const passwordHash = await hashPassword(normalizedEmail, password);
-  const role = normalizedEmail === 'nunesnbnxn@gmail.com' ? 'admin' : 'customer';
+  const role = LOCAL_ADMIN_EMAILS.includes(normalizedEmail) ? 'admin' : 'customer';
   runStatement(
     `INSERT INTO local_users(email, name, phone, address, role, status, password_hash, created_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,

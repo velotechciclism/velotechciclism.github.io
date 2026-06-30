@@ -36,13 +36,17 @@ Observacao de backend nesta revalidacao: o backend compilou e o schema Prisma va
 Foram implementadas funcionalidades visiveis no modo GitHub Pages/local-first:
 
 - rota `/admin` com painel administrativo para usuários com `role = admin`;
-- conta `nunesnbnxn@gmail.com` promovida automaticamente a administradora no SQLite local;
+- contas `nunesnbnxn@gmail.com` e `c.eduardoteixeiraguinsber@gmail.com` promovidas automaticamente a administradoras no SQLite local;
 - gestão local de usuários com promoção/remocao de admin e bloqueio/desbloqueio;
 - gestão local de produtos com stock total, stock disponivel, limite `maxPerUser` e ocultacao;
 - cartões e detalhe de produto exibem stock e limite por usuário;
 - carrinho valida produto sem stock, stock disponivel e limite especifico por produto;
 - avaliacoes ganharam campo `status` para moderação administrativa;
 - chatbot local passou a usar o catálogo mesclado com stock/visibilidade definidos pelo admin;
+- aba administrativa `Dados` adicionada para visualizar usuários, carrinhos, pedidos, favoritos, avaliações, contatos, newsletter, chats e overrides de produtos;
+- exportação administrativa adicionada em JSON e SQLite local (`.sqlite`);
+- aviso visual de modo local removido da tela de login/cadastro;
+- roteiro didático criado em `docs/roteiro-video-novos-ajustes.md`;
 - prints de validação foram salvos em `screenshots/`.
 
 Arquivos de evidência visual:

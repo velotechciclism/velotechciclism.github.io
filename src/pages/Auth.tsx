@@ -7,7 +7,6 @@ import { Input } from '../components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import logo from '@/assets/logo.png';
-import { shouldUseRemoteApi } from '@/lib/api';
 
 type PhoneCountry = {
   code: string;
@@ -88,9 +87,6 @@ export default function Auth() {
   const [localError, setLocalError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const selectedCountry = getCountryByCode(selectedCountryCode);
-  const localOnly = !shouldUseRemoteApi();
-
-
   const { register, login, isLoading, error, isAuthenticated } = useAuthContext();
 
   // Redirect authenticated users to home
@@ -258,13 +254,6 @@ export default function Auth() {
           </CardHeader>
 
           <CardContent className="px-6 pb-8 pt-2 sm:px-10 sm:pb-10">
-            {localOnly && (
-              <Alert className="mb-5 border-amber-400/40 bg-amber-950/40">
-                <AlertDescription className="text-amber-100">
-                  Modo local: esta conta fica somente neste navegador e nao sincroniza com outros dispositivos.
-                </AlertDescription>
-              </Alert>
-            )}
             {successMessage && (
               <Alert className="mb-5 border-emerald-200 bg-emerald-50">
                 <AlertDescription className="text-emerald-800">{successMessage}</AlertDescription>

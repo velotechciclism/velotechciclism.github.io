@@ -4,6 +4,7 @@ const IDB_NAME = "velotech-local-database";
 const IDB_STORE = "files";
 const IDB_KEY = "velotech.sqlite";
 const SCHEMA_VERSION = "1";
+const LOCAL_ADMIN_EMAILS = ['nunesnbnxn@gmail.com', 'c.eduardoteixeiraguinsber@gmail.com'];
 
 let database: Database | null = null;
 let persistChain = Promise.resolve();
@@ -164,10 +165,12 @@ function runLightweightMigrations(): void {
   addColumnIfMissing('local_users', 'role', "TEXT NOT NULL DEFAULT 'customer'");
   addColumnIfMissing('local_users', 'status', "TEXT NOT NULL DEFAULT 'active'");
   addColumnIfMissing('product_reviews', 'status', "TEXT NOT NULL DEFAULT 'approved'");
-  requireDatabase().run(
-    "UPDATE local_users SET role = 'admin', status = 'active' WHERE lower(email) = lower(?)",
-    ['nunesnbnxn@gmail.com']
-  );
+  for (const email of LOCAL_ADMIN_EMAILS) {
+    requireDatabase().run(
+      "UPDATE local_users SET role = 'admin', status = 'active' WHERE lower(email) = lower(?)",
+      [email]
+    );
+  }
 }
 
 function migrateLegacyLocalStorage(): void {
@@ -310,6 +313,11 @@ export function persistBrowserDatabase(): Promise<void> {
     .then(() => saveFile(snapshot))
     .catch((error) => console.warn("Nao foi possivel persistir o SQLite local.", error));
   return persistChain;
+}
+
+export async function exportBrowserDatabase(): Promise<Uint8Array> {
+  await persistBrowserDatabase();
+  return requireDatabase().export();
 }
 
 export function newLocalId(prefix: string): string {
