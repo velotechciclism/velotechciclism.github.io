@@ -50,6 +50,7 @@ Arquivos de evidência visual:
 - `screenshots/01-produtos-stock-limite.png`;
 - `screenshots/02-painel-admin.png`;
 - `screenshots/03-admin-stock-editado.png`.
+- `public/screenshots/04-deploy-produtos-github-pages.png`, publicado em `/screenshots/04-deploy-produtos-github-pages.png`.
 
 ## Resumo executivo
 
