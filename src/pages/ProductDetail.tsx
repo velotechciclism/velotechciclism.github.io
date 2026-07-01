@@ -25,6 +25,7 @@ import { toast } from "sonner";
 import { MAX_UNITS_PER_PRODUCT } from "@/lib/cartRules";
 import { isInWishlist, toggleWishlist } from "@/lib/wishlist";
 import { getCatalogProduct } from "@/lib/localCatalog";
+import { recordLocalActivity } from "@/lib/localActivity";
 
 const ProductDetail: React.FC = () => {
   const { t } = useLanguage();
@@ -39,6 +40,7 @@ const ProductDetail: React.FC = () => {
   useEffect(() => {
     if (id) {
       setLiked(isInWishlist(id));
+      void recordLocalActivity('product_view', { productId: id });
     }
   }, [id]);
 

@@ -132,10 +132,19 @@ O painel tem quatro áreas:
 Na aba Produtos, o administrador pode:
 
 - ver todos os produtos;
+- adicionar produtos novos;
+- editar nome, descrição, categoria, marca, preço e imagem;
 - editar stock total;
 - editar stock disponível;
 - editar limite por usuário;
 - ocultar ou mostrar produtos.
+
+Na aba Conteúdo, o administrador pode:
+
+- criar categorias locais;
+- criar marcas locais;
+- remover categorias/marcas locais;
+- usar essas categorias e marcas no cadastro de produtos.
 
 Na aba Usuários, o administrador pode:
 
@@ -161,6 +170,8 @@ Na aba Dados, o administrador consegue:
 - ver contatos;
 - ver newsletter;
 - ver mensagens do chatbot;
+- ver atividade recente;
+- ver histórico de alterações de stock;
 - exportar dados em JSON;
 - baixar o banco `.sqlite`.
 

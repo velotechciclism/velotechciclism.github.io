@@ -69,12 +69,48 @@ const SCHEMA = `
   );
   CREATE TABLE IF NOT EXISTS local_product_overrides (
     product_id TEXT PRIMARY KEY,
+    name TEXT,
+    description TEXT,
+    category TEXT,
+    brand TEXT,
+    price REAL,
+    image TEXT,
+    is_custom INTEGER NOT NULL DEFAULT 0,
     stock_total INTEGER NOT NULL DEFAULT 50 CHECK(stock_total >= 0),
     stock_available INTEGER NOT NULL DEFAULT 50 CHECK(stock_available >= 0),
     max_per_user INTEGER NOT NULL DEFAULT 5 CHECK(max_per_user > 0),
     is_hidden INTEGER NOT NULL DEFAULT 0,
     updated_at TEXT NOT NULL
   );
+  CREATE TABLE IF NOT EXISTS local_categories (
+    name TEXT PRIMARY KEY COLLATE NOCASE,
+    created_at TEXT NOT NULL
+  );
+  CREATE TABLE IF NOT EXISTS local_brands (
+    name TEXT PRIMARY KEY COLLATE NOCASE,
+    created_at TEXT NOT NULL
+  );
+  CREATE TABLE IF NOT EXISTS stock_history (
+    id TEXT PRIMARY KEY,
+    product_id TEXT NOT NULL,
+    previous_total INTEGER NOT NULL,
+    previous_available INTEGER NOT NULL,
+    next_total INTEGER NOT NULL,
+    next_available INTEGER NOT NULL,
+    reason TEXT NOT NULL,
+    created_at TEXT NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS idx_stock_history_product_created ON stock_history(product_id, created_at DESC);
+  CREATE TABLE IF NOT EXISTS user_activity_events (
+    id TEXT PRIMARY KEY,
+    user_id INTEGER,
+    event_type TEXT NOT NULL,
+    product_id TEXT,
+    details TEXT,
+    created_at TEXT NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS idx_activity_created ON user_activity_events(created_at DESC);
+  CREATE INDEX IF NOT EXISTS idx_activity_product_type ON user_activity_events(product_id, event_type);
   CREATE TABLE IF NOT EXISTS cart_items (
     owner_key TEXT NOT NULL,
     product_id TEXT NOT NULL,
@@ -165,6 +201,13 @@ function runLightweightMigrations(): void {
   addColumnIfMissing('local_users', 'role', "TEXT NOT NULL DEFAULT 'customer'");
   addColumnIfMissing('local_users', 'status', "TEXT NOT NULL DEFAULT 'active'");
   addColumnIfMissing('product_reviews', 'status', "TEXT NOT NULL DEFAULT 'approved'");
+  addColumnIfMissing('local_product_overrides', 'name', 'TEXT');
+  addColumnIfMissing('local_product_overrides', 'description', 'TEXT');
+  addColumnIfMissing('local_product_overrides', 'category', 'TEXT');
+  addColumnIfMissing('local_product_overrides', 'brand', 'TEXT');
+  addColumnIfMissing('local_product_overrides', 'price', 'REAL');
+  addColumnIfMissing('local_product_overrides', 'image', 'TEXT');
+  addColumnIfMissing('local_product_overrides', 'is_custom', 'INTEGER NOT NULL DEFAULT 0');
   for (const email of LOCAL_ADMIN_EMAILS) {
     requireDatabase().run(
       "UPDATE local_users SET role = 'admin', status = 'active' WHERE lower(email) = lower(?)",

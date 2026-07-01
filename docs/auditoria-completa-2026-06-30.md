@@ -61,6 +61,20 @@ O chatbot local foi reforçado para atuar mais como consultor de compra:
 - atalhos visuais no widget para consultas frequentes como "bike para trilha até 300" e "luvas baratas em stock";
 - uso do catálogo administrável, respeitando produtos ocultos e stock local.
 
+## Fechamento do plano funcional - 01/07/2026
+
+Foram adicionados os pontos que ainda estavam parciais no modo GitHub Pages/local-first:
+
+- criação de produtos pelo administrador com nome, descrição, categoria, marca, preço, imagem, stock e `maxPerUser`;
+- edição completa dos produtos, incluindo preço, descrição e imagem;
+- desativação/ocultação de produtos pela administração;
+- gestão local de categorias e marcas;
+- histórico de alterações de stock em `stock_history`;
+- registro de atividade local em `user_activity_events`, incluindo visualização de produto, carrinho e checkout;
+- dashboard com produtos mais visualizados;
+- relatórios simples de inventário e atividade;
+- checkout com seleção visual dos métodos do plano: Visa, Mastercard, PayPal, MB Way, Apple Pay e Google Pay.
+
 Arquivos de evidência visual:
 
 - `screenshots/01-produtos-stock-limite.png`;

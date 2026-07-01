@@ -16,6 +16,7 @@ const Cart: React.FC = () => {
   const { isAuthenticated } = useAuthContext();
   const [promoCode, setPromoCode] = useState("");
   const [appliedPromoCode, setAppliedPromoCode] = useState<string | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState("Visa");
 
   const shipping = totalPrice > 100 ? 0 : 9.99;
   const tax = totalPrice * 0.23;
@@ -90,7 +91,7 @@ const Cart: React.FC = () => {
     }
 
     try {
-      await checkout("cartao", "Endereco nao informado", appliedPromoCode || undefined);
+      await checkout(paymentMethod, "Endereco nao informado", appliedPromoCode || undefined);
       toast.success(t("notifications.checkoutSuccess"));
     } catch (error) {
       const message = error instanceof Error ? error.message : t("notifications.checkoutError");
@@ -313,28 +314,24 @@ const Cart: React.FC = () => {
                     {t("cart.paymentMethods")}
                   </p>
                   <div className="flex flex-wrap justify-center gap-2">
-                    <div className="px-3 py-1.5 bg-muted rounded-lg flex items-center justify-center text-xs font-bold">
-                      PIX
-                    </div>
-                    <div className="px-3 py-1.5 bg-muted rounded-lg flex items-center justify-center text-xs font-bold">
-                      MB WAY
-                    </div>
-                    <div className="px-3 py-1.5 bg-muted rounded-lg flex items-center justify-center text-xs font-bold">
-                      MULTIBANCO
-                    </div>
-                    <div className="px-3 py-1.5 bg-muted rounded-lg flex items-center justify-center text-xs font-bold">
-                      VISA
-                    </div>
-                    <div className="px-3 py-1.5 bg-muted rounded-lg flex items-center justify-center text-xs font-bold">
-                      MASTERCARD
-                    </div>
-                    <div className="px-3 py-1.5 bg-muted rounded-lg flex items-center justify-center text-xs font-bold">
-                      PAYPAL
-                    </div>
-                    <div className="px-3 py-1.5 bg-muted rounded-lg flex items-center justify-center text-xs font-bold">
-                      TRANSFERÊNCIA
-                    </div>
+                    {["Visa", "Mastercard", "PayPal", "MB Way", "Apple Pay", "Google Pay"].map((method) => (
+                      <button
+                        key={method}
+                        type="button"
+                        onClick={() => setPaymentMethod(method)}
+                        className={`px-3 py-1.5 rounded-lg flex items-center justify-center text-xs font-bold transition ${
+                          paymentMethod === method
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted hover:bg-muted/80"
+                        }`}
+                      >
+                        {method}
+                      </button>
+                    ))}
                   </div>
+                  <p className="mt-3 text-center text-xs text-muted-foreground">
+                    Pagamento simulado selecionado: {paymentMethod}
+                  </p>
                 </div>
               </div>
             </div>

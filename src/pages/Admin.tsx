@@ -7,7 +7,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuthContext } from "@/context/AuthContext";
-import { getCatalogProducts, updateProductInventory } from "@/lib/localCatalog";
+import {
+  ensureLocalBrand,
+  ensureLocalCategory,
+  getCatalogProducts,
+  getManagedBrands,
+  getManagedCategories,
+  hideProduct,
+  removeLocalBrand,
+  removeLocalCategory,
+  saveEditableProduct,
+  updateProductInventory,
+} from "@/lib/localCatalog";
 import { exportBrowserDatabase, persistBrowserDatabase, queryRows, runStatement } from "@/lib/browserDatabase";
 import { toast } from "sonner";
 
@@ -42,6 +53,41 @@ type StoredData = {
   newsletter: Array<Record<string, unknown>>;
   chatMessages: Array<Record<string, unknown>>;
   productOverrides: Array<Record<string, unknown>>;
+  activity: Array<Record<string, unknown>>;
+  stockHistory: Array<Record<string, unknown>>;
+};
+
+type ProductForm = {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  brand: string;
+  price: string;
+  image: string;
+  stockTotal: string;
+  stockAvailable: string;
+  maxPerUser: string;
+  isHidden: boolean;
+};
+
+type ProductViewRow = {
+  product_id: string;
+  total: number;
+};
+
+const emptyProductForm: ProductForm = {
+  id: "",
+  name: "",
+  description: "",
+  category: "Acessórios",
+  brand: "VeloTech",
+  price: "",
+  image: "/placeholder.svg",
+  stockTotal: "50",
+  stockAvailable: "50",
+  maxPerUser: "5",
+  isHidden: false,
 };
 
 function readUsers(): LocalUserAdminRow[] {
@@ -73,7 +119,20 @@ function readStoredData(): StoredData {
     newsletter: queryRows("SELECT email, sync_status, created_at FROM newsletter_subscribers ORDER BY created_at DESC"),
     chatMessages: queryRows("SELECT id, conversation_id, role, content, created_at FROM chat_messages ORDER BY created_at DESC"),
     productOverrides: queryRows("SELECT product_id, stock_total, stock_available, max_per_user, is_hidden, updated_at FROM local_product_overrides ORDER BY updated_at DESC"),
+    activity: queryRows("SELECT id, user_id, event_type, product_id, details, created_at FROM user_activity_events ORDER BY created_at DESC"),
+    stockHistory: queryRows("SELECT id, product_id, previous_total, previous_available, next_total, next_available, reason, created_at FROM stock_history ORDER BY created_at DESC"),
   };
+}
+
+function readMostViewedProducts(): ProductViewRow[] {
+  return queryRows<ProductViewRow>(
+    `SELECT product_id, COUNT(*) AS total
+       FROM user_activity_events
+      WHERE event_type = 'product_view' AND product_id IS NOT NULL
+      GROUP BY product_id
+      ORDER BY total DESC
+      LIMIT 5`
+  );
 }
 
 function downloadBlob(fileName: string, blob: Blob): void {
@@ -97,6 +156,12 @@ const Admin: React.FC = () => {
   const [reviews, setReviews] = useState(() => readReviews());
   const [catalogProducts, setCatalogProducts] = useState(() => getCatalogProducts({ includeHidden: true }));
   const [storedData, setStoredData] = useState<StoredData>(() => readStoredData());
+  const [managedCategories, setManagedCategories] = useState(() => getManagedCategories());
+  const [managedBrands, setManagedBrands] = useState(() => getManagedBrands());
+  const [productForm, setProductForm] = useState<ProductForm>(emptyProductForm);
+  const [newCategory, setNewCategory] = useState("");
+  const [newBrand, setNewBrand] = useState("");
+  const mostViewedProducts = readMostViewedProducts();
 
   const isAdmin = profile?.role === "admin";
 
@@ -145,6 +210,8 @@ const Admin: React.FC = () => {
     setReviews(readReviews());
     setCatalogProducts(getCatalogProducts({ includeHidden: true }));
     setStoredData(readStoredData());
+    setManagedCategories(getManagedCategories());
+    setManagedBrands(getManagedBrands());
   };
 
   const updateUser = async (userId: number, values: Partial<Pick<LocalUserAdminRow, "role" | "status">>) => {
@@ -200,6 +267,67 @@ const Admin: React.FC = () => {
     });
     refreshAdminData();
     toast.success(product.isHidden ? "Produto visível novamente." : "Produto ocultado.");
+  };
+
+  const startEditingProduct = (productId: string) => {
+    const product = catalogProducts.find((item) => item.id === productId);
+    if (!product) return;
+    setProductForm({
+      id: product.id,
+      name: product.name,
+      description: product.description,
+      category: product.category,
+      brand: product.brand,
+      price: String(product.price),
+      image: product.image,
+      stockTotal: String(product.stockTotal || 50),
+      stockAvailable: String(product.stockAvailable || 0),
+      maxPerUser: String(product.maxPerUser || 5),
+      isHidden: Boolean(product.isHidden),
+    });
+  };
+
+  const resetProductForm = () => setProductForm(emptyProductForm);
+
+  const saveProductForm = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    if (!productForm.name.trim() || !productForm.description.trim()) {
+      toast.error("Informe nome e descrição do produto.");
+      return;
+    }
+
+    await saveEditableProduct({
+      id: productForm.id || undefined,
+      name: productForm.name,
+      description: productForm.description,
+      category: productForm.category,
+      brand: productForm.brand,
+      price: Number(productForm.price),
+      image: productForm.image,
+      stockTotal: Number(productForm.stockTotal),
+      stockAvailable: Number(productForm.stockAvailable),
+      maxPerUser: Number(productForm.maxPerUser),
+      isHidden: productForm.isHidden,
+    });
+
+    resetProductForm();
+    refreshAdminData();
+    toast.success("Produto salvo no catálogo.");
+  };
+
+  const addCategory = async () => {
+    await ensureLocalCategory(newCategory);
+    setNewCategory("");
+    refreshAdminData();
+    toast.success("Categoria salva.");
+  };
+
+  const addBrand = async () => {
+    await ensureLocalBrand(newBrand);
+    setNewBrand("");
+    refreshAdminData();
+    toast.success("Marca salva.");
   };
 
   const statCards = [
@@ -259,14 +387,138 @@ const Admin: React.FC = () => {
           </div>
 
           <Tabs defaultValue="products" className="mt-8">
-            <TabsList className="grid w-full max-w-3xl grid-cols-4">
+            <TabsList className="grid w-full max-w-5xl grid-cols-5">
               <TabsTrigger value="products">Produtos</TabsTrigger>
+              <TabsTrigger value="content">Conteúdo</TabsTrigger>
               <TabsTrigger value="users">Usuários</TabsTrigger>
               <TabsTrigger value="reviews">Avaliações</TabsTrigger>
               <TabsTrigger value="data">Dados</TabsTrigger>
             </TabsList>
 
             <TabsContent value="products" className="mt-6">
+              <form onSubmit={saveProductForm} className="mb-6 rounded-lg border border-white/10 bg-zinc-900 p-5">
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <div>
+                    <h2 className="font-display text-xl font-bold">
+                      {productForm.id ? "Editar produto" : "Adicionar produto"}
+                    </h2>
+                    <p className="text-sm text-zinc-400">
+                      Nome, descrição, categoria, marca, preço, imagem, stock e limite por usuário.
+                    </p>
+                  </div>
+                  {productForm.id && (
+                    <Button type="button" variant="outline" onClick={resetProductForm}>
+                      Novo produto
+                    </Button>
+                  )}
+                </div>
+                <div className="grid gap-4 lg:grid-cols-2">
+                  <Input
+                    value={productForm.name}
+                    onChange={(event) => setProductForm((prev) => ({ ...prev, name: event.target.value }))}
+                    placeholder="Nome do produto"
+                  />
+                  <Input
+                    value={productForm.image}
+                    onChange={(event) => setProductForm((prev) => ({ ...prev, image: event.target.value }))}
+                    placeholder="/placeholder.svg ou URL da imagem"
+                  />
+                  <textarea
+                    value={productForm.description}
+                    onChange={(event) => setProductForm((prev) => ({ ...prev, description: event.target.value }))}
+                    placeholder="Descrição"
+                    rows={4}
+                    className="min-h-[96px] rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground lg:col-span-2"
+                  />
+                  <select
+                    value={productForm.category}
+                    onChange={(event) => setProductForm((prev) => ({ ...prev, category: event.target.value }))}
+                    className="h-10 rounded-md border border-border bg-background px-3 text-sm text-foreground"
+                  >
+                    {managedCategories.map((category) => (
+                      <option key={category} value={category}>{category}</option>
+                    ))}
+                  </select>
+                  <select
+                    value={productForm.brand}
+                    onChange={(event) => setProductForm((prev) => ({ ...prev, brand: event.target.value }))}
+                    className="h-10 rounded-md border border-border bg-background px-3 text-sm text-foreground"
+                  >
+                    {managedBrands.map((brand) => (
+                      <option key={brand} value={brand}>{brand}</option>
+                    ))}
+                  </select>
+                  <Input
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    value={productForm.price}
+                    onChange={(event) => setProductForm((prev) => ({ ...prev, price: event.target.value }))}
+                    placeholder="Preço"
+                  />
+                  <Input
+                    type="number"
+                    min={1}
+                    value={productForm.maxPerUser}
+                    onChange={(event) => setProductForm((prev) => ({ ...prev, maxPerUser: event.target.value }))}
+                    placeholder="Máximo por usuário"
+                  />
+                  <Input
+                    type="number"
+                    min={0}
+                    value={productForm.stockTotal}
+                    onChange={(event) => setProductForm((prev) => ({ ...prev, stockTotal: event.target.value }))}
+                    placeholder="Stock total"
+                  />
+                  <Input
+                    type="number"
+                    min={0}
+                    value={productForm.stockAvailable}
+                    onChange={(event) => setProductForm((prev) => ({ ...prev, stockAvailable: event.target.value }))}
+                    placeholder="Stock disponível"
+                  />
+                </div>
+                <label className="mt-4 flex items-center gap-2 text-sm text-zinc-300">
+                  <input
+                    type="checkbox"
+                    checked={productForm.isHidden}
+                    onChange={(event) => setProductForm((prev) => ({ ...prev, isHidden: event.target.checked }))}
+                  />
+                  Ocultar produto da vitrine
+                </label>
+                <div className="mt-5 flex flex-wrap gap-3">
+                  <Button type="submit" variant="yellow">Salvar produto</Button>
+                  {productForm.id && (
+                    <Button type="button" variant="outline" onClick={() => void hideProduct(productForm.id).then(refreshAdminData)}>
+                      Desativar produto
+                    </Button>
+                  )}
+                </div>
+              </form>
+
+              <div className="mb-6 grid gap-4 lg:grid-cols-2">
+                <div className="rounded-lg border border-white/10 bg-zinc-900 p-4">
+                  <h3 className="font-semibold">Produtos mais visualizados</h3>
+                  <div className="mt-3 space-y-2">
+                    {mostViewedProducts.length > 0 ? mostViewedProducts.map((item) => {
+                      const product = catalogProducts.find((candidate) => candidate.id === item.product_id);
+                      return (
+                        <div key={item.product_id} className="flex justify-between gap-3 text-sm">
+                          <span className="truncate">{product?.name || item.product_id}</span>
+                          <span className="font-semibold text-primary">{item.total}</span>
+                        </div>
+                      );
+                    }) : <p className="text-sm text-zinc-400">Ainda não há visualizações registradas.</p>}
+                  </div>
+                </div>
+                <div className="rounded-lg border border-white/10 bg-zinc-900 p-4">
+                  <h3 className="font-semibold">Relatório rápido de inventário</h3>
+                  <p className="mt-3 text-sm text-zinc-300">
+                    {catalogProducts.filter((product) => (product.stockAvailable || 0) <= 5).length} produto(s) com stock reduzido e {catalogProducts.filter((product) => product.isHidden).length} produto(s) oculto(s).
+                  </p>
+                </div>
+              </div>
+
               <div className="overflow-x-auto rounded-lg border border-white/10 bg-zinc-900">
                 <table className="w-full min-w-[860px] text-sm">
                   <thead className="bg-zinc-950 text-left text-zinc-300">
@@ -318,14 +570,75 @@ const Admin: React.FC = () => {
                           </span>
                         </td>
                         <td className="p-3">
+                          <div className="flex flex-wrap gap-2">
+                          <Button variant="outline" size="sm" onClick={() => startEditingProduct(product.id)}>
+                            Editar
+                          </Button>
                           <Button variant="outline" size="sm" onClick={() => toggleProductVisibility(product.id)}>
                             {product.isHidden ? "Mostrar" : "Ocultar"}
                           </Button>
+                          </div>
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="content" className="mt-6">
+              <div className="grid gap-6 lg:grid-cols-2">
+                <div className="rounded-lg border border-white/10 bg-zinc-900 p-5">
+                  <h2 className="font-display text-xl font-bold">Categorias</h2>
+                  <div className="mt-4 flex gap-2">
+                    <Input
+                      value={newCategory}
+                      onChange={(event) => setNewCategory(event.target.value)}
+                      placeholder="Nova categoria"
+                    />
+                    <Button variant="yellow" onClick={() => void addCategory()}>Adicionar</Button>
+                  </div>
+                  <div className="mt-5 grid gap-2">
+                    {managedCategories.map((category) => (
+                      <div key={category} className="flex items-center justify-between rounded-md border border-white/10 bg-black p-3 text-sm">
+                        <span>{category}</span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => void removeLocalCategory(category).then(refreshAdminData)}
+                        >
+                          Remover local
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="rounded-lg border border-white/10 bg-zinc-900 p-5">
+                  <h2 className="font-display text-xl font-bold">Marcas</h2>
+                  <div className="mt-4 flex gap-2">
+                    <Input
+                      value={newBrand}
+                      onChange={(event) => setNewBrand(event.target.value)}
+                      placeholder="Nova marca"
+                    />
+                    <Button variant="yellow" onClick={() => void addBrand()}>Adicionar</Button>
+                  </div>
+                  <div className="mt-5 grid gap-2">
+                    {managedBrands.map((brand) => (
+                      <div key={brand} className="flex items-center justify-between rounded-md border border-white/10 bg-black p-3 text-sm">
+                        <span>{brand}</span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => void removeLocalBrand(brand).then(refreshAdminData)}
+                        >
+                          Remover local
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </TabsContent>
 
@@ -435,6 +748,8 @@ const Admin: React.FC = () => {
                       ["Newsletter", storedData.newsletter.length],
                       ["Overrides", storedData.productOverrides.length],
                       ["Favoritos", storedData.favorites.length],
+                      ["Atividades", storedData.activity.length],
+                      ["Histórico stock", storedData.stockHistory.length],
                     ].map(([label, value]) => (
                       <div key={String(label)} className="rounded-lg border border-white/10 bg-zinc-900 p-4">
                         <p className="text-xs uppercase text-zinc-400">{label}</p>
@@ -506,6 +821,56 @@ const Admin: React.FC = () => {
                         )}
                       </tbody>
                     </table>
+                  </div>
+
+                  <div className="grid gap-4 lg:grid-cols-2">
+                    <div className="overflow-x-auto rounded-lg border border-white/10 bg-zinc-900">
+                      <table className="w-full min-w-[640px] text-sm">
+                        <thead className="bg-zinc-950 text-left text-zinc-300">
+                          <tr>
+                            <th className="p-3">Produto</th>
+                            <th className="p-3">Antes</th>
+                            <th className="p-3">Depois</th>
+                            <th className="p-3">Motivo</th>
+                            <th className="p-3">Data</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {storedData.stockHistory.slice(0, 12).map((row) => (
+                            <tr key={String(row.id)} className="border-t border-white/10">
+                              <td className="p-3">{String(row.product_id)}</td>
+                              <td className="p-3">{String(row.previous_available)}/{String(row.previous_total)}</td>
+                              <td className="p-3">{String(row.next_available)}/{String(row.next_total)}</td>
+                              <td className="p-3">{String(row.reason || "-")}</td>
+                              <td className="p-3">{formatDate(row.created_at)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <div className="overflow-x-auto rounded-lg border border-white/10 bg-zinc-900">
+                      <table className="w-full min-w-[640px] text-sm">
+                        <thead className="bg-zinc-950 text-left text-zinc-300">
+                          <tr>
+                            <th className="p-3">Evento</th>
+                            <th className="p-3">Usuário</th>
+                            <th className="p-3">Produto</th>
+                            <th className="p-3">Data</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {storedData.activity.slice(0, 12).map((row) => (
+                            <tr key={String(row.id)} className="border-t border-white/10">
+                              <td className="p-3">{String(row.event_type)}</td>
+                              <td className="p-3">{String(row.user_id || "-")}</td>
+                              <td className="p-3">{String(row.product_id || "-")}</td>
+                              <td className="p-3">{formatDate(row.created_at)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
               </div>
