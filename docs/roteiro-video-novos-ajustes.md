@@ -321,6 +321,33 @@ Isso faz com que o chatbot:
 
 O chatbot continua sem usar API externa. Ele faz busca local por palavras, sinônimos, contexto recente e orçamento.
 
+Depois dos novos ajustes, ele também passou a funcionar como um consultor de compra.
+
+Ele tenta entender:
+
+- o que a pessoa quer comprar;
+- quanto pretende gastar;
+- se o uso é trilha, estrada, urbano, treino ou infantil;
+- se a pessoa é iniciante, intermediária ou avançada;
+- se a prioridade é preço, conforto, segurança, resistência ou desempenho;
+- se existe preferência por marca, cor, tamanho ou aro;
+- se a pessoa está perguntando sobre stock, frete, pagamento ou finalização.
+
+Com isso, o chatbot não apenas lista produtos. Ele explica por que cada opção faz sentido e orienta o usuário a abrir o produto e seguir para o carrinho.
+
+Exemplos de perguntas melhores para demonstrar:
+
+```txt
+bike para trilha até 300
+luvas baratas em stock
+roupa para treino
+presente para criança de 8 anos
+compare duas opções
+quero comprar uma bicicleta para iniciante
+```
+
+Também foram adicionados atalhos visuais no próprio widget, para o usuário clicar sem precisar digitar tudo.
+
 ## 9. Rotas e navegação
 
 ### `src/App.tsx`

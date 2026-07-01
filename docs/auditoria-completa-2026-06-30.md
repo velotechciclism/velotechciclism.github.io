@@ -49,6 +49,18 @@ Foram implementadas funcionalidades visiveis no modo GitHub Pages/local-first:
 - roteiro didático criado em `docs/roteiro-video-novos-ajustes.md`;
 - prints de validação foram salvos em `screenshots/`.
 
+## Melhoria do chatbot local - 30/06/2026
+
+O chatbot local foi reforçado para atuar mais como consultor de compra:
+
+- vocabulário expandido para bicicletas, acessórios, roupas, usos, níveis, tamanhos, cores, pagamento, stock, frete e intenção de compra;
+- correção simples de erros comuns de digitação;
+- criação de um perfil da necessidade do cliente com orçamento, categoria, uso, prioridade, marca, tamanho, cor e urgência;
+- ranqueamento de produtos por aderência semântica, orçamento, stock, categoria, uso e intenção;
+- respostas com motivos de recomendação e orientação para abrir o produto e seguir para o carrinho;
+- atalhos visuais no widget para consultas frequentes como "bike para trilha até 300" e "luvas baratas em stock";
+- uso do catálogo administrável, respeitando produtos ocultos e stock local.
+
 Arquivos de evidência visual:
 
 - `screenshots/01-produtos-stock-limite.png`;

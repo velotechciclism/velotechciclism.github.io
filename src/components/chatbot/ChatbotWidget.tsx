@@ -89,7 +89,14 @@ const ChatbotWidget: React.FC = () => {
         {
           id: "welcome",
           role: "assistant",
-          content: `Olá! 👋 Sou o assistente virtual da VeloTech. Como posso ajudá-lo hoje? Posso responder perguntas sobre nossos produtos, dar dicas de ciclismo ou ajudar a encontrar o equipamento perfeito para você! 🚴‍♂️
+          content: `Olá! Sou o assistente de compra da VeloTech. Posso encontrar o melhor produto por uso, orçamento, nível, tamanho e stock.
+
+Experimente perguntar:
+- bike para trilha até 300
+- luvas baratas em stock
+- roupa para treino
+- presente para criança de 8 anos
+- compare duas opções
 
 📞 **Contato Direto:**
 • WhatsApp: ${contactInfo.whatsapp.display}
@@ -127,13 +134,14 @@ const ChatbotWidget: React.FC = () => {
     };
   }, []);
 
-  const sendMessage = async () => {
-    if (!inputValue.trim() || isLoading) return;
+  const sendMessage = async (overrideMessage?: string) => {
+    const messageText = (overrideMessage ?? inputValue).trim();
+    if (!messageText || isLoading) return;
 
     const userMessage: Message = {
       id: crypto.randomUUID(),
       role: "user",
-      content: inputValue.trim(),
+      content: messageText,
       timestamp: new Date(),
     };
 
@@ -228,6 +236,11 @@ const ChatbotWidget: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const sendSuggestedMessage = (message: string) => {
+    if (isLoading) return;
+    void sendMessage(message);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -341,6 +354,25 @@ const ChatbotWidget: React.FC = () => {
 
         {/* Input */}
         <div className="absolute bottom-0 left-0 right-0 p-4 bg-background border-t border-border">
+          {messages.length <= 1 && (
+            <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
+              {[
+                "bike para trilha até 300",
+                "luvas baratas em stock",
+                "roupa para treino",
+                "presente para criança",
+              ].map((suggestion) => (
+                <button
+                  key={suggestion}
+                  type="button"
+                  onClick={() => sendSuggestedMessage(suggestion)}
+                  className="shrink-0 rounded-full border border-border px-3 py-1 text-xs text-muted-foreground hover:border-primary hover:text-foreground"
+                >
+                  {suggestion}
+                </button>
+              ))}
+            </div>
+          )}
           <div className="flex gap-2">
             <Input
               ref={inputRef}
@@ -352,7 +384,7 @@ const ChatbotWidget: React.FC = () => {
               className="flex-1"
             />
             <Button
-              onClick={sendMessage}
+              onClick={() => sendMessage()}
               disabled={!inputValue.trim() || isLoading}
               size="icon"
               className="shrink-0"
