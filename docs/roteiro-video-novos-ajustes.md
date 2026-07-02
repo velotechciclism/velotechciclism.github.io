@@ -559,6 +559,48 @@ Agora a página exibe apenas canais funcionais para o usuário:
 
 O texto introdutório também foi atualizado para orientar o usuário a usar esses canais.
 
+### Prints de validação publicados
+
+Os prints abaixo foram tirados da versão publicada em GitHub Pages, não apenas do ambiente local.
+
+Checkout com formulário de cartão fictício:
+
+```txt
+https://velotechciclism.github.io/screenshots/07-checkout-pagamento-ficticio-cartao.png
+```
+
+Onde ver no site:
+
+```txt
+https://velotechciclism.github.io/#/cart
+```
+
+Observação: é necessário adicionar um produto ao carrinho antes de abrir a tela.
+
+Página de contato sem o formulário "Envie-nos uma Mensagem":
+
+```txt
+https://velotechciclism.github.io/screenshots/08-contato-sem-formulario-mensagem.png
+```
+
+Onde ver no site:
+
+```txt
+https://velotechciclism.github.io/#/contact
+```
+
+Select/dropdown com tema escuro:
+
+```txt
+https://velotechciclism.github.io/screenshots/09-select-tema-escuro-produtos.png
+```
+
+Onde ver no site:
+
+```txt
+https://velotechciclism.github.io/#/products
+```
+
 ## 14. Como demonstrar no video
 
 1. Abrir o site publicado.
