@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Trash2, Plus, Minus, ShoppingBag, ArrowRight } from "lucide-react";
+import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, CreditCard, LockKeyhole } from "lucide-react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,36 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useAuthContext } from "@/context/AuthContext";
 import { toast } from "sonner";
 
+const PAYMENT_METHODS = ["Visa", "Mastercard", "PayPal", "MB Way", "Apple Pay", "Google Pay"] as const;
+const CARD_PAYMENT_METHODS = new Set<string>(["Visa", "Mastercard"]);
+
+const formatCardNumber = (value: string) =>
+  value
+    .replace(/\D/g, "")
+    .slice(0, 16)
+    .replace(/(\d{4})(?=\d)/g, "$1 ")
+    .trim();
+
+const formatExpiry = (value: string) => {
+  const digits = value.replace(/\D/g, "").slice(0, 4);
+  return digits.length > 2 ? `${digits.slice(0, 2)}/${digits.slice(2)}` : digits;
+};
+
+const isValidExpiry = (value: string) => {
+  const [monthValue, yearValue] = value.split("/");
+  const month = Number(monthValue);
+  const year = Number(`20${yearValue}`);
+
+  if (!monthValue || !yearValue || month < 1 || month > 12) {
+    return false;
+  }
+
+  const now = new Date();
+  const currentMonth = now.getMonth() + 1;
+  const currentYear = now.getFullYear();
+  return year > currentYear || (year === currentYear && month >= currentMonth);
+};
+
 const Cart: React.FC = () => {
   const { t } = useLanguage();
   const { items, removeItem, updateQuantity, totalPrice, clearCart, checkout } = useCart();
@@ -17,6 +47,13 @@ const Cart: React.FC = () => {
   const [promoCode, setPromoCode] = useState("");
   const [appliedPromoCode, setAppliedPromoCode] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState("Visa");
+  const [cardData, setCardData] = useState({
+    holder: "",
+    number: "",
+    expiry: "",
+    cvc: "",
+    billingPostalCode: "",
+  });
 
   const shipping = totalPrice > 100 ? 0 : 9.99;
   const tax = totalPrice * 0.23;
@@ -84,15 +121,69 @@ const Cart: React.FC = () => {
     toast.error("Cupom invalido. Tente VELO10 ou BIKE15.");
   };
 
+  const validatePayment = () => {
+    if (!CARD_PAYMENT_METHODS.has(paymentMethod)) {
+      return true;
+    }
+
+    const cardDigits = cardData.number.replace(/\D/g, "");
+    const holder = cardData.holder.trim();
+    const cvc = cardData.cvc.replace(/\D/g, "");
+    const postalCode = cardData.billingPostalCode.trim();
+
+    if (holder.length < 3) {
+      toast.error("Informe o nome impresso no cartão fictício.");
+      return false;
+    }
+
+    if (cardDigits.length < 13 || cardDigits.length > 16) {
+      toast.error("Informe um número de cartão fictício válido.");
+      return false;
+    }
+
+    if (!isValidExpiry(cardData.expiry)) {
+      toast.error("Informe uma validade futura no formato MM/AA.");
+      return false;
+    }
+
+    if (cvc.length < 3 || cvc.length > 4) {
+      toast.error("Informe um CVC fictício com 3 ou 4 dígitos.");
+      return false;
+    }
+
+    if (postalCode.length < 4) {
+      toast.error("Informe o código postal de faturação.");
+      return false;
+    }
+
+    return true;
+  };
+
   const handleFinalizarCompra = async () => {
     if (!isAuthenticated) {
       toast.error("Entre na sua conta para finalizar a compra");
       return;
     }
 
+    if (!validatePayment()) {
+      return;
+    }
+
     try {
-      await checkout(paymentMethod, "Endereco nao informado", appliedPromoCode || undefined);
+      const cardDigits = cardData.number.replace(/\D/g, "");
+      const paymentLabel = CARD_PAYMENT_METHODS.has(paymentMethod)
+        ? `${paymentMethod} final ${cardDigits.slice(-4)} (simulado)`
+        : `${paymentMethod} (simulado)`;
+
+      await checkout(paymentLabel, "Endereco nao informado", appliedPromoCode || undefined);
       toast.success(t("notifications.checkoutSuccess"));
+      setCardData({
+        holder: "",
+        number: "",
+        expiry: "",
+        cvc: "",
+        billingPostalCode: "",
+      });
     } catch (error) {
       const message = error instanceof Error ? error.message : t("notifications.checkoutError");
       toast.error(message);
@@ -295,8 +386,85 @@ const Cart: React.FC = () => {
                   </Button>
                 </div>
 
+                {/* Payment Methods */}
+                <div className="mt-6 pt-6 border-t border-border">
+                  <div className="mb-4 flex items-center gap-2">
+                    <CreditCard className="h-5 w-5 text-primary" />
+                    <h3 className="font-display text-lg font-bold text-white">
+                      Pagamento fictício
+                    </h3>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {PAYMENT_METHODS.map((method) => (
+                      <button
+                        key={method}
+                        type="button"
+                        onClick={() => setPaymentMethod(method)}
+                        className={`min-h-10 rounded-lg px-3 py-2 text-xs font-bold transition ${
+                          paymentMethod === method
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-zinc-800 text-zinc-200 hover:bg-zinc-700"
+                        }`}
+                      >
+                        {method}
+                      </button>
+                    ))}
+                  </div>
+
+                  {CARD_PAYMENT_METHODS.has(paymentMethod) ? (
+                    <div className="mt-4 space-y-3 rounded-xl border border-zinc-700 bg-black/30 p-4">
+                      <Input
+                        value={cardData.holder}
+                        onChange={(event) => setCardData((prev) => ({ ...prev, holder: event.target.value }))}
+                        placeholder="Nome no cartão"
+                        autoComplete="cc-name"
+                      />
+                      <Input
+                        value={cardData.number}
+                        onChange={(event) => setCardData((prev) => ({ ...prev, number: formatCardNumber(event.target.value) }))}
+                        placeholder="4242 4242 4242 4242"
+                        inputMode="numeric"
+                        autoComplete="cc-number"
+                      />
+                      <div className="grid grid-cols-2 gap-3">
+                        <Input
+                          value={cardData.expiry}
+                          onChange={(event) => setCardData((prev) => ({ ...prev, expiry: formatExpiry(event.target.value) }))}
+                          placeholder="MM/AA"
+                          inputMode="numeric"
+                          autoComplete="cc-exp"
+                        />
+                        <Input
+                          value={cardData.cvc}
+                          onChange={(event) => setCardData((prev) => ({ ...prev, cvc: event.target.value.replace(/\D/g, "").slice(0, 4) }))}
+                          placeholder="CVC"
+                          inputMode="numeric"
+                          autoComplete="cc-csc"
+                        />
+                      </div>
+                      <Input
+                        value={cardData.billingPostalCode}
+                        onChange={(event) => setCardData((prev) => ({ ...prev, billingPostalCode: event.target.value }))}
+                        placeholder="Código postal de faturação"
+                        autoComplete="billing postal-code"
+                      />
+                    </div>
+                  ) : (
+                    <div className="mt-4 rounded-xl border border-zinc-700 bg-black/30 p-4 text-sm text-zinc-300">
+                      {paymentMethod} será confirmado em modo demonstrativo, sem cobrança real.
+                    </div>
+                  )}
+
+                  <div className="mt-3 flex items-start gap-2 rounded-lg bg-zinc-950/70 p-3 text-xs text-zinc-300">
+                    <LockKeyhole className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
+                    <p>
+                      Dados fictícios: o site valida o formulário apenas no navegador e não guarda número do cartão nem CVC.
+                    </p>
+                  </div>
+                </div>
+
                 {/* Botão de finalização */}
-                <Button variant="yellow" size="lg" className="w-full" onClick={handleFinalizarCompra}>
+                <Button variant="yellow" size="lg" className="mt-6 w-full" onClick={handleFinalizarCompra}>
                   {t("cart.finalizePurchase")}
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
@@ -307,32 +475,6 @@ const Cart: React.FC = () => {
                     {t("cart.addMoreForFreeShipping").replace("{amount}", (100 - totalPrice).toFixed(2))}
                   </p>
                 )}
-
-                {/* Payment Methods */}
-                <div className="mt-6 pt-6 border-t border-border">
-                  <p className="text-sm text-muted-foreground text-center mb-3">
-                    {t("cart.paymentMethods")}
-                  </p>
-                  <div className="flex flex-wrap justify-center gap-2">
-                    {["Visa", "Mastercard", "PayPal", "MB Way", "Apple Pay", "Google Pay"].map((method) => (
-                      <button
-                        key={method}
-                        type="button"
-                        onClick={() => setPaymentMethod(method)}
-                        className={`px-3 py-1.5 rounded-lg flex items-center justify-center text-xs font-bold transition ${
-                          paymentMethod === method
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-muted hover:bg-muted/80"
-                        }`}
-                      >
-                        {method}
-                      </button>
-                    ))}
-                  </div>
-                  <p className="mt-3 text-center text-xs text-muted-foreground">
-                    Pagamento simulado selecionado: {paymentMethod}
-                  </p>
-                </div>
               </div>
             </div>
           </div>

@@ -1,98 +1,12 @@
-import React, { useState } from "react";
+import React from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import { Button } from "@/components/ui/button";
-import { Mail, Phone, MapPin, Send, MessageCircle } from "lucide-react";
+import { Mail, Phone, MapPin, MessageCircle } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
-import { getApiUrl, shouldUseRemoteApi } from "@/lib/api";
 import { contactInfo } from "@/config/contact";
-import { saveLocalContact } from "@/lib/localEngagement";
 
 const Contact: React.FC = () => {
   const { t } = useLanguage();
-  const API_URL = getApiUrl();
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    subject: "",
-    message: "",
-  });
-
-  const [submitted, setSubmitted] = useState(false);
-  const [savedLocally, setSavedLocally] = useState(false);
-  const [isSending, setIsSending] = useState(false);
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSending(true);
-
-    const payload = {
-      name: formData.name.trim(),
-      email: formData.email.trim(),
-      subject: formData.subject.trim(),
-      message: formData.message.trim(),
-    };
-
-    try {
-      if (!shouldUseRemoteApi()) {
-        await saveLocalContact(payload);
-        setSavedLocally(true);
-        setSubmitted(true);
-        setFormData({ name: "", email: "", subject: "", message: "" });
-        setTimeout(() => setSubmitted(false), 3000);
-        return;
-      }
-
-      const response = await fetch(`${API_URL}/contact/messages`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        throw new Error("Falha ao enviar mensagem");
-      }
-
-      setSubmitted(true);
-      setSavedLocally(false);
-      setFormData({
-        name: "",
-        email: "",
-        subject: "",
-        message: "",
-      });
-
-      setTimeout(() => {
-        setSubmitted(false);
-      }, 3000);
-    } catch {
-      try {
-        await saveLocalContact(payload);
-      } catch {
-        // O mailto abaixo ainda permite que a pessoa envie a mensagem.
-      }
-      const mailToUrl = `${contactInfo.email.link}?subject=${encodeURIComponent(
-        formData.subject.trim()
-      )}&body=${encodeURIComponent(
-        `Nome: ${formData.name.trim()}\nE-mail: ${formData.email.trim()}\n\nMensagem:\n${formData.message.trim()}`
-      )}`;
-      window.location.href = mailToUrl;
-    } finally {
-      setIsSending(false);
-    }
-  };
 
   const contactMethods = [
     {
@@ -145,7 +59,7 @@ const Contact: React.FC = () => {
 
         {/* Contact Methods */}
         <div className="container mx-auto px-4 py-12">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {contactMethods.map((method, index) => (
               method.link ? (
                 <a
@@ -186,91 +100,6 @@ const Contact: React.FC = () => {
                 </div>
               )
             ))}
-          </div>
-
-          {/* Contact Form */}
-          <div className="max-w-2xl mx-auto rounded-2xl bg-muted p-8 sm:p-12">
-            <h2 className="font-display text-2xl font-bold text-foreground mb-6">
-              {t("contact.sendMessage")}
-            </h2>
-
-            {submitted ? (
-              <div className="rounded-lg bg-green-50 dark:bg-green-950 p-6 border border-green-200 dark:border-green-800">
-                <p className="text-green-800 dark:text-green-200 font-semibold">
-                  {savedLocally
-                    ? "Mensagem salva neste navegador. Para falar com a equipe, use e-mail ou WhatsApp."
-                    : t("contact.thankYou")}
-                </p>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
-                      {t("contact.name")}
-                    </label>
-                    <input
-                      type="text"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-2 rounded-lg bg-background border border-border focus:outline-none focus:ring-2 focus:ring-primary"
-                      placeholder={t("common.name")}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
-                      {t("contact.email")}
-                    </label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-2 rounded-lg bg-background border border-border focus:outline-none focus:ring-2 focus:ring-primary"
-                      placeholder="seu@exemplo.pt"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    {t("contact.subject")}
-                  </label>
-                  <input
-                    type="text"
-                    name="subject"
-                    value={formData.subject}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-2 rounded-lg bg-background border border-border focus:outline-none focus:ring-2 focus:ring-primary"
-                    placeholder={t("contact.subject")}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    {t("contact.message")}
-                  </label>
-                  <textarea
-                    name="message"
-                    value={formData.message}
-                    onChange={handleChange}
-                    required
-                    rows={5}
-                    className="w-full px-4 py-2 rounded-lg bg-background border border-border focus:outline-none focus:ring-2 focus:ring-primary"
-                    placeholder={t("contact.message")}
-                  />
-                </div>
-
-                <Button type="submit" className="w-full group" disabled={isSending}>
-                  <Send className="w-4 h-4 mr-2 group-hover:-translate-y-1 transition-transform" />
-                  {isSending ? "Enviando..." : t("contact.send")}
-                </Button>
-              </form>
-            )}
           </div>
         </div>
 

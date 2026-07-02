@@ -489,7 +489,77 @@ Por isso, a solução atual é:
 - exportação manual para auditoria;
 - backend opcional para uma versão realmente centralizada.
 
-## 13. Como demonstrar no video
+## 13. Ajustes de revisão de checkout, selects e contato
+
+Depois da revisão visual e funcional, foram feitos mais três ajustes.
+
+### Checkout com cartão fictício
+
+Arquivo principal:
+
+```txt
+src/pages/Cart.tsx
+```
+
+O carrinho recebeu uma área de pagamento mais completa. Agora o usuário pode escolher Visa, Mastercard, PayPal, MB Way, Apple Pay ou Google Pay.
+
+Quando a opção é Visa ou Mastercard, aparece um formulário com:
+
+- nome no cartão;
+- número do cartão;
+- validade;
+- CVC;
+- código postal de faturação.
+
+Como o projeto roda no GitHub Pages e os dados são fictícios, esse formulário não processa cobrança real. Ele apenas valida os campos no navegador e registra no pedido somente o método de pagamento simulado, por exemplo:
+
+```txt
+Visa final 4242 (simulado)
+```
+
+O número completo do cartão e o CVC não são salvos no SQLite.
+
+Funções adicionadas:
+
+- `formatCardNumber`: formata o número do cartão em blocos de 4 dígitos.
+- `formatExpiry`: formata a validade no padrão `MM/AA`.
+- `isValidExpiry`: verifica se a validade informada ainda não expirou.
+- `validatePayment`: valida os campos fictícios antes de finalizar a compra.
+
+### Menus Select/Dropdown no tema escuro
+
+Arquivos alterados:
+
+```txt
+src/components/ui/select.tsx
+src/index.css
+```
+
+O componente Select baseado em Radix foi ajustado para usar fundo escuro, texto claro, bordas compatíveis com o tema e destaque amarelo ao focar itens.
+
+Também foi adicionado CSS global para selects nativos, usado em telas como avaliações, cadastro, administração e autenticação. Isso corrige o problema de opções com fundo branco no tema escuro.
+
+### Remoção da seção "Envie-nos uma Mensagem"
+
+Arquivos alterados:
+
+```txt
+src/pages/Contact.tsx
+src/locales/pt-br.json
+```
+
+A página de contato não mostra mais o formulário "Envie-nos uma Mensagem", porque ele poderia passar a impressão de envio real pelo site.
+
+Agora a página exibe apenas canais funcionais para o usuário:
+
+- telefone;
+- e-mail;
+- WhatsApp;
+- endereço.
+
+O texto introdutório também foi atualizado para orientar o usuário a usar esses canais.
+
+## 14. Como demonstrar no video
 
 1. Abrir o site publicado.
 2. Mostrar a página de produtos.
@@ -510,9 +580,16 @@ Por isso, a solução atual é:
 17. Clicar em Exportar JSON.
 18. Clicar em Baixar SQLite.
 19. Explicar que esses arquivos substituem um link remoto no modo GitHub Pages.
-20. Fechar explicando que a versão com banco central exigiria publicar o backend da pasta `server/`.
+20. Abrir o carrinho.
+21. Mostrar o formulário de cartão fictício no checkout.
+22. Explicar que os dados do cartão não são salvos.
+23. Abrir uma tela com select, como avaliações ou administração.
+24. Mostrar que o menu usa fundo escuro.
+25. Abrir a página de contato.
+26. Mostrar que o formulário foi removido e ficaram apenas canais reais.
+27. Fechar explicando que a versão com banco central exigiria publicar o backend da pasta `server/`.
 
-## 14. Resumo final para falar no video
+## 15. Resumo final para falar no video
 
 O VeloTech agora tem um modo administrativo completo para demonstração em GitHub Pages.
 
